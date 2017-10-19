@@ -13,98 +13,103 @@
 
 const u32 FPS = 60;
 const b32 FULLSCREEN = false;
-const u32 WINDOW_WIDTH = 1920;
-const u32 WINDOW_HEIGHT = 1080;
+const u32 WINDOW_WIDTH = 1280;
+const u32 WINDOW_HEIGHT = 720;
+
 
 
 void
-game_loop(SDL_Window *sdl_window, u32 argc, const char *argv[]/*, UpdateAndRenderFunc update_and_render_func*/)
+engine_setup_loop(Engine *engine)
 {
-  b32 running = true;
+  memset(engine, 0, sizeof(Engine));
 
-  Keys keys = {};
+  engine->useconds_per_frame = 1000000 / FPS;
+  engine->frame_dt = engine->useconds_per_frame;
 
-  u32 useconds_per_frame = 1000000 / FPS;
-  u32 frame_dt = useconds_per_frame;
-
-  FPS_Counter fps = {
-    .frame_count = 0,
-    .last_update = get_us()
-  };
-
-  while (running)
-  {
-    u64 last_frame_end = get_us();
-
-    reset_key_events(&keys);
-
-    SDL_Event event;
-    while(SDL_PollEvent(&event))
-    {
-      switch (event.type)
-      {
-        case SDL_QUIT:
-        {
-          running = false;
-        } break;
-
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
-        {
-          process_key_event(&keys, (SDL_KeyboardEvent *)&event);
-        } break;
-
-        case SDL_MOUSEMOTION:
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
-        case SDL_MOUSEWHEEL:
-        {
-        } break;
-      }
-    }
-
-    // running &= update_and_render_func(renderer, &keys, &mouse, last_frame_end, frame_dt, fps.current_avg, argc, argv);
-
-    if (keys.ascii[KEY_ESCAPE].down_event ||
-        (keys.ascii['w'].down_event &&
-         keys.ascii['w'].modifier | KMOD_CTRL) ||
-        (keys.ascii['w'].down_event &&
-         keys.ascii['w'].modifier | KMOD_CTRL))
-    {
-      running = false;
-    }
-
-    SDL_GL_SwapWindow(sdl_window->window);
-
-    ++fps.frame_count;
-    if (last_frame_end >= fps.last_update + seconds_in_us(1))
-    {
-      fps.last_update = last_frame_end;
-      fps.current_avg = fps.frame_count;
-      fps.frame_count = 0;
-    }
-
-    frame_dt = get_us() - last_frame_end;
-
-    if (frame_dt < useconds_per_frame)
-    {
-      sleep_us(useconds_per_frame - frame_dt);
-      frame_dt = useconds_per_frame;
-    }
-    else
-    {
-      printf("Missed frame rate: %d", frame_dt);
-    }
-  }
+  engine->fps.frame_count = 0;
+  engine->fps.last_update = get_us();
 }
 
 
 b32
-start_engine(u32 argc, const char *argv[], const char window_name[])
+engine_loop_start(Engine *engine)
+{
+  b32 running = true;
+
+  engine->frame_start = get_us();
+
+  reset_key_events(&engine->keys);
+
+  SDL_Event event;
+  while(SDL_PollEvent(&event))
+  {
+    switch (event.type)
+    {
+      case SDL_QUIT:
+      {
+        running = false;
+      } break;
+
+      case SDL_KEYDOWN:
+      case SDL_KEYUP:
+      {
+        process_key_event(&engine->keys, (SDL_KeyboardEvent *)&event);
+      } break;
+
+      case SDL_MOUSEMOTION:
+      case SDL_MOUSEBUTTONDOWN:
+      case SDL_MOUSEBUTTONUP:
+      case SDL_MOUSEWHEEL:
+      {
+      } break;
+    }
+  }
+
+  if (engine->keys.ascii[KEY_ESCAPE].down_event ||
+      (engine->keys.ascii['w'].down_event &&
+       engine->keys.ascii['w'].modifier | KMOD_CTRL) ||
+      (engine->keys.ascii['w'].down_event &&
+       engine->keys.ascii['w'].modifier | KMOD_CTRL))
+  {
+    running = false;
+  }
+
+  return running;
+}
+
+
+void
+engine_loop_end(Engine *engine)
+{
+  SDL_GL_SwapWindow(engine->sdl_window.window);
+
+  ++engine->fps.frame_count;
+  if (engine->frame_start >= engine->fps.last_update + seconds_in_us(1))
+  {
+    engine->fps.last_update = engine->frame_start;
+    engine->fps.current_avg = engine->fps.frame_count;
+    engine->fps.frame_count = 0;
+  }
+
+  engine->frame_dt = get_us() - engine->frame_start;
+
+  if (engine->frame_dt < engine->useconds_per_frame)
+  {
+    sleep_us(engine->useconds_per_frame - engine->frame_dt);
+    engine->frame_dt = engine->useconds_per_frame;
+  }
+  else
+  {
+    printf("Missed frame rate: %d", engine->frame_dt);
+  }
+
+}
+
+
+b32
+init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 {
   b32 success = true;
-
-  SDL_Window sdl_window;
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
   {
@@ -126,12 +131,12 @@ start_engine(u32 argc, const char *argv[], const char window_name[])
   }
   else
   {
-    sdl_window.width = WINDOW_WIDTH;
-    sdl_window.height = WINDOW_HEIGHT;
+    engine->sdl_window.width = WINDOW_WIDTH;
+    engine->sdl_window.height = WINDOW_HEIGHT;
   }
 
-  sdl_window.window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, sdl_window.width, sdl_window.height, flags);
-  if (!sdl_window.window)
+  engine->sdl_window.window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, engine->sdl_window.width, engine->sdl_window.height, flags);
+  if (!engine->sdl_window.window)
   {
     printf("Failed to initialise SDL window: %s\n", SDL_GetError());
     success = false;
@@ -140,7 +145,7 @@ start_engine(u32 argc, const char *argv[], const char window_name[])
 
   if (FULLSCREEN)
   {
-    s32 display_index = SDL_GetWindowDisplayIndex(sdl_window.window);
+    s32 display_index = SDL_GetWindowDisplayIndex(engine->sdl_window.window);
     if (display_index < 0)
     {
       printf("Failed to get display index.\n");
@@ -154,12 +159,12 @@ start_engine(u32 argc, const char *argv[], const char window_name[])
       success = false;
       return success;
     }
-    sdl_window.width = window_rect.w;
-    sdl_window.height = window_rect.h;
+    engine->sdl_window.width = window_rect.w;
+    engine->sdl_window.height = window_rect.h;
   }
 
-  sdl_window.gl_context = SDL_GL_CreateContext(sdl_window.window);
-  if (!sdl_window.gl_context)
+  engine->sdl_window.gl_context = SDL_GL_CreateContext(engine->sdl_window.window);
+  if (!engine->sdl_window.gl_context)
   {
     printf("Failed to create OpenGL context.\n");
     success = false;
@@ -177,7 +182,7 @@ start_engine(u32 argc, const char *argv[], const char window_name[])
     return success;
   }
 
-  glViewport(0, 0, sdl_window.width, sdl_window.height);
+  glViewport(0, 0, engine->sdl_window.width, engine->sdl_window.height);
   glEnable(GL_DEPTH_TEST);
 
 #ifdef DEBUG
@@ -192,11 +197,14 @@ start_engine(u32 argc, const char *argv[], const char window_name[])
   gl_print_errors();
   printf("OpenGL init finished.\n");
 
-  game_loop(&sdl_window, argc, argv/*, update_and_render_func*/);
+return success;
+}
 
-  SDL_GL_DeleteContext(sdl_window.gl_context);
-  SDL_DestroyWindow(sdl_window.window);
+
+void
+stop_engine(Engine *engine)
+{
+  SDL_GL_DeleteContext(engine->sdl_window.gl_context);
+  SDL_DestroyWindow(engine->sdl_window.window);
   SDL_Quit();
-
-  return success;
 }

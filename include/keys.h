@@ -1,5 +1,5 @@
 #ifndef KEY_LISTENER_H_DEF
-#define KEY_LISTENER_H_DEF value
+#define KEY_LISTENER_H_DEF
 
 #include <SDL2/SDL.h>
 
@@ -22,8 +22,7 @@ enum AsciiKeyConstants
   KEY_ESCAPE = 0x1b,
   KEY_ENTER = 0x0d,
   KEY_BACKSPACE = 0x08,
-  KEY_DELETE = 0x7f,
-
+  KEY_DELETE = 0x7f
 };
 
 
