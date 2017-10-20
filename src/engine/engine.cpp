@@ -17,7 +17,6 @@ const u32 WINDOW_WIDTH = 1280;
 const u32 WINDOW_HEIGHT = 720;
 
 
-
 void
 engine_setup_loop(Engine *engine)
 {
