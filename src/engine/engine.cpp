@@ -9,7 +9,7 @@
 #include "engine.h"
 #include "timing.h"
 #include "keys.h"
-#include "gl-util.h"
+#include "opengl-util.h"
 
 
 const u32 FPS = 60;
@@ -194,7 +194,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   const unsigned char *opengl_version = glGetString(GL_VERSION);
   print("OpenGL Version: %s\n", opengl_version);
-  gl_print_errors();
+  opengl_print_errors();
   print("OpenGL init finished.\n");
 
 return success;

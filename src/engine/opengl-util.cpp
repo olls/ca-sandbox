@@ -1,12 +1,12 @@
-#include <cstdio>
 #include <GL/glew.h>
 
-#include "gl-util.h"
 #include "types.h"
+#include "print.h"
+#include "opengl-util.h"
 
 
 void
-gl_print_error(GLenum error_code, const char *file, u32 line)
+opengl_print_error(GLenum error_code, const char *file, u32 line)
 {
   const char *error;
   switch (error_code)
@@ -44,12 +44,12 @@ gl_print_error(GLenum error_code, const char *file, u32 line)
       error = "GL_TABLE_TOO_LARGE";
     }
   }
-  printf("OpenGL error: %s at %s:%d\n", error, file, line);
+  print("OpenGL error: %s at %s:%d\n", error, file, line);
 }
 
 
 b32
-_gl_print_errors(const char *file, u32 line)
+_opengl_print_errors(const char *file, u32 line)
 {
   b32 success = true;
 
@@ -57,7 +57,7 @@ _gl_print_errors(const char *file, u32 line)
   while (error != GL_NO_ERROR)
   {
     success &= false;
-    gl_print_error(error, file, line);
+    opengl_print_error(error, file, line);
 
     error = glGetError();
   }
