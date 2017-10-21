@@ -5,6 +5,7 @@
 
 
 #include "types.h"
+#include "print.h"
 #include "engine.h"
 #include "timing.h"
 #include "keys.h"
@@ -99,7 +100,7 @@ engine_loop_end(Engine *engine)
   }
   else
   {
-    printf("Missed frame rate: %d", engine->frame_dt);
+    print("Missed frame rate: %d", engine->frame_dt);
   }
 
 }
@@ -112,7 +113,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
   {
-      printf("Failed to init SDL.\n");
+      print("Failed to init SDL.\n");
       success = false;
       return success;
   }
@@ -137,7 +138,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   engine->sdl_window.window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, engine->sdl_window.width, engine->sdl_window.height, flags);
   if (!engine->sdl_window.window)
   {
-    printf("Failed to initialise SDL window: %s\n", SDL_GetError());
+    print("Failed to initialise SDL window: %s\n", SDL_GetError());
     success = false;
     return success;
   }
@@ -147,14 +148,14 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
     s32 display_index = SDL_GetWindowDisplayIndex(engine->sdl_window.window);
     if (display_index < 0)
     {
-      printf("Failed to get display index.\n");
+      print("Failed to get display index.\n");
       success = false;
       return success;
     }
     SDL_Rect window_rect;
     if (SDL_GetDisplayBounds(display_index, &window_rect))
     {
-      printf("Failed to get display bounds.\n");
+      print("Failed to get display bounds.\n");
       success = false;
       return success;
     }
@@ -165,7 +166,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   engine->sdl_window.gl_context = SDL_GL_CreateContext(engine->sdl_window.window);
   if (!engine->sdl_window.gl_context)
   {
-    printf("Failed to create OpenGL context.\n");
+    print("Failed to create OpenGL context.\n");
     success = false;
     return success;
   }
@@ -176,7 +177,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   GLenum glew_status = glewInit();
   if (glew_status != GLEW_OK)
   {
-    printf("Failed to init GLEW: \"%s\"\n", glewGetErrorString(glew_status));
+    print("Failed to init GLEW: \"%s\"\n", glewGetErrorString(glew_status));
     success = false;
     return success;
   }
@@ -192,9 +193,9 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 #endif
 
   const unsigned char *opengl_version = glGetString(GL_VERSION);
-  printf("OpenGL Version: %s\n", opengl_version);
+  print("OpenGL Version: %s\n", opengl_version);
   gl_print_errors();
-  printf("OpenGL init finished.\n");
+  print("OpenGL init finished.\n");
 
 return success;
 }

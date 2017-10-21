@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <cstring>
 
+#include "types.h"
+#include "print.h"
 #include "cell.h"
 #include "cell-storage.h"
-#include "types.h"
 
 
 s64Vec2
@@ -49,7 +49,7 @@ init_cell_block(CellBlock *cell_block, s64Vec2 pos)
 CellBlock *
 get_cell_block(Universe *universe, s64Vec2 search_cell_block_position)
 {
-  printf("Getting CellBlock (%ld, %ld).\n", search_cell_block_position.x, search_cell_block_position.y);
+  print("Getting CellBlock (%ld, %ld).\n", search_cell_block_position.x, search_cell_block_position.y);
   CellBlock *result = 0;
 
   u32 cell_block_hash = search_cell_block_position.x * 7 + search_cell_block_position.y * 13;
