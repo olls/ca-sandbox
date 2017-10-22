@@ -1,5 +1,5 @@
-#ifndef OPENGL_BUFFERS_H_DEF
-#define OPENGL_BUFFERS_H_DEF
+#ifndef OPENGL_BUFFER_H_DEF
+#define OPENGL_BUFFER_H_DEF
 
 
 // Implements a continuous array in an OpenGL buffer:
@@ -13,7 +13,6 @@
 #include <GL/glew.h>
 
 #include "types.h"
-#include "limits.h"
 
 
 const u32 INITIAL_GL_BUFFER_TOTAL_ELEMENTS = 16;

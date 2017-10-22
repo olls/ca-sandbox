@@ -5,7 +5,7 @@
 #include "maths.h"
 #include "assert.h"
 #include "opengl-util.h"
-#include "opengl-buffers.h"
+#include "opengl-buffer.h"
 
 
 void
