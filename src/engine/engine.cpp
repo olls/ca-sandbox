@@ -21,7 +21,7 @@ const u32 WINDOW_HEIGHT = 720;
 void
 engine_setup_loop(Engine *engine)
 {
-  memset(engine, 0, sizeof(Engine));
+  memset(&engine->keys, 0, sizeof(Keys));
 
   engine->useconds_per_frame = 1000000 / FPS;
   engine->frame_dt = engine->useconds_per_frame;
@@ -197,7 +197,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   opengl_print_errors();
   print("OpenGL init finished.\n");
 
-return success;
+  return success;
 }
 
 

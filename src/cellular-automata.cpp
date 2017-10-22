@@ -1,5 +1,8 @@
 #include <GL/glew.h>
 
+#include "imgui.h"
+#include "imgui_impl_sdl_gl3.h"
+
 #include "types.h"
 #include "vectors.h"
 #include "engine.h"
@@ -51,6 +54,8 @@ main(int argc, const char *argv[])
       {
         init = false;
 
+        ImGui_ImplSdlGL3_Init(engine.sdl_window.window);
+
         b32 shader_success = init_shaders(&shader_program);
         running &= shader_success;
 
@@ -62,9 +67,22 @@ main(int argc, const char *argv[])
         CellBlock *cell_block_d = get_cell_block(&universe, (s64Vec2){1, 1});
       }
 
+      ImGui_ImplSdlGL3_NewFrame(engine.sdl_window.window);
+
+      ImGuiIO& io = ImGui::GetIO();
+
+      ImGui::ShowTestWindow();
+
+      glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+      glClearColor(1, 1, 1, 1);
+      glClear(GL_COLOR_BUFFER_BIT);
+      ImGui::Render();
+
       engine_loop_end(&engine);
     }
   }
+
+  ImGui_ImplSdlGL3_Shutdown();
 
   stop_engine(&engine);
   return success;
