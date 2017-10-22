@@ -48,8 +48,6 @@ main(int argc, const char *argv[])
     b32 running = true;
     while (running)
     {
-      running &= engine_loop_start(&engine);
-
       if (init)
       {
         init = false;
@@ -67,18 +65,50 @@ main(int argc, const char *argv[])
         CellBlock *cell_block_d = get_cell_block(&universe, (s64Vec2){1, 1});
       }
 
+      //
+      // Process inputs
+      //
+
+      SDL_Event event;
+      while(SDL_PollEvent(&event))
+      {
+        ImGui_ImplSdlGL3_ProcessEvent(&event);
+        if (event.type == SDL_QUIT)
+        {
+            running = false;
+        }
+      }
+
+      //
+      // Start frame
+      //
+
+      engine_frame_start(&engine);
       ImGui_ImplSdlGL3_NewFrame(engine.sdl_window.window);
 
       ImGuiIO& io = ImGui::GetIO();
 
+      if (io.KeysDown[SDLK_ESCAPE] ||
+          (io.KeyCtrl && io.KeysDown['w']))
+      {
+        running = false;
+      }
+
       ImGui::ShowTestWindow();
 
-      glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+      //
+      // Render
+      //
+
+      glViewport(0, 0, engine.sdl_window.width, engine.sdl_window.height);
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
+
+
+
       ImGui::Render();
 
-      engine_loop_end(&engine);
+      engine_frame_end(&engine);
     }
   }
 

@@ -8,7 +8,6 @@
 #include "print.h"
 #include "engine.h"
 #include "timing.h"
-#include "keys.h"
 #include "opengl-util.h"
 
 
@@ -21,8 +20,6 @@ const u32 WINDOW_HEIGHT = 720;
 void
 engine_setup_loop(Engine *engine)
 {
-  memset(&engine->keys, 0, sizeof(Keys));
-
   engine->useconds_per_frame = 1000000 / FPS;
   engine->frame_dt = engine->useconds_per_frame;
 
@@ -31,55 +28,15 @@ engine_setup_loop(Engine *engine)
 }
 
 
-b32
-engine_loop_start(Engine *engine)
+void
+engine_frame_start(Engine *engine)
 {
-  b32 running = true;
-
   engine->frame_start = get_us();
-
-  reset_key_events(&engine->keys);
-
-  SDL_Event event;
-  while(SDL_PollEvent(&event))
-  {
-    switch (event.type)
-    {
-      case SDL_QUIT:
-      {
-        running = false;
-      } break;
-
-      case SDL_KEYDOWN:
-      case SDL_KEYUP:
-      {
-        process_key_event(&engine->keys, (SDL_KeyboardEvent *)&event);
-      } break;
-
-      case SDL_MOUSEMOTION:
-      case SDL_MOUSEBUTTONDOWN:
-      case SDL_MOUSEBUTTONUP:
-      case SDL_MOUSEWHEEL:
-      {
-      } break;
-    }
-  }
-
-  if (engine->keys.ascii[KEY_ESCAPE].down_event ||
-      (engine->keys.ascii['w'].down_event &&
-       engine->keys.ascii['w'].modifier | KMOD_CTRL) ||
-      (engine->keys.ascii['w'].down_event &&
-       engine->keys.ascii['w'].modifier | KMOD_CTRL))
-  {
-    running = false;
-  }
-
-  return running;
 }
 
 
 void
-engine_loop_end(Engine *engine)
+engine_frame_end(Engine *engine)
 {
   SDL_GL_SwapWindow(engine->sdl_window.window);
 
@@ -102,7 +59,6 @@ engine_loop_end(Engine *engine)
   {
     print("Missed frame rate: %d", engine->frame_dt);
   }
-
 }
 
 
