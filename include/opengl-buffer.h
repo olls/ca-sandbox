@@ -34,4 +34,32 @@ struct OpenGL_Buffer
 };
 
 
+void
+create_opengl_buffer(OpenGL_Buffer *buffer, u32 element_size, GLenum binding_target, GLenum usage, u32 size = 0);
+
+
+void
+opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements = 0);
+
+
+void
+opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *new_element);
+
+
+u32
+opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element);
+
+
+u32
+opengl_buffer_add_items(OpenGL_Buffer *buffer, u32 n_elements, void *elements);
+
+
+void
+opengl_buffer_remove_element(OpenGL_Buffer *buffer, u32 element_to_remove);
+
+
+void
+opengl_buffer_get_element(OpenGL_Buffer *buffer, u32 element_position, void *result);
+
+
 #endif

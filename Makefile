@@ -20,7 +20,9 @@ all: $(TARGET)
 
 clean:
 	@rm -rf $(BUILDDIR)
+	@mkdir $(BUILDDIR)
 	@rm -rf $(TARGETDIR)
+	@mkdir $(TARGETDIR)
 
 # Pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)

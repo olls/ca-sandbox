@@ -1,6 +1,17 @@
 #ifndef CELL_STORAGE_H_DEF
 #define CELL_STORAGE_H_DEF
 
+
+// - CellBlocks store NxN block of cells
+// - Universe is made up of a grid of CellBlocks
+// - All cells in a CellBlock are initialised
+// - CellBlocks are stored on the heap, and accessed via a hashmap on the block position.
+//   - i.e.: block_pos = cell.pos / block_size
+// - On simulation, each cell block is simulated as a whole
+// - To iterate over all CellBlocks / Cells just loop through the hashmap.
+// - Possible optimisation: CellBlocks store pointers to neighbours for quick access to border cell states.
+
+
 #include "cell.h"
 #include "vectors.h"
 
@@ -9,7 +20,7 @@ const u32 CELL_BLOCK_DIM = 16;
 
 struct CellBlock
 {
-  b32 initalised;
+  b32 initialised;
 
   s64Vec2 block_position;
 

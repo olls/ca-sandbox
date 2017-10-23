@@ -9,25 +9,33 @@
 
 
 void
-create_opengl_buffer(OpenGL_Buffer *buffer, u32 size = 0)
+create_opengl_buffer(OpenGL_Buffer *buffer, u32 element_size, GLenum binding_target, GLenum usage, u32 size)
 {
   glGenBuffers(1, &buffer->id);
 
+  buffer->element_size = element_size;
+  buffer->binding_target = binding_target;
+  buffer->usage = usage;
   buffer->elements_used = 0;
   buffer->total_elements = max(size, INITIAL_GL_BUFFER_TOTAL_ELEMENTS);
 
-  print("Allocating new OpenGL buffer of size %u", buffer->total_elements);
+  // TODO: Can we do without this?
+  buffer->setup_attributes_function = 0;
+
+  print("Allocating new OpenGL buffer of size %u\n", buffer->total_elements);
 
   glBindBuffer(buffer->binding_target, buffer->id);
   glBufferData(buffer->binding_target, buffer->element_size * buffer->total_elements, NULL, GL_STATIC_DRAW);
   glBindBuffer(buffer->binding_target, 0);
+
+  opengl_print_errors();
 }
 
 
 void
-opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements = 0)
+opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements)
 {
-  print("Out of space in OpenGL buffer, allocating larger.");
+  print("Out of space in OpenGL buffer, allocating larger.\n");
 
   assert(buffer->total_elements != 0);
 
@@ -77,7 +85,7 @@ opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements = 0)
   glBindBuffer(buffer->binding_target, 0);
 
   opengl_print_errors();
-  print("Reallocated VBO.");
+  print("Reallocated VBO.\n");
 }
 
 
@@ -92,7 +100,7 @@ opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *
   }
   else
   {
-    print("Cannot update element %u. OpenGL buffer only has %u elements", element_position, buffer->elements_used);
+    print("Cannot update element %u. OpenGL buffer only has %u elements\n", element_position, buffer->elements_used);
   }
 
   opengl_print_errors();
@@ -102,7 +110,7 @@ opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *
 u32
 opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element)
 {
-  print("Adding new element to OpenGL buffer.");
+  print("Adding new element to OpenGL buffer.\n");
 
   if (buffer->elements_used >= buffer->total_elements)
   {

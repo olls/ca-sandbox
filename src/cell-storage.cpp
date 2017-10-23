@@ -1,28 +1,10 @@
 #include <stdlib.h>
-#include <cstring>
+#include <string.h>
 
 #include "types.h"
 #include "print.h"
 #include "cell.h"
 #include "cell-storage.h"
-
-
-s64Vec2
-cell_position_to_cell_block_position(s64Vec2 cell_position)
-{
-  s64Vec2 result = cell_position / CELL_BLOCK_DIM;
-
-  return result;
-}
-
-
-s64Vec2
-cell_block_position_to_cell_position(s64Vec2 cell_block_position)
-{
-  s64Vec2 result = cell_block_position * CELL_BLOCK_DIM;
-
-  return result;
-}
 
 
 void
@@ -35,12 +17,12 @@ init_cell_hashmap(Universe *universe)
 
 
 void
-init_cell_block(CellBlock *cell_block, s64Vec2 pos)
+init_cell_block(CellBlock *cell_block, s64Vec2 position)
 {
   memset(cell_block, 0, sizeof(CellBlock));
 
-  cell_block->block_position = pos;
-  cell_block->initalised = true;
+  cell_block->block_position = position;
+  cell_block->initialised = true;
 
   // TODO: Initialise cells
 }
@@ -60,11 +42,15 @@ get_cell_block(Universe *universe, s64Vec2 search_cell_block_position)
   {
     // Hash slot was 0, allocate CellBlock
     candidate_cell_block = (CellBlock *)malloc(sizeof(CellBlock));
+
+    // Store the pointer in the hash map!
+    universe->hashmap[cell_block_hash] = candidate_cell_block;
+
     init_cell_block(candidate_cell_block, search_cell_block_position);
   }
 
   // Follow CellBlock linked list
-  while (candidate_cell_block->initalised &&
+  while (candidate_cell_block->initialised &&
          candidate_cell_block->block_position != search_cell_block_position)
   {
     // Allocate next_block if it doesn't exist, as the CellBlock __must__ be in this hash slot.

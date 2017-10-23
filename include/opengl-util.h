@@ -10,4 +10,12 @@ b32
 _opengl_print_errors(const char *file, u32 line);
 
 
+void
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *user_param);
+
+
+void
+opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user_param);
+
+
 #endif
