@@ -18,7 +18,7 @@ struct uVec2
 };
 
 
-struct sVec2
+struct s32Vec2
 {
   s32 x;
   s32 y;

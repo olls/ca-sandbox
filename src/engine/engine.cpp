@@ -139,7 +139,6 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   }
 
   glViewport(0, 0, engine->sdl_window.width, engine->sdl_window.height);
-  glEnable(GL_DEPTH_TEST);
 
 #define DEBUG
 #ifdef DEBUG

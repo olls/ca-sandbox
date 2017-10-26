@@ -1,0 +1,18 @@
+#version 330 core
+
+
+in ivec2 s32_cell_block_position;
+
+out vec4 colour_varying;
+
+
+void
+main(void)
+{
+  vec2 local_cell_block_position = vec2(s32_cell_block_position);
+  vec2 scaled_cell_block_position = local_cell_block_position * 0.4;
+
+
+  gl_Position = vec4(scaled_cell_block_position, 0.0, 1.0);
+  colour_varying = vec4(1, 0, 0, 1);
+}

@@ -22,7 +22,7 @@ struct CellBlock
 {
   b32 initialised;
 
-  s64Vec2 block_position;
+  s32Vec2 block_position;
 
   Cell cells[CELL_BLOCK_DIM * CELL_BLOCK_DIM];
 
@@ -44,7 +44,7 @@ init_cell_hashmap(Universe *universe);
 
 
 CellBlock *
-get_cell_block(Universe *universe, s64Vec2 search_cell_block_position);
+get_cell_block(Universe *universe, s32Vec2 search_cell_block_position);
 
 
 #endif
