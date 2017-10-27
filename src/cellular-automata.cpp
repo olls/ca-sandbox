@@ -51,6 +51,7 @@ main(int argc, const char *argv[])
     OpenGL_Buffer test_cell_drawing_vbo;
     OpenGL_Buffer test_cell_drawing_ibo;
     GLuint test_cell_drawing_vao;
+    GLuint mat4_projection_matrix_uniform;
 
     b32 init = true;
     b32 running = true;
@@ -65,6 +66,8 @@ main(int argc, const char *argv[])
         b32 shader_success = init_shaders(&test_cell_drawing_shader_program);
         running &= shader_success;
 
+        // Uniforms
+        mat4_projection_matrix_uniform = glGetUniformLocation(test_cell_drawing_shader_program, "projection_matrix");
 
         // Generate and Bind VAO
         glGenVertexArrays(1, &test_cell_drawing_vao);
@@ -138,10 +141,19 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
+      r32 aspect = (r32)engine.sdl_window.height / engine.sdl_window.width;
+      r32 projection_matrix[] = {
+        aspect,  0,  0,  0,
+        0,      -1,  0,  0,
+        0,       0,  1,  0,
+        0,       0,  0,  1
+      };
+
+      glUniformMatrix4fv(mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+
       test_draw_cells(test_cell_drawing_shader_program, test_cell_drawing_vao, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
       opengl_print_errors();
-
       glBindVertexArray(0);
 
       ImGui::Render();

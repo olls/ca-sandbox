@@ -1,6 +1,8 @@
 #version 330 core
 
 
+uniform mat4 projection_matrix;
+
 in ivec2 s32_cell_block_position;
 
 out vec4 colour_varying;
@@ -13,6 +15,6 @@ main(void)
   vec2 scaled_cell_block_position = local_cell_block_position * 0.2;
 
 
-  gl_Position = vec4(scaled_cell_block_position, 0.0, 1.0);
+  gl_Position = projection_matrix * vec4(scaled_cell_block_position, 0.0, 1.0);
   colour_varying = vec4(1, 0, 0, 1);
 }
