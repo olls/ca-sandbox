@@ -8,8 +8,9 @@
 
 
 void
-test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo)
+test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
 {
+  u32 i = 0;
   for (u32 hash_slot = 0; hash_slot < universe->hashmap_size; ++hash_slot)
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
@@ -23,26 +24,32 @@ test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo)
         (s32Vec2){0, 1} + cell_block->block_position
       };
 
-      opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);
-      opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 1);
-      opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 2);
-      opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 3);
+      GLushort index_a = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);
+      GLushort index_b = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 1);
+      GLushort index_c = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 2);
+      GLushort index_d = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 3);
+
+      opengl_buffer_new_element(cell_drawing_ibo, &index_a);
+      opengl_buffer_new_element(cell_drawing_ibo, &index_b);
+      opengl_buffer_new_element(cell_drawing_ibo, &index_c);
+
+      opengl_buffer_new_element(cell_drawing_ibo, &index_d);
+      opengl_buffer_new_element(cell_drawing_ibo, &index_a);
+      opengl_buffer_new_element(cell_drawing_ibo, &index_c);
     }
   }
 }
 
 
 void
-test_draw_cells(GLuint shader_program, GLuint vao, OpenGL_Buffer *cell_drawing_vbo)
+test_draw_cells(GLuint shader_program, GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
 {
   glUseProgram(shader_program);
   glBindVertexArray(vao);
-  glBindBuffer(cell_drawing_vbo->binding_target, cell_drawing_vbo->id);
 
-  glDrawArrays(GL_LINE_LOOP, 0, cell_drawing_vbo->elements_used);
+  glBindBuffer(cell_drawing_ibo->binding_target, cell_drawing_ibo->id);
+  glDrawElements(GL_TRIANGLES, cell_drawing_ibo->elements_used, GL_UNSIGNED_SHORT, 0);
 
   opengl_print_errors();
-
   glBindVertexArray(0);
-  glBindBuffer(cell_drawing_vbo->binding_target, 0);
 }

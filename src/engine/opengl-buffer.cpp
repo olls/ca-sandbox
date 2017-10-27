@@ -190,5 +190,4 @@ opengl_buffer_get_element(OpenGL_Buffer *buffer, u32 element_position, void *res
 {
   glBindBuffer(buffer->binding_target, buffer->id);
   glGetBufferSubData(buffer->binding_target, buffer->element_size * element_position, buffer->element_size, result);
-  glBindBuffer(buffer->binding_target, 0);
 }

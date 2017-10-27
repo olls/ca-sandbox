@@ -6,11 +6,11 @@
 
 
 void
-test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo);
+test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
 
 
 void
-test_draw_cells(GLuint shader_program, GLuint vao, OpenGL_Buffer *cell_drawing_vbo);
+test_draw_cells(GLuint shader_program, GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
 
 
 #endif

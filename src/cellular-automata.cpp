@@ -15,7 +15,7 @@
 
 
 b32
-init_shaders(GLuint *shader_program)
+init_shaders(GLuint *test_cell_drawing_shader_program)
 {
   b32 success = true;
 
@@ -29,7 +29,7 @@ init_shaders(GLuint *shader_program)
     GL_FRAGMENT_SHADER
   };
 
-  success &= create_shader_program(filenames, types, 2, shader_program);
+  success &= create_shader_program(filenames, types, 2, test_cell_drawing_shader_program);
 
   return success;
 }
@@ -46,9 +46,11 @@ main(int argc, const char *argv[])
   if (success)
   {
     Universe universe;
-    GLuint shader_program = 0;
+
+    GLuint test_cell_drawing_shader_program = 0;
     OpenGL_Buffer test_cell_drawing_vbo;
-    GLuint vao;
+    OpenGL_Buffer test_cell_drawing_ibo;
+    GLuint test_cell_drawing_vao;
 
     b32 init = true;
     b32 running = true;
@@ -60,28 +62,29 @@ main(int argc, const char *argv[])
 
         ImGui_ImplSdlGL3_Init(engine.sdl_window.window);
 
-        b32 shader_success = init_shaders(&shader_program);
+        b32 shader_success = init_shaders(&test_cell_drawing_shader_program);
         running &= shader_success;
 
 
-        // Generate, Bind VAO
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        // Generate and Bind VAO
+        glGenVertexArrays(1, &test_cell_drawing_vao);
+        glBindVertexArray(test_cell_drawing_vao);
 
-        // Generate VBO
+        // Generate and Bind VBO
         create_opengl_buffer(&test_cell_drawing_vbo, sizeof(s32Vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-
-        // Bind VBO
         glBindBuffer(test_cell_drawing_vbo.binding_target, test_cell_drawing_vbo.id);
 
+        // Generate and Bind IBO
+        create_opengl_buffer(&test_cell_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+        glBindBuffer(test_cell_drawing_ibo.binding_target, test_cell_drawing_ibo.id);
+
         // Get attribute locations
-        GLuint attrib_location_screen_position = glGetAttribLocation(shader_program, "s32_cell_block_position");
+        GLuint attrib_location_screen_position = glGetAttribLocation(test_cell_drawing_shader_program, "s32_cell_block_position");
         glEnableVertexAttribArray(attrib_location_screen_position);
         glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32Vec2), (void *)0);
 
-        glBindVertexArray(0);
-        glBindBuffer(test_cell_drawing_vbo.binding_target, 0);
         opengl_print_errors();
+        glBindVertexArray(0);
 
 
         init_cell_hashmap(&universe);
@@ -91,7 +94,7 @@ main(int argc, const char *argv[])
         CellBlock *cell_block_c = get_cell_block(&universe, (s32Vec2){1, 0});
         CellBlock *cell_block_d = get_cell_block(&universe, (s32Vec2){1, 1});
 
-        test_draw_cells_upload(&universe, &test_cell_drawing_vbo);
+        test_draw_cells_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
         opengl_print_errors();
       }
@@ -135,12 +138,11 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      test_draw_cells(shader_program, vao, &test_cell_drawing_vbo);
+      test_draw_cells(test_cell_drawing_shader_program, test_cell_drawing_vao, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
       opengl_print_errors();
 
       glBindVertexArray(0);
-      glBindBuffer(test_cell_drawing_vbo.binding_target, 0);
 
       ImGui::Render();
 
