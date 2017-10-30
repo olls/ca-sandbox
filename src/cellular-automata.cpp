@@ -74,7 +74,7 @@ main(int argc, const char *argv[])
         glBindVertexArray(test_cell_drawing_vao);
 
         // Generate and Bind VBO
-        create_opengl_buffer(&test_cell_drawing_vbo, sizeof(s32Vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+        create_opengl_buffer(&test_cell_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
         glBindBuffer(test_cell_drawing_vbo.binding_target, test_cell_drawing_vbo.id);
 
         // Generate and Bind IBO
@@ -84,18 +84,20 @@ main(int argc, const char *argv[])
         // Get attribute locations
         GLuint attrib_location_screen_position = glGetAttribLocation(test_cell_drawing_shader_program, "s32_cell_block_position");
         glEnableVertexAttribArray(attrib_location_screen_position);
-        glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32Vec2), (void *)0);
+        glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
 
         opengl_print_errors();
         glBindVertexArray(0);
 
+        init_cell_drawing(&cell_instancing, &general_vertex_buffer, &general_index_buffer);
+
 
         init_cell_hashmap(&universe);
 
-        CellBlock *cell_block_a = get_cell_block(&universe, (s32Vec2){0, 0});
-        CellBlock *cell_block_b = get_cell_block(&universe, (s32Vec2){0, 1});
-        CellBlock *cell_block_c = get_cell_block(&universe, (s32Vec2){1, 0});
-        CellBlock *cell_block_d = get_cell_block(&universe, (s32Vec2){1, 1});
+        CellBlock *cell_block_a = get_cell_block(&universe, (s32vec2){0, 0});
+        CellBlock *cell_block_b = get_cell_block(&universe, (s32vec2){0, 1});
+        CellBlock *cell_block_c = get_cell_block(&universe, (s32vec2){1, 0});
+        CellBlock *cell_block_d = get_cell_block(&universe, (s32vec2){1, 1});
 
         test_draw_cell_blocks_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 

@@ -17,7 +17,7 @@ init_cell_hashmap(Universe *universe)
 
 
 void
-init_cell_block(CellBlock *cell_block, s32Vec2 position)
+init_cell_block(CellBlock *cell_block, s32vec2 position)
 {
   print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
   memset(cell_block, 0, sizeof(CellBlock));
@@ -30,7 +30,7 @@ init_cell_block(CellBlock *cell_block, s32Vec2 position)
 
 
 CellBlock *
-get_cell_block(Universe *universe, s32Vec2 search_cell_block_position)
+get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 {
   print("Getting CellBlock (%d, %d).\n", search_cell_block_position.x, search_cell_block_position.y);
   CellBlock *result = 0;
@@ -52,7 +52,7 @@ get_cell_block(Universe *universe, s32Vec2 search_cell_block_position)
 
   // Follow CellBlock linked list
   while (candidate_cell_block->initialised &&
-         candidate_cell_block->block_position != search_cell_block_position)
+         !vec2_eq(candidate_cell_block->block_position, search_cell_block_position))
   {
     // Allocate next_block if it doesn't exist, as the CellBlock __must__ be in this hash slot.
     if (candidate_cell_block->next_block == 0)

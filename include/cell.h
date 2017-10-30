@@ -6,7 +6,7 @@
 
 struct Cell
 {
-  uVec2 block_offset;
+  uvec2 block_offset;
 
   u32 state;
 };

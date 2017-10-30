@@ -17,11 +17,11 @@ test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, Open
 
     if (cell_block != 0 && cell_block->initialised)
     {
-      s32Vec2 square_vertices[] = {
-        (s32Vec2){0, 0} + cell_block->block_position,
-        (s32Vec2){1, 0} + cell_block->block_position,
-        (s32Vec2){1, 1} + cell_block->block_position,
-        (s32Vec2){0, 1} + cell_block->block_position
+      s32vec2 square_vertices[] = {
+        vec2_add((s32vec2){0, 0}, cell_block->block_position),
+        vec2_add((s32vec2){1, 0}, cell_block->block_position),
+        vec2_add((s32vec2){1, 1}, cell_block->block_position),
+        vec2_add((s32vec2){0, 1}, cell_block->block_position)
       };
 
       GLushort index_a = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);

@@ -4,128 +4,386 @@
 #include "types.h"
 
 
-struct Vec2
+struct vec2
 {
   r32 x;
   r32 y;
 };
 
 
-struct uVec2
+struct uvec2
 {
   u32 x;
   u32 y;
 };
 
 
-struct s32Vec2
+struct s32vec2
 {
   s32 x;
   s32 y;
 };
 
 
-struct s64Vec2
+struct s64vec2
 {
   s64 x;
   s64 y;
 };
 
 
-template <typename Vec>
-Vec
-operator+(Vec a, Vec b)
+template <typename vec>
+vec
+vec2_add(vec a, vec b)
 {
-  Vec result;
+  vec result;
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   return result;
 }
 
-template <typename Vec>
-Vec
-operator-(Vec a, Vec b)
+template <typename vec>
+vec
+vec2_subtract(vec a, vec b)
 {
-  Vec result;
+  vec result;
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   return result;
 }
 
-template <typename Vec>
-Vec
-operator*(Vec a, Vec b)
+template <typename vec>
+vec
+vec2_multiply(vec a, vec b)
 {
-  Vec result;
+  vec result;
   result.x = a.x * b.x;
   result.y = a.y * b.y;
   return result;
 }
 
-template <typename Vec>
-Vec
-operator/(Vec a, Vec b)
+template <typename vec>
+vec
+vec2_divide(vec a, vec b)
 {
-  Vec result;
+  vec result;
   result.x = a.x / b.x;
   result.y = a.y / b.y;
   return result;
 }
 
-template <typename Vec, typename Scalar>
-Vec
-operator+(Vec a, Scalar b)
+template <typename vec, typename Scalar>
+vec
+vec2_add(vec a, Scalar b)
 {
-  Vec result;
+  vec result;
   result.x = a.x + b;
   result.y = a.y + b;
   return result;
 }
 
-template <typename Vec, typename Scalar>
-Vec
-operator-(Vec a, Scalar b)
+template <typename vec, typename Scalar>
+vec
+vec2_subtract(vec a, Scalar b)
 {
-  Vec result;
+  vec result;
   result.x = a.x - b;
   result.y = a.y - b;
   return result;
 }
 
-template <typename Vec, typename Scalar>
-Vec
-operator*(Vec a, Scalar b)
+template <typename vec, typename Scalar>
+vec
+vec2_multiply(vec a, Scalar b)
 {
-  Vec result;
+  vec result;
   result.x = a.x * b;
   result.y = a.y * b;
   return result;
 }
 
-template <typename Vec, typename Scalar>
-Vec
-operator/(Vec a, Scalar b)
+template <typename vec, typename Scalar>
+vec
+vec2_divide(vec a, Scalar b)
 {
-  Vec result;
+  vec result;
   result.x = a.x / b;
   result.y = a.y / b;
   return result;
 }
 
-template <typename Vec>
+template <typename vec>
 b32
-operator==(Vec a, Vec b)
+vec2_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&
                a.y == b.y;
   return result;
 }
 
-template <typename Vec>
-b32
-operator!=(Vec a, Vec b)
+
+struct vec3
 {
-  b32 result = !(a == b);
+  r32 x;
+  r32 y;
+  r32 z;
+};
+
+
+struct uvec3
+{
+  u32 x;
+  u32 y;
+  u32 z;
+};
+
+
+struct s32vec3
+{
+  s32 x;
+  s32 y;
+  s32 z;
+};
+
+
+struct s64vec3
+{
+  s64 x;
+  s64 y;
+  s64 z;
+};
+
+
+template <typename vec>
+vec
+vec3_add(vec a, vec b)
+{
+  vec result;
+  result.x = a.x + b.x;
+  result.y = a.y + b.y;
+  result.z = a.z + b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec3_subtract(vec a, vec b)
+{
+  vec result;
+  result.x = a.x - b.x;
+  result.y = a.y - b.y;
+  result.z = a.z - b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec3_multiply(vec a, vec b)
+{
+  vec result;
+  result.x = a.x * b.x;
+  result.y = a.y * b.y;
+  result.z = a.z * b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec3_divide(vec a, vec b)
+{
+  vec result;
+  result.x = a.x / b.x;
+  result.y = a.y / b.y;
+  result.z = a.z / b.z;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec3_add(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x + b;
+  result.y = a.y + b;
+  result.z = a.z + b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec3_subtract(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x - b;
+  result.y = a.y - b;
+  result.z = a.z - b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec3_multiply(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x * b;
+  result.y = a.y * b;
+  result.z = a.z * b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec3_divide(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x / b;
+  result.y = a.y / b;
+  result.z = a.z / b;
+  return result;
+}
+
+template <typename vec>
+b32
+vec3_eq(vec a, vec b)
+{
+  b32 result = a.x == b.x &&
+               a.y == b.y &&
+               a.z == b.z;
+  return result;
+}
+
+
+struct vec4
+{
+  r32 w;
+  r32 x;
+  r32 y;
+  r32 z;
+};
+
+
+struct uvec4
+{
+  u32 w;
+  u32 x;
+  u32 y;
+  u32 z;
+};
+
+
+struct s32vec4
+{
+  s32 w;
+  s32 x;
+  s32 y;
+  s32 z;
+};
+
+
+struct s64vec4
+{
+  s64 w;
+  s64 x;
+  s64 y;
+  s64 z;
+};
+
+
+template <typename vec>
+vec
+vec4_add(vec a, vec b)
+{
+  vec result;
+  result.x = a.x + b.x;
+  result.y = a.y + b.y;
+  result.z = a.z + b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec4_subtract(vec a, vec b)
+{
+  vec result;
+  result.x = a.x - b.x;
+  result.y = a.y - b.y;
+  result.z = a.z - b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec4_multiply(vec a, vec b)
+{
+  vec result;
+  result.x = a.x * b.x;
+  result.y = a.y * b.y;
+  result.z = a.z * b.z;
+  return result;
+}
+
+template <typename vec>
+vec
+vec4_divide(vec a, vec b)
+{
+  vec result;
+  result.x = a.x / b.x;
+  result.y = a.y / b.y;
+  result.z = a.z / b.z;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec4_add(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x + b;
+  result.y = a.y + b;
+  result.z = a.z + b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec4_subtract(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x - b;
+  result.y = a.y - b;
+  result.z = a.z - b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec4_multiply(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x * b;
+  result.y = a.y * b;
+  result.z = a.z * b;
+  return result;
+}
+
+template <typename vec, typename Scalar>
+vec
+vec4_divide(vec a, Scalar b)
+{
+  vec result;
+  result.x = a.x / b;
+  result.y = a.y / b;
+  result.z = a.z / b;
+  return result;
+}
+
+template <typename vec>
+b32
+vec4_eq(vec a, vec b)
+{
+  b32 result = a.x == b.x &&
+               a.y == b.y &&
+               a.z == b.z;
   return result;
 }
 
