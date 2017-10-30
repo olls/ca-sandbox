@@ -97,7 +97,7 @@ main(int argc, const char *argv[])
         CellBlock *cell_block_c = get_cell_block(&universe, (s32Vec2){1, 0});
         CellBlock *cell_block_d = get_cell_block(&universe, (s32Vec2){1, 1});
 
-        test_draw_cells_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
+        test_draw_cell_blocks_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
         opengl_print_errors();
       }
@@ -149,9 +149,10 @@ main(int argc, const char *argv[])
         0,       0,  0,  1
       };
 
+      glUseProgram(test_cell_drawing_shader_program);
       glUniformMatrix4fv(mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
 
-      test_draw_cells(test_cell_drawing_shader_program, test_cell_drawing_vao, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
+      test_draw_cell_blocks(test_cell_drawing_vao, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
       opengl_print_errors();
       glBindVertexArray(0);

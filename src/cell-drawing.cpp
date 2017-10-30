@@ -42,9 +42,8 @@ test_draw_cells_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, Open
 
 
 void
-test_draw_cells(GLuint shader_program, GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
+test_draw_cell_blocks(GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
 {
-  glUseProgram(shader_program);
   glBindVertexArray(vao);
 
   glBindBuffer(cell_drawing_ibo->binding_target, cell_drawing_ibo->id);

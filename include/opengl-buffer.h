@@ -51,7 +51,7 @@ opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element);
 
 
 u32
-opengl_buffer_add_items(OpenGL_Buffer *buffer, u32 n_elements, void *elements);
+opengl_buffer_add_elements(OpenGL_Buffer *buffer, u32 n_elements, void *elements);
 
 
 void
