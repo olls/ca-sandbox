@@ -1,0 +1,27 @@
+#version 330 core
+
+
+uniform mat4 projection_matrix;
+
+in vec2 vertex;
+
+in int s32_block_position_x;
+in int s32_block_position_y;
+in vec2 cell_position;
+in vec4 cell_colour;
+
+out vec4 colour_varying;
+
+
+void
+main(void)
+{
+  vec2 local_block_position = vec2(s32_block_position_x, s32_block_position_y);
+  local_block_position += cell_position;
+  local_block_position += vertex * 0.05;
+  vec2 scaled_block_position = local_block_position * 0.4;
+
+
+  gl_Position = projection_matrix * vec4(scaled_block_position, 0.0, 1.0);
+  colour_varying = cell_colour;
+}

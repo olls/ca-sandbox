@@ -19,13 +19,28 @@ init_cell_hashmap(Universe *universe)
 void
 init_cell_block(CellBlock *cell_block, s32vec2 position)
 {
+  static u32 s = 0;
+
   print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
   memset(cell_block, 0, sizeof(CellBlock));
 
   cell_block->block_position = position;
   cell_block->initialised = true;
 
-  // TODO: Initialise cells
+  for (u32 cell_y = 0;
+       cell_y < CELL_BLOCK_DIM;
+       ++cell_y)
+  {
+    for (u32 cell_x = 0;
+         cell_x < CELL_BLOCK_DIM;
+         ++cell_x)
+    {
+      Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
+
+      cell->block_offset = (uvec2){cell_x, cell_y};
+      cell->state = s++;
+    }
+  }
 }
 
 

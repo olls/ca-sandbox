@@ -26,7 +26,6 @@ create_opengl_buffer(OpenGL_Buffer *buffer, u32 element_size, GLenum binding_tar
 
   glBindBuffer(buffer->binding_target, buffer->id);
   glBufferData(buffer->binding_target, buffer->element_size * buffer->total_elements, NULL, GL_STATIC_DRAW);
-  glBindBuffer(buffer->binding_target, 0);
 
   opengl_print_errors();
 }
@@ -82,8 +81,6 @@ opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements)
     buffer->setup_attributes_function(buffer);
   }
 
-  glBindBuffer(buffer->binding_target, 0);
-
   opengl_print_errors();
   print("Reallocated VBO.\n");
 }
@@ -96,7 +93,6 @@ opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *
   {
     glBindBuffer(buffer->binding_target, buffer->id);
     glBufferSubData(buffer->binding_target, buffer->element_size * element_position, buffer->element_size, new_element);
-    glBindBuffer(buffer->binding_target, 0);
   }
   else
   {
@@ -110,7 +106,7 @@ opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *
 u32
 opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element)
 {
-  print("Adding new element to OpenGL buffer.\n");
+  // print("Adding new element to OpenGL buffer.\n");
 
   if (buffer->elements_used >= buffer->total_elements)
   {
@@ -145,7 +141,6 @@ opengl_buffer_add_elements(OpenGL_Buffer *buffer, u32 n_elements, void *elements
 
     glBindBuffer(buffer->binding_target, buffer->id);
     glBufferSubData(buffer->binding_target, buffer->element_size * start_position, buffer->element_size * n_elements, elements);
-    glBindBuffer(buffer->binding_target, 0);
 
     buffer->elements_used += n_elements;
   }
@@ -178,8 +173,6 @@ opengl_buffer_remove_element(OpenGL_Buffer *buffer, u32 element_to_remove)
 
       glCopyBufferSubData(buffer->binding_target, buffer->binding_target, element_to_move_position, element_to_remove_position, buffer->element_size);
     }
-
-    glBindBuffer(buffer->binding_target, 0);
   }
   opengl_print_errors();
 }

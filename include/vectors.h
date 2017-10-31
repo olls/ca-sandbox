@@ -32,8 +32,15 @@ struct s64vec2
 };
 
 
+inline vec2
+uvec2_to_vec2(uvec2 a)
+{
+  vec2 result = {(r32)a.x, (r32)a.y};
+  return result;
+}
+
 template <typename vec>
-vec
+inline vec
 vec2_add(vec a, vec b)
 {
   vec result;
@@ -43,7 +50,7 @@ vec2_add(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec2_subtract(vec a, vec b)
 {
   vec result;
@@ -53,7 +60,7 @@ vec2_subtract(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec2_multiply(vec a, vec b)
 {
   vec result;
@@ -63,7 +70,7 @@ vec2_multiply(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec2_divide(vec a, vec b)
 {
   vec result;
@@ -73,7 +80,7 @@ vec2_divide(vec a, vec b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec2_add(vec a, Scalar b)
 {
   vec result;
@@ -83,7 +90,7 @@ vec2_add(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec2_subtract(vec a, Scalar b)
 {
   vec result;
@@ -93,7 +100,7 @@ vec2_subtract(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec2_multiply(vec a, Scalar b)
 {
   vec result;
@@ -103,7 +110,7 @@ vec2_multiply(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec2_divide(vec a, Scalar b)
 {
   vec result;
@@ -113,7 +120,7 @@ vec2_divide(vec a, Scalar b)
 }
 
 template <typename vec>
-b32
+inline b32
 vec2_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&
@@ -154,8 +161,15 @@ struct s64vec3
 };
 
 
+inline vec3
+uvec3_to_vec3(uvec3 a)
+{
+  vec3 result = {(r32)a.x, (r32)a.y, (r32)a.z};
+  return result;
+}
+
 template <typename vec>
-vec
+inline vec
 vec3_add(vec a, vec b)
 {
   vec result;
@@ -166,7 +180,7 @@ vec3_add(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec3_subtract(vec a, vec b)
 {
   vec result;
@@ -177,7 +191,7 @@ vec3_subtract(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec3_multiply(vec a, vec b)
 {
   vec result;
@@ -188,7 +202,7 @@ vec3_multiply(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec3_divide(vec a, vec b)
 {
   vec result;
@@ -199,7 +213,7 @@ vec3_divide(vec a, vec b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec3_add(vec a, Scalar b)
 {
   vec result;
@@ -210,7 +224,7 @@ vec3_add(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec3_subtract(vec a, Scalar b)
 {
   vec result;
@@ -221,7 +235,7 @@ vec3_subtract(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec3_multiply(vec a, Scalar b)
 {
   vec result;
@@ -232,7 +246,7 @@ vec3_multiply(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec3_divide(vec a, Scalar b)
 {
   vec result;
@@ -243,7 +257,7 @@ vec3_divide(vec a, Scalar b)
 }
 
 template <typename vec>
-b32
+inline b32
 vec3_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&
@@ -289,8 +303,15 @@ struct s64vec4
 };
 
 
+inline vec4
+uvec4_to_vec4(uvec4 a)
+{
+  vec4 result = {(r32)a.w, (r32)a.x, (r32)a.y, (r32)a.z};
+  return result;
+}
+
 template <typename vec>
-vec
+inline vec
 vec4_add(vec a, vec b)
 {
   vec result;
@@ -301,7 +322,7 @@ vec4_add(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec4_subtract(vec a, vec b)
 {
   vec result;
@@ -312,7 +333,7 @@ vec4_subtract(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec4_multiply(vec a, vec b)
 {
   vec result;
@@ -323,7 +344,7 @@ vec4_multiply(vec a, vec b)
 }
 
 template <typename vec>
-vec
+inline vec
 vec4_divide(vec a, vec b)
 {
   vec result;
@@ -334,7 +355,7 @@ vec4_divide(vec a, vec b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec4_add(vec a, Scalar b)
 {
   vec result;
@@ -345,7 +366,7 @@ vec4_add(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec4_subtract(vec a, Scalar b)
 {
   vec result;
@@ -356,7 +377,7 @@ vec4_subtract(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec4_multiply(vec a, Scalar b)
 {
   vec result;
@@ -367,7 +388,7 @@ vec4_multiply(vec a, Scalar b)
 }
 
 template <typename vec, typename Scalar>
-vec
+inline vec
 vec4_divide(vec a, Scalar b)
 {
   vec result;
@@ -378,7 +399,7 @@ vec4_divide(vec a, Scalar b)
 }
 
 template <typename vec>
-b32
+inline b32
 vec4_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&

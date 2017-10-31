@@ -35,7 +35,7 @@ compile_shader(const char filename[], GLuint shader_type, GLuint *result)
       GLchar *info_log = (GLchar *)malloc(sizeof(GLchar) * log_size);
       glGetShaderInfoLog(*result, log_size, NULL, info_log);
 
-      print("Shader compile error: \"%s\"\n", info_log);
+      print("Shader compile error (%s): \"%s\"\n", filename, info_log);
       free(info_log);
 
       glDeleteShader(*result);

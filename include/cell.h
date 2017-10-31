@@ -6,6 +6,7 @@
 
 struct Cell
 {
+  // Integer position relative to the block
   uvec2 block_offset;
 
   u32 state;

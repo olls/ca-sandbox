@@ -10,26 +10,39 @@
 #include "opengl-util.h"
 #include "opengl-shaders.h"
 #include "opengl-buffer.h"
+#include "opengl-general-buffers.h"
 #include "cell-storage.h"
 #include "cell-drawing.h"
 
 
 b32
-init_shaders(GLuint *test_cell_drawing_shader_program)
+init_shaders(GLuint *test_cell_blocks_drawing_shader_program, GLuint *cell_instance_drawing_shader_program)
 {
   b32 success = true;
 
-  const char *filenames[] = {
+  const char *blocks_filenames[] = {
     "src/shaders/debug-cell-blocks.glvs",
     "src/shaders/screen.glfs"
   };
 
-  GLenum types[] = {
+  GLenum blocks_types[] = {
     GL_VERTEX_SHADER,
     GL_FRAGMENT_SHADER
   };
 
-  success &= create_shader_program(filenames, types, 2, test_cell_drawing_shader_program);
+  success &= create_shader_program(blocks_filenames, blocks_types, 2, test_cell_blocks_drawing_shader_program);
+
+  const char *cells_filenames[] = {
+    "src/shaders/cell-instancing.glvs",
+    "src/shaders/screen.glfs"
+  };
+
+  GLenum cell_types[] = {
+    GL_VERTEX_SHADER,
+    GL_FRAGMENT_SHADER
+  };
+
+  success &= create_shader_program(cells_filenames, cell_types, 2, cell_instance_drawing_shader_program);
 
   return success;
 }
@@ -47,11 +60,19 @@ main(int argc, const char *argv[])
   {
     Universe universe;
 
-    GLuint test_cell_drawing_shader_program = 0;
-    OpenGL_Buffer test_cell_drawing_vbo;
-    OpenGL_Buffer test_cell_drawing_ibo;
-    GLuint test_cell_drawing_vao;
-    GLuint mat4_projection_matrix_uniform;
+    GLuint test_cell_blocks_drawing_shader_program = 0;
+    OpenGL_Buffer test_cell_drawing_vbo = {};
+    OpenGL_Buffer test_cell_drawing_ibo = {};
+    GLuint test_cell_drawing_vao = 0;
+    GLuint test_cell_blocks_drawing_mat4_projection_matrix_uniform = 0;
+
+    OpenGL_Buffer general_vertex_buffer = {};
+    OpenGL_Buffer general_index_buffer = {};
+
+    GLuint cell_instance_drawing_shader_program = 0;
+    GLuint cell_instance_drawing_vao = 0;
+    CellInstancing cell_instancing = {};
+    GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
 
     b32 init = true;
     b32 running = true;
@@ -61,36 +82,53 @@ main(int argc, const char *argv[])
       {
         init = false;
 
+        // TODO: Ensure stuff is destroyed / freed before re-init-ing
+
         ImGui_ImplSdlGL3_Init(engine.sdl_window.window);
 
-        b32 shader_success = init_shaders(&test_cell_drawing_shader_program);
+        opengl_create_general_buffers(&general_vertex_buffer, &general_index_buffer);
+
+        b32 shader_success = init_shaders(&test_cell_blocks_drawing_shader_program, &cell_instance_drawing_shader_program);
         running &= shader_success;
 
         // Uniforms
-        mat4_projection_matrix_uniform = glGetUniformLocation(test_cell_drawing_shader_program, "projection_matrix");
+        test_cell_blocks_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(test_cell_blocks_drawing_shader_program, "projection_matrix");
+        cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
 
-        // Generate and Bind VAO
-        glGenVertexArrays(1, &test_cell_drawing_vao);
-        glBindVertexArray(test_cell_drawing_vao);
 
-        // Generate and Bind VBO
-        create_opengl_buffer(&test_cell_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-        glBindBuffer(test_cell_drawing_vbo.binding_target, test_cell_drawing_vbo.id);
+        // Debug cell block drawing
+        {
 
-        // Generate and Bind IBO
-        create_opengl_buffer(&test_cell_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-        glBindBuffer(test_cell_drawing_ibo.binding_target, test_cell_drawing_ibo.id);
+          // Generate and Bind VAO
+          glGenVertexArrays(1, &test_cell_drawing_vao);
+          glBindVertexArray(test_cell_drawing_vao);
 
-        // Get attribute locations
-        GLuint attrib_location_screen_position = glGetAttribLocation(test_cell_drawing_shader_program, "s32_cell_block_position");
-        glEnableVertexAttribArray(attrib_location_screen_position);
-        glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
+          // Generate and Bind VBO
+          create_opengl_buffer(&test_cell_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+          glBindBuffer(test_cell_drawing_vbo.binding_target, test_cell_drawing_vbo.id);
 
-        opengl_print_errors();
-        glBindVertexArray(0);
+          // Generate and Bind IBO
+          create_opengl_buffer(&test_cell_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+          glBindBuffer(test_cell_drawing_ibo.binding_target, test_cell_drawing_ibo.id);
 
-        init_cell_drawing(&cell_instancing, &general_vertex_buffer, &general_index_buffer);
+          // Get attribute locations
+          GLuint attrib_location_screen_position = glGetAttribLocation(test_cell_blocks_drawing_shader_program, "s32_cell_block_position");
+          glEnableVertexAttribArray(attrib_location_screen_position);
+          glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
 
+          opengl_print_errors();
+          glBindVertexArray(0);
+        }
+
+        // Cell instance drawing
+        {
+          glGenVertexArrays(1, &cell_instance_drawing_vao);
+          glBindVertexArray(cell_instance_drawing_vao);
+
+          init_cell_drawing(&cell_instancing, &general_vertex_buffer, &general_index_buffer);
+
+          glBindVertexArray(0);
+        }
 
         init_cell_hashmap(&universe);
 
@@ -98,8 +136,10 @@ main(int argc, const char *argv[])
         CellBlock *cell_block_b = get_cell_block(&universe, (s32vec2){0, 1});
         CellBlock *cell_block_c = get_cell_block(&universe, (s32vec2){1, 0});
         CellBlock *cell_block_d = get_cell_block(&universe, (s32vec2){1, 1});
+        CellBlock *cell_block_e = get_cell_block(&universe, (s32vec2){2, 1});
 
         test_draw_cell_blocks_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
+        upload_cell_instances(&universe, &cell_instancing);
 
         opengl_print_errors();
       }
@@ -151,13 +191,41 @@ main(int argc, const char *argv[])
         0,       0,  0,  1
       };
 
-      glUseProgram(test_cell_drawing_shader_program);
-      glUniformMatrix4fv(mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+#if 0
+      //
+      // Test cell blocks drawing
+      //
+
+      glUseProgram(test_cell_blocks_drawing_shader_program);
+      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
 
       test_draw_cell_blocks(test_cell_drawing_vao, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
       opengl_print_errors();
+#endif
+
+      //
+      // Cell instance drawing
+      //
+
+      // TODO: Clear instance buffer and re-upload each frame (or on change?)
+      // upload_cell_instances(&universe, &cell_instancing);
+
+      glBindVertexArray(cell_instance_drawing_vao);
+      glUseProgram(cell_instance_drawing_shader_program);
+      glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+
+      // Re-initialise attributes in case instance buffer has been reallocated
+      init_cell_instances_buffer_attributes(&cell_instancing.buffer, &general_index_buffer, &general_vertex_buffer, cell_instance_drawing_shader_program);
+
+      draw_cell_instances(&cell_instancing);
+
+      opengl_print_errors();
       glBindVertexArray(0);
+
+      //
+      // imGUI Rendering
+      //
 
       ImGui::Render();
 
