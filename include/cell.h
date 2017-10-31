@@ -10,6 +10,7 @@ struct Cell
   uvec2 block_offset;
 
   u32 state;
+  u32 previous_state;
 };
 
 

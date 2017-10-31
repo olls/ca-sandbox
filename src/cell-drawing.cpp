@@ -115,7 +115,15 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 
           vec2 cell_position = vec2_divide(uvec2_to_vec2(cell->block_offset), CELL_BLOCK_DIM);
 
-          vec4 colour = {(r32)(cell->state%256)/256, (r32)(cell->state%153)/153, (r32)(cell->state%23)/23, 1};
+          vec4 colour;
+          if (cell->state == 1)
+          {
+            colour = (vec4){1, 0, 0, 1};
+          }
+          else
+          {
+            colour = (vec4){0.5, 0.5, 0.5, 1};
+          }
 
           CellInstance cell_instance = {
             .block_position = cell_block->block_position,

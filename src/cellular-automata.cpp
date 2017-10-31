@@ -13,6 +13,10 @@
 #include "opengl-general-buffers.h"
 #include "cell-storage.h"
 #include "cell-drawing.h"
+#include "simulate.h"
+
+
+const u32 SIM_FREQUENCEY = 10;
 
 
 b32
@@ -74,6 +78,8 @@ main(int argc, const char *argv[])
     CellInstancing cell_instancing = {};
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
 
+    u64 last_sim_time = 0;
+
     b32 init = true;
     b32 running = true;
     while (running)
@@ -132,14 +138,12 @@ main(int argc, const char *argv[])
 
         init_cell_hashmap(&universe);
 
-        CellBlock *cell_block_a = get_cell_block(&universe, (s32vec2){0, 0});
-        CellBlock *cell_block_b = get_cell_block(&universe, (s32vec2){0, 1});
-        CellBlock *cell_block_c = get_cell_block(&universe, (s32vec2){1, 0});
-        CellBlock *cell_block_d = get_cell_block(&universe, (s32vec2){1, 1});
-        CellBlock *cell_block_e = get_cell_block(&universe, (s32vec2){2, 1});
+        // NOTE: Set a seed stating state
+        CellBlock *cell_block = get_cell_block(&universe, (s32vec2){0, 0});
+        Cell *cell = cell_block->cells + (8 * CELL_BLOCK_DIM) + 8;
+        cell->state = 1;
 
         test_draw_cell_blocks_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
-        upload_cell_instances(&universe, &cell_instancing);
 
         opengl_print_errors();
       }
@@ -174,6 +178,16 @@ main(int argc, const char *argv[])
       }
 
       ImGui::ShowTestWindow();
+
+      //
+      // Simulate
+      //
+
+      if (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
+      {
+        last_sim_time = engine.frame_start;
+        test_simulate_cells(&universe);
+      }
 
       //
       // Render

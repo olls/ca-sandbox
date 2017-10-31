@@ -19,9 +19,7 @@ init_cell_hashmap(Universe *universe)
 void
 init_cell_block(CellBlock *cell_block, s32vec2 position)
 {
-  static u32 s = 0;
-
-  print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
+  // print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
   memset(cell_block, 0, sizeof(CellBlock));
 
   cell_block->block_position = position;
@@ -38,7 +36,7 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
       Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
 
       cell->block_offset = (uvec2){cell_x, cell_y};
-      cell->state = s++;
+      cell->state = 0;
     }
   }
 }
@@ -47,7 +45,7 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 CellBlock *
 get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 {
-  print("Getting CellBlock (%d, %d).\n", search_cell_block_position.x, search_cell_block_position.y);
+  // print("Getting CellBlock (%d, %d).\n", search_cell_block_position.x, search_cell_block_position.y);
   CellBlock *result = 0;
 
   u32 cell_block_hash = search_cell_block_position.x * 7 + search_cell_block_position.y * 13;
