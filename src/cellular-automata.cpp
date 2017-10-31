@@ -208,8 +208,8 @@ main(int argc, const char *argv[])
       // Cell instance drawing
       //
 
-      // TODO: Clear instance buffer and re-upload each frame (or on change?)
-      // upload_cell_instances(&universe, &cell_instancing);
+      cell_instancing.buffer.elements_used = 0;
+      upload_cell_instances(&universe, &cell_instancing);
 
       glBindVertexArray(cell_instance_drawing_vao);
       glUseProgram(cell_instance_drawing_shader_program);
