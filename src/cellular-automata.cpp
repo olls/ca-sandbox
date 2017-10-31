@@ -78,7 +78,7 @@ main(int argc, const char *argv[])
     CellInstancing cell_instancing = {};
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
 
-    u64 last_sim_time = 0;
+    u64 last_sim_time = get_us();
 
     b32 init = true;
     b32 running = true;
@@ -140,8 +140,21 @@ main(int argc, const char *argv[])
 
         // NOTE: Set a seed stating state
         CellBlock *cell_block = get_cell_block(&universe, (s32vec2){0, 0});
-        Cell *cell = cell_block->cells + (8 * CELL_BLOCK_DIM) + 8;
+        Cell *cell;
+        #define get_cell(x, y) (cell_block->cells + ((x) * CELL_BLOCK_DIM) + (y))
+
+        cell = get_cell(7, 7);
         cell->state = 1;
+        cell = get_cell(8, 7);
+        cell->state = 1;
+        cell = get_cell(6, 7);
+        cell->state = 1;
+        cell = get_cell(7, 8);
+        cell->state = 1;
+        cell = get_cell(7, 6);
+        cell->state = 1;
+
+        #undef get_cell
 
         test_draw_cell_blocks_upload(&universe, &test_cell_drawing_vbo, &test_cell_drawing_ibo);
 
@@ -186,7 +199,7 @@ main(int argc, const char *argv[])
       if (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
       {
         last_sim_time = engine.frame_start;
-        test_simulate_cells(&universe);
+        test_simulate_cells(&universe, last_sim_time);
       }
 
       //

@@ -5,7 +5,7 @@
 
 
 void
-test_simulate_cells(Universe *universe);
+test_simulate_cells(Universe *universe, u64 current_frame);
 
 
 #endif

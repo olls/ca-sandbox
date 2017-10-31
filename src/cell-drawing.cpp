@@ -118,11 +118,11 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
           vec4 colour;
           if (cell->state == 1)
           {
-            colour = (vec4){1, 0, 0, 1};
+            colour = (vec4){0.3, 0.3, 0.3, 1};
           }
           else
           {
-            colour = (vec4){0.5, 0.5, 0.5, 1};
+            colour = (vec4){0.7, 0.7, 0.7, 1};
           }
 
           CellInstance cell_instance = {

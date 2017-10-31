@@ -21,11 +21,13 @@ const u32 CELL_BLOCK_DIM = 16;
 struct CellBlock
 {
   b32 initialised;
+  u64 last_simulated_on_frame;
 
   s32vec2 block_position;
 
   Cell cells[CELL_BLOCK_DIM * CELL_BLOCK_DIM];
 
+  // For hash collisions
   CellBlock *next_block;
 };
 
