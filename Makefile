@@ -1,6 +1,6 @@
 CC          := clang++
 
-TARGET      := cellular-automata
+TARGET      := ca-sandbox
 
 SRCDIR      := src
 INCDIR      := include

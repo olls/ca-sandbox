@@ -56,7 +56,7 @@ int
 main(int argc, const char *argv[])
 {
   Engine engine;
-  b32 success = init_sdl(argc, argv, "Cellular Automata", &engine);
+  b32 success = init_sdl(argc, argv, "CA Sandbox", &engine);
 
   engine_setup_loop(&engine);
 
@@ -257,6 +257,8 @@ main(int argc, const char *argv[])
       ImGui::Render();
 
       engine_frame_end(&engine);
+
+      sleep_us(1000000);
     }
   }
 
