@@ -92,6 +92,8 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   if (FULLSCREEN)
   {
     flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
+    engine->window.width = 0;
+    engine->window.height = 0;
   }
   else
   {
