@@ -103,37 +103,44 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 
     if (cell_block != 0 && cell_block->initialised)
     {
-      for (u32 cell_y = 0;
-           cell_y < CELL_BLOCK_DIM;
-           ++cell_y)
+      do
       {
-        for (u32 cell_x = 0;
-             cell_x < CELL_BLOCK_DIM;
-             ++cell_x)
+        for (u32 cell_y = 0;
+             cell_y < CELL_BLOCK_DIM;
+             ++cell_y)
         {
-          Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
-
-          vec2 cell_position = vec2_divide(uvec2_to_vec2(cell->block_offset), CELL_BLOCK_DIM);
-
-          vec4 colour;
-          if (cell->state == 1)
+          for (u32 cell_x = 0;
+               cell_x < CELL_BLOCK_DIM;
+               ++cell_x)
           {
-            colour = (vec4){0.3, 0.3, 0.3, 1};
-          }
-          else
-          {
-            colour = (vec4){0.7, 0.7, 0.7, 1};
-          }
+            Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
 
-          CellInstance cell_instance = {
-            .block_position = cell_block->block_position,
-            .cell_position = cell_position,
-            .colour = colour
-          };
+            vec2 cell_position = vec2_divide(uvec2_to_vec2(cell->block_offset), CELL_BLOCK_DIM);
 
-          opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+            vec4 colour;
+            if (cell->state == 1)
+            {
+              colour = (vec4){0.3, 0.3, 0.3, 1};
+            }
+            else
+            {
+              colour = (vec4){0.7, 0.7, 0.7, 1};
+            }
+
+            CellInstance cell_instance = {
+              .block_position = cell_block->block_position,
+              .cell_position = cell_position,
+              .colour = colour
+            };
+
+            opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+          }
         }
+
+        // Follow any hashmap collision chains
+        cell_block = cell_block->next_block;
       }
+      while (cell_block != 0);
     }
   }
 }

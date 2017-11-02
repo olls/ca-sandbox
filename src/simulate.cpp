@@ -5,103 +5,86 @@
 #include "cell-storage.h"
 
 
-Cell *
-test_get_cell(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
-{
-  // Gets a cell from within 1 CELL_BLOCK_DIM of the cell_block
-
-  // TODO: Cache CellBlocks
-
-  Cell *result = 0;
-
-  s32vec2 relative_cell_block = {0, 0};
-
-  if (cell_x < 0)
-  {
-    relative_cell_block.x = -1;
-    cell_x += CELL_BLOCK_DIM;
-  }
-  if (cell_x >= CELL_BLOCK_DIM)
-  {
-    relative_cell_block.x = 1;
-    cell_x -= CELL_BLOCK_DIM;
-  }
-
-  if (cell_y < 0)
-  {
-    relative_cell_block.y = -1;
-    cell_y += CELL_BLOCK_DIM;
-  }
-  if (cell_y >= CELL_BLOCK_DIM)
-  {
-    relative_cell_block.y = 1;
-    cell_y -= CELL_BLOCK_DIM;
-  }
-
-  if (!vec2_eq(relative_cell_block, (s32vec2){0, 0}))
-  {
-    s32vec2 new_cell_block_position = vec2_add(relative_cell_block, cell_block->block_position);
-
-    CellBlock *new_cell_block = get_cell_block(universe, new_cell_block_position);
-    cell_block = new_cell_block;
-  }
-
-  if (cell_block != 0)
-  {
-    result = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
-  }
-
-  return result;
-}
+/// @file
+/// @brief Contains functions for running the CA simulation on the CellBlocks.
 
 
+/// @brief Placeholder function implementing a hard coded transition rule for a single Cell.
+///
+/// Operates directly on the Cell in the CellBlock.
 void
 test_transition_rule(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
 {
-  if (!(cell_block->block_position.x >= -2 && cell_block->block_position.x <= 2 &&
-        cell_block->block_position.y >= -2 && cell_block->block_position.y <= 2))
+  Cell *cell = get_cell_relative_to_block(universe, cell_block, cell_x, cell_y);
+
+  // Test Von Neumann neighbourhood
+  Cell *cell_north = get_cell_relative_to_block(universe, cell_block, cell_x, cell_y - 1);
+  Cell *cell_east  = get_cell_relative_to_block(universe, cell_block, cell_x + 1, cell_y);
+  Cell *cell_south = get_cell_relative_to_block(universe, cell_block, cell_x, cell_y + 1);
+  Cell *cell_west  = get_cell_relative_to_block(universe, cell_block, cell_x - 1, cell_y);
+
+  Cell *cell_north_east = get_cell_relative_to_block(universe, cell_block, cell_x + 1, cell_y - 1);
+  Cell *cell_south_east = get_cell_relative_to_block(universe, cell_block, cell_x + 1, cell_y + 1);
+  Cell *cell_south_west = get_cell_relative_to_block(universe, cell_block, cell_x - 1, cell_y + 1);
+  Cell *cell_north_west = get_cell_relative_to_block(universe, cell_block, cell_x - 1, cell_y - 1);
+
+  u32 n_enabled_neighbours = (cell_north->previous_state + cell_east->previous_state + cell_south->previous_state + cell_west->previous_state +
+                              cell_north_east->previous_state + cell_south_east->previous_state + cell_south_west->previous_state + cell_north_west->previous_state +
+                              cell->previous_state);
+
+#if 0
+  if (n_enabled_neighbours == 3 ||
+      n_enabled_neighbours == 7 ||
+      n_enabled_neighbours == 8)
   {
-    print("Hit boundary at %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
+    cell->state = 1;
+  }
+#else
+  if (n_enabled_neighbours <= 4)
+  {
+    cell->state = 0;
   }
   else
   {
-    Cell *cell = test_get_cell(universe, cell_block, cell_x, cell_y);
-
-    // Test Von Neumann neighbourhood
-    Cell *cell_north = test_get_cell(universe, cell_block, cell_x, cell_y - 1);
-    Cell *cell_east  = test_get_cell(universe, cell_block, cell_x + 1, cell_y);
-    Cell *cell_south = test_get_cell(universe, cell_block, cell_x, cell_y + 1);
-    Cell *cell_west  = test_get_cell(universe, cell_block, cell_x - 1, cell_y);
-
-    Cell *cell_north_east = test_get_cell(universe, cell_block, cell_x + 1, cell_y - 1);
-    Cell *cell_south_east = test_get_cell(universe, cell_block, cell_x + 1, cell_y + 1);
-    Cell *cell_south_west = test_get_cell(universe, cell_block, cell_x - 1, cell_y + 1);
-    Cell *cell_north_west = test_get_cell(universe, cell_block, cell_x - 1, cell_y - 1);
-
-    u32 n_enabled_neighbours = (cell_north->previous_state + cell_east->previous_state + cell_south->previous_state + cell_west->previous_state +
-                                cell_north_east->previous_state + cell_south_east->previous_state + cell_south_west->previous_state + cell_north_west->previous_state +
-                                cell->previous_state);
-
-    // if (n_enabled_neighbours == 3 ||
-    //     n_enabled_neighbours == 7 ||
-    //     n_enabled_neighbours == 8)
-    // {
-    //   cell->state = 1;
-    // }
-    if (n_enabled_neighbours <= 4)
-    {
-      cell->state = 0;
-    }
-    else
-    {
-      cell->state = 1;
-    }
+    cell->state = 1;
   }
+#endif
 }
 
 
+/// Simulates one frame of a CellBlock using test_transition_rule()
 void
-test_simulate_cells(Universe *universe, u64 current_frame)
+simulate_cell_block(Universe *universe, CellBlock *cell_block)
+{
+  print("Simulating CellBlock %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
+
+  for (s32 cell_y = 0;
+       cell_y < CELL_BLOCK_DIM;
+       ++cell_y)
+  {
+    for (s32 cell_x = 0;
+         cell_x < CELL_BLOCK_DIM;
+         ++cell_x)
+    {
+      test_transition_rule(universe, cell_block, cell_x, cell_y);
+    }
+  }
+
+}
+
+/// Simulates one frame of the Universe.
+///
+/// @param[in] universe
+/// @param[in] current_frame  the time in us of the current frame.
+///
+/// First we iterate over every Cell in the Universe, copying its state into `Cell.previous_state`.
+///   Next we iterate over every CellBlock and simulate it using simulate_cell_block() if it has not
+///   yet been simulated on this frame. We continue to iterate over all the CellBlocks until they
+///   have all been simulated on this frame; this is to allow for new CellBlocks to be created
+///   during the simulation of a CellBlock, and the new CellBlock will still be simulated within the
+///   same frame.
+void
+simulate_cells(Universe *universe, u64 current_frame)
 {
   // First copy all Cell states into previous_state
 
@@ -113,14 +96,21 @@ test_simulate_cells(Universe *universe, u64 current_frame)
 
     if (cell_block != 0 && cell_block->initialised)
     {
-      for (u32 cell_index = 0;
-           cell_index < CELL_BLOCK_DIM * CELL_BLOCK_DIM;
-           ++cell_index)
+      do
       {
-        Cell *cell = cell_block->cells + cell_index;
+        for (u32 cell_index = 0;
+             cell_index < CELL_BLOCK_DIM * CELL_BLOCK_DIM;
+             ++cell_index)
+        {
+          Cell *cell = cell_block->cells + cell_index;
 
-        cell->previous_state = cell->state;
+          cell->previous_state = cell->state;
+        }
+
+        // Follow the hashmap collision chain
+        cell_block = cell_block->next_block;
       }
+      while (cell_block != 0);
     }
   }
 
@@ -133,6 +123,7 @@ test_simulate_cells(Universe *universe, u64 current_frame)
   while (simulated_any_blocks)
   {
     simulated_any_blocks = false;
+    print("Hashmap loop\n");
 
     for (u32 hash_slot = 0;
          hash_slot < universe->hashmap_size;
@@ -141,23 +132,33 @@ test_simulate_cells(Universe *universe, u64 current_frame)
       CellBlock *cell_block = universe->hashmap[hash_slot];
 
       if (cell_block != 0 &&
-          cell_block->initialised &&
-          cell_block->last_simulated_on_frame != current_frame)
+          cell_block->initialised)
       {
-        cell_block->last_simulated_on_frame = current_frame;
-        simulated_any_blocks = true;
-
-        for (s32 cell_y = 0;
-             cell_y < CELL_BLOCK_DIM;
-             ++cell_y)
+        do
         {
-          for (s32 cell_x = 0;
-               cell_x < CELL_BLOCK_DIM;
-               ++cell_x)
+          if (cell_block->initialised &&
+              cell_block->last_simulated_on_frame != current_frame)
           {
-            test_transition_rule(universe, cell_block, cell_x, cell_y);
+            if (!((cell_block->block_position.x >= -4 &&
+                   cell_block->block_position.x <=  3) &&
+                  (cell_block->block_position.y >= -2 &&
+                   cell_block->block_position.y <= 1)))
+            {
+              print("Hit boundary at %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
+            }
+            else
+            {
+              cell_block->last_simulated_on_frame = current_frame;
+              simulated_any_blocks = true;
+
+              simulate_cell_block(universe, cell_block);
+            }
           }
+
+          // Follow any hashmap collision chains
+          cell_block = cell_block->next_block;
         }
+        while (cell_block != 0);
       }
     }
   }

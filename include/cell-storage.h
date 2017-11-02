@@ -40,7 +40,7 @@ struct CellBlock
   /// Array of cells within the block.
   Cell cells[CELL_BLOCK_DIM * CELL_BLOCK_DIM];
 
-  /// The next CellBlock in this hash slot in the hashmap of Universe. 0 if this is the last
+  /// The next CellBlock in this hash slot in the hashmap of Universe.  0 if this is the last
   ///   CellBlock in this slot.
   CellBlock *next_block;
 };
@@ -71,6 +71,10 @@ init_cell_hashmap(Universe *universe);
 
 CellBlock *
 get_cell_block(Universe *universe, s32vec2 search_cell_block_position);
+
+
+Cell *
+get_cell_relative_to_block(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y);
 
 
 #endif

@@ -184,6 +184,8 @@ main(int argc, const char *argv[])
       // Start frame
       //
 
+      print("Frame Start\n");
+
       engine_frame_start(&engine);
       ImGui_ImplSdlGL3_NewFrame(engine.window.sdl_window);
 
@@ -204,7 +206,7 @@ main(int argc, const char *argv[])
       if (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
       {
         last_sim_time = engine.frame_start;
-        test_simulate_cells(&universe, last_sim_time);
+        simulate_cells(&universe, last_sim_time);
       }
 
       //

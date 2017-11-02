@@ -8,9 +8,7 @@
 
 
 /// @file
-///
-/// Implements functions for accessing the Universe.
-///
+/// @brief Implements functions for accessing the Universe.
 
 
 /// Initialise the universe
@@ -69,6 +67,7 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 /// @param [in] universe                    Pointer to an initialised Universe.
 /// @param [in] search_cell_block_position  The position of the CellBlock to get.
 ///
+/// @returns 0 on error
 CellBlock *
 get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 {
@@ -105,6 +104,64 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
   }
 
   result = candidate_cell_block;
+
+  return result;
+}
+
+
+/// Retrieves a cell from within 1 CELL_BLOCK_DIM of the cell_block
+
+/// Gets a cell at a position relative to the `cell_block`; if the cell is not within the
+///   `cell_block` but it is within one of the `cell_block`s eight immediate neighbours, it will
+///   retrieve the neighbouring CellBlock and return the correct cell.
+///
+/// This is used to retrieve cells across CellBlock borders seamlessly.
+///
+/// @returns 0 on failure, this shouldn't happen as get_cell_block() will create new CellBlocks if
+///            they don't exist.
+Cell *
+get_cell_relative_to_block(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
+{
+  // TODO: Cache CellBlocks
+
+  Cell *result = 0;
+
+  s32vec2 relative_cell_block = {0, 0};
+
+  if (cell_x < 0)
+  {
+    relative_cell_block.x = -1;
+    cell_x += CELL_BLOCK_DIM;
+  }
+  if (cell_x >= CELL_BLOCK_DIM)
+  {
+    relative_cell_block.x = 1;
+    cell_x -= CELL_BLOCK_DIM;
+  }
+
+  if (cell_y < 0)
+  {
+    relative_cell_block.y = -1;
+    cell_y += CELL_BLOCK_DIM;
+  }
+  if (cell_y >= CELL_BLOCK_DIM)
+  {
+    relative_cell_block.y = 1;
+    cell_y -= CELL_BLOCK_DIM;
+  }
+
+  if (!vec2_eq(relative_cell_block, (s32vec2){0, 0}))
+  {
+    s32vec2 new_cell_block_position = vec2_add(relative_cell_block, cell_block->block_position);
+
+    CellBlock *new_cell_block = get_cell_block(universe, new_cell_block_position);
+    cell_block = new_cell_block;
+  }
+
+  if (cell_block != 0)
+  {
+    result = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
+  }
 
   return result;
 }
