@@ -9,6 +9,19 @@
 #include "cell-storage.h"
 
 
+/// @file
+/// @brief Functions for drawing the Universe to the screen using OpenGL instancing.
+
+
+/// @brief Initialise the CellInstancing struct by creating the OpenGL_Buffer which holds the
+///          CellInstances, and upload the cell vertices/indices to the general buffers.
+///
+/// @param[out] cell_instancing  Pointer to the struct to fill out.
+/// @param[in] general_vertex_buffer  Pointer to a general OpenGL_Buffer setup to take `vec2`
+///                                     elements.
+/// @param[in] general_index_buffer  Pointer to a general OpenGL_Buffer setup to take `GLushort`
+///                                    index elements.
+///
 void
 init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer)
 {
@@ -34,6 +47,7 @@ init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex
 }
 
 
+/// Setup the attributes used by the instanced cell drawing for the cell-instancing.glvs shader.
 void
 init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer, GLuint cell_instance_drawing_shader_program)
 {
@@ -91,6 +105,12 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 }
 
 
+/// @brief Upload all Cells in the Universe to the CellInstancing.buffer so that they can be drawn.
+///
+/// Overwrites the buffer each call, so any updates are drawn. CellInastances could be updated
+///   individually more cleverly, but it isn't worth the complexity while re-uploading them each
+///   frame is fast enough.
+///
 void
 upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 {
@@ -149,6 +169,7 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 }
 
 
+/// Draws all the CellInstances uploaded to CellInstance.buffer
 void
 draw_cell_instances(CellInstancing *cell_instancing)
 {

@@ -1,0 +1,3 @@
+#!/usr/bin/fish
+
+make-and-run listen 'make docs' 'xdotool search --onlyvisible --name 'ca-sandbox' windowactivate --sync key --clearmodifiers --window 0 ctrl+r'

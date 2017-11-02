@@ -2,6 +2,11 @@
 #include "vectors.h"
 
 
+/// @file
+/// @brief General OpenGL_Buffer%s for vertices and indices to be used for variety of purposes.
+
+
+/// Creates the two general OpenGL_Buffer%s for vertex and index storage
 void
 opengl_create_general_buffers(OpenGL_Buffer *general_vertex_buffer,
                               OpenGL_Buffer *general_index_buffer)

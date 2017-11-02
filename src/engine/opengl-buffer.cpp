@@ -8,6 +8,19 @@
 #include "opengl-buffer.h"
 
 
+/// @file
+/// @brief Functions for manipulating OpenGL_Buffer objects
+
+
+/// Generates a new OpenGL buffer object, sets the members of OpenGL_Buffer and allocates the
+///   initial size of the buffer in OpenGL.
+///
+/// @param[out] buffer
+/// @param[in] element_size  The size of an element in this buffer in bytes
+/// @param[in] binding_target
+/// @param[in] usage
+/// @param[in] size  The initial number of elements the buffer should be allocated for
+///
 void
 create_opengl_buffer(OpenGL_Buffer *buffer, u32 element_size, GLenum binding_target, GLenum usage, u32 size)
 {
@@ -31,6 +44,10 @@ create_opengl_buffer(OpenGL_Buffer *buffer, u32 element_size, GLenum binding_tar
 }
 
 
+/// Re-allocate an OpenGL_Buffer object to hold at least n additional elements.
+///
+/// Copies the old data into the new buffer, element indices remain intact.
+///
 void
 opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements)
 {
@@ -86,6 +103,13 @@ opengl_buffer_extend(OpenGL_Buffer *buffer, u32 minimum_new_total_elements)
 }
 
 
+/// Overwrite an element in an OpenGL_Buffer object
+///
+/// @param[in] buffer
+/// @param[in] element_position  The index of the element within the buffer
+/// @param[in] new_element  The value to overwrite with.  Must point to an object with the same size
+///                           as `buffer.element_size`.
+///
 void
 opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *new_element)
 {
@@ -103,6 +127,11 @@ opengl_buffer_update_element(OpenGL_Buffer *buffer, u32 element_position, void *
 }
 
 
+/// Adds a new element to the end of an OpenGL_Buffer, extending it if necessary.
+///
+/// @param[in] buffer
+/// @param[in] element  The element to be added.  Must point to an object with the same size as
+///                       `buffer.element_size`.
 u32
 opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element)
 {
@@ -123,6 +152,13 @@ opengl_buffer_new_element(OpenGL_Buffer *buffer, void *element)
 }
 
 
+/// Add an array of new elements to the end of an OpenGL_Buffer, extending it if necessary.
+///
+/// @param[in] buffer
+/// @param[in] n_elements  The number of elements to be added to the buffer.
+/// @param[in] elements  Pointer to array of elements, this array should be
+///                        `buffer.element_size * n_elements` bytes big.
+///
 u32
 opengl_buffer_add_elements(OpenGL_Buffer *buffer, u32 n_elements, void *elements)
 {
@@ -149,6 +185,14 @@ opengl_buffer_add_elements(OpenGL_Buffer *buffer, u32 n_elements, void *elements
 }
 
 
+/// Remove an element from an OpenGL_Buffer, moving the last element in the buffer into its position
+///   to maintain a contiguous array of elements.  Because of this, as soon as this function is
+///   called any element indices which have previously been stored can no longer be assumed to be
+///   correct.  Therefore if you need to retain element indicies, you should avoid this function.
+///
+/// @param[in] buffer
+/// @param[in] element_to_remove  The index of the element which is to be removed.
+///
 void
 opengl_buffer_remove_element(OpenGL_Buffer *buffer, u32 element_to_remove)
 {
@@ -178,6 +222,13 @@ opengl_buffer_remove_element(OpenGL_Buffer *buffer, u32 element_to_remove)
 }
 
 
+/// Downloads an element from an OpenGL_Buffer
+///
+/// @param[in] buffer
+/// @param[in] element_position  The index of the element to retrieve
+/// @param[out] result  A pointer to allocated memory to place the result in. Must have a size of
+///                       `buffer.element_size`.
+///
 void
 opengl_buffer_get_element(OpenGL_Buffer *buffer, u32 element_position, void *result)
 {

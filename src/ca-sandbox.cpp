@@ -21,9 +21,13 @@
 /// @brief Program root file.
 
 
+/// The number of simulations iterations per second.
 const u32 SIM_FREQUENCEY = 5;
 
 
+/// @brief Compile all the OpenGL shaders used in the program.
+///
+/// TODO: Shader compilation should probably be moved to the locations where the shaders are used.
 b32
 init_shaders(GLuint *test_cell_blocks_drawing_shader_program, GLuint *cell_instance_drawing_shader_program)
 {
@@ -57,6 +61,7 @@ init_shaders(GLuint *test_cell_blocks_drawing_shader_program, GLuint *cell_insta
 }
 
 
+/// Main program setup and loop
 int
 main(int argc, const char *argv[])
 {

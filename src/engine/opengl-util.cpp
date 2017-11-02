@@ -5,6 +5,11 @@
 #include "opengl-util.h"
 
 
+/// @file
+/// @brief Utility functions for debugging OpenGL
+
+
+/// Convert an OpenGL error code into a string, and print it.
 void
 opengl_print_error(GLenum error_code, const char *file, u32 line)
 {
@@ -48,6 +53,7 @@ opengl_print_error(GLenum error_code, const char *file, u32 line)
 }
 
 
+/// Get all errors from OpenGL, and print them.
 b32
 _opengl_print_errors(const char *file, u32 line)
 {
@@ -66,6 +72,10 @@ _opengl_print_errors(const char *file, u32 line)
 }
 
 
+/// @brief A callback function used by OpenGL for debug output.
+///
+/// This is enabled in init_sdl() with DEBUG defined.
+///
 void
 opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user_param)
 {
@@ -165,6 +175,7 @@ opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum sever
 }
 
 
+/// Function alias for alternate OpenGL versions.
 void
 opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, void *user_param)
 {

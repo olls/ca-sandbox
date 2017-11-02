@@ -36,6 +36,7 @@ struct s64vec2
 };
 
 
+/// Truncate u32 vector values to r32 vector.
 inline vec2
 uvec2_to_vec2(uvec2 a)
 {
@@ -165,6 +166,7 @@ struct s64vec3
 };
 
 
+/// Truncate u32 vector values to r32 vector.
 inline vec3
 uvec3_to_vec3(uvec3 a)
 {
@@ -307,6 +309,7 @@ struct s64vec4
 };
 
 
+/// Truncate u32 vector values to r32 vector.
 inline vec4
 uvec4_to_vec4(uvec4 a)
 {

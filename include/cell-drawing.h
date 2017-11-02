@@ -5,25 +5,46 @@
 #include "cell-storage.h"
 
 
+/// @file
+/// @brief Data structures for drawing the Cell%s with OpenGL
+///
+/// Cells are drawn using OpenGL instanced rendering. The vertices are uploaded once to an
+///   OpenGL_Buffer, then the coordinates and colour for each CellInstance is uploaded separately.
+///   All the CellInstance%s are then drawn by OpenGL using the one set of vertices.
+///
+/// The cell vertices and indices are stored in the `general_buffer`, which is maintained in the
+///   main() function.
+///
+
+
+/// Holds the OpenGL identifiers for cell drawing
 struct CellInstancing
 {
+  /// The buffer where the CellInstances are uploaded
   OpenGL_Buffer buffer;
 
+  /// The position of the cell vertices within the general buffer
   u32 cell_general_vertices_position;
-  u32 cell_general_indices_position;
+  u32 cell_n_vertices;  ///< Number of vertices stored in the general buffer
 
-  u32 cell_n_vertices;
-  u32 cell_n_indices;
+  /// The position of the cell vertex indices within the general buffer
+  u32 cell_general_indices_position;
+  u32 cell_n_indices;  ///< Number of indices stored in the general buffer
 };
 
 
+/// @brief The details for a single cell to be rendered, this is the object which is uploaded to the
+///          OpenGL_Buffer
+///
 struct CellInstance
 {
+  /// The global position of the block
   s32vec2 block_position;
 
-  // The cell's position within the block 0-1
+  /// The cell's position within the block 0-1
   vec2 cell_position;
 
+  /// Colour to draw the cell
   vec4 colour;
 };
 

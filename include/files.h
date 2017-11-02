@@ -5,11 +5,24 @@
 #include "files.h"
 
 
+/// @file
+///
+
+
+/// Object used to hold a file reference for a `mmap`-ed file using open_file()
 struct File
 {
+  /// The OS file descriptor
   s32 fd;
+
+  /// Pointer to the read-only file data
   const char *read_ptr;
+
+  /// @brief Pointer to writeable file-data, this pointer is only set if `write` is set to true when
+  ///          opening the file.
   u8 *write_ptr;
+
+  /// Length of the open file in bytes.
   s32 size;
 };
 

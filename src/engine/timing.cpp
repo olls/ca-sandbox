@@ -5,6 +5,10 @@
 #include "timing.h"
 
 
+/// @file
+
+
+/// Returns the current time in micro-seconds
 u64
 get_us()
 {
@@ -14,6 +18,7 @@ get_us()
 }
 
 
+/// Sleeps for us micro-second
 b32
 sleep_us(u32 us)
 {

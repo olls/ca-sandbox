@@ -2,34 +2,42 @@
 #define OPENGL_BUFFER_H_DEF
 
 
-// Implements a continuous array in an OpenGL buffer:
-// - Allocates a block of memory in OpenGL
-// - On element deletion, last element in array is moved into deleted elements position.
-//   - This means element indices are not constant, and an element's position in the buffer can not be assumed.
-// - On element addition, element is prepended to end of the elements.
-// - If buffer reaches capacity, new buffer is allocated with twice the previous capacity, and elements are copied into it.
-
-
 #include <GL/glew.h>
 
 #include "types.h"
 
 
+///@file
+///
+/// Implements a continuous array in an OpenGL buffer object:
+/// - Allocates a block of memory in OpenGL
+/// - On element deletion, last element in array is moved into deleted elements position.
+///   - This means element indices are not constant, and an element's position in the buffer can not be assumed.
+/// - On element addition, element is prepended to end of the elements.
+/// - If buffer reaches capacity, new buffer is allocated with twice the previous capacity, and elements are copied into it.
+
+
+/// The initial size for all OpenGL_Buffer%s created with create_opengl_buffer()
 const u32 INITIAL_GL_BUFFER_TOTAL_ELEMENTS = 16;
+
+/// The maximum size in bytes of an OpenGL_Buffer
 const u32 MAX_BUFFER_SIZE = MAX_U32;
 
 
+/// Holds state and references for an allocated OpenGL buffer
 struct OpenGL_Buffer
 {
-  GLuint id;
+  GLuint id;  ///< The reference to the OpenGL buffer object
 
-  u32 element_size;
-  u32 total_elements;
-  u32 elements_used;
+  u32 element_size;  ///< The size of each element in this buffer in bytes
+  u32 total_elements;  ///< The total number of elements this buffer can currently hold
+  u32 elements_used;  ///< The total number of elements this buffer is currently holding
 
-  GLenum binding_target;
-  GLenum usage;
+  GLenum binding_target;  ///< OpenGL binding target to be used
+  GLenum usage;  ///< OpenGL usage pattern
 
+  /// @brief The function to be called after re-allocating the buffer, needed for re-assigning the
+  ///          attributes.
   void (*setup_attributes_function)(OpenGL_Buffer *);
 };
 

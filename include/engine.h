@@ -41,7 +41,7 @@ struct Engine
 
 
 b32
-init_sdl(u32 argc, const char **argv, const char *name, Engine *engine);
+init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine);
 
 void
 engine_setup_loop(Engine *engine);
