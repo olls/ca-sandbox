@@ -7,7 +7,8 @@
 #pragma once
 
 //---- Define assertion handler. Defaults to calling assert().
-//#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
+#include "assert.h"
+#define IM_ASSERT(_EXPR)  assert(_EXPR)
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows.
 //#define IMGUI_API __declspec( dllexport )
@@ -25,7 +26,7 @@
 //#define IMGUI_DISABLE_TEST_WINDOWS
 
 //---- Don't define obsolete functions names. Consider enabling from time to time or when updating to reduce like hood of using already obsolete function/names
-//#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
+#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 
 //---- Pack colors to BGRA instead of RGBA (remove need to post process vertex buffer in back ends)
 //#define IMGUI_USE_BGRA_PACKED_COLOR
@@ -34,15 +35,16 @@
 //#define IMGUI_STB_NAMESPACE     ImGuiStb
 
 //---- Define constructor and implicit cast operators to convert back<>forth from your math types and ImVec2/ImVec4.
-/*
+
+#include "vectors.h"
 #define IM_VEC2_CLASS_EXTRA                                                 \
-        ImVec2(const MyVec2& f) { x = f.x; y = f.y; }                       \
-        operator MyVec2() const { return MyVec2(x,y); }
+        ImVec2(const vec2& f) { x = f.x; y = f.y; }                       \
+        operator vec2() const { return (vec2){x,y}; }
 
 #define IM_VEC4_CLASS_EXTRA                                                 \
-        ImVec4(const MyVec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
-        operator MyVec4() const { return MyVec4(x,y,z,w); }
-*/
+        ImVec4(const vec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
+        operator vec4() const { return (vec4){w,x,y,z}; }
+
 
 //---- Use 32-bit vertex indices (instead of default: 16-bit) to allow meshes with more than 64K vertices
 //#define ImDrawIdx unsigned int

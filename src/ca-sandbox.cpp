@@ -1,8 +1,5 @@
 #include <GL/glew.h>
 
-#include "imgui.h"
-#include "imgui_impl_sdl_gl3.h"
-
 #include "types.h"
 #include "vectors.h"
 #include "print.h"
@@ -14,6 +11,9 @@
 #include "cell-storage.h"
 #include "cell-drawing.h"
 #include "simulate.h"
+
+#include "imgui.h"
+#include "imgui_impl_sdl_gl3.h"
 
 
 /// @file
