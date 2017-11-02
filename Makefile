@@ -6,6 +6,7 @@ SRCDIR      := src
 INCDIR      := include
 BUILDDIR    := obj
 TARGETDIR   := bin
+DOCSDIR     := docs
 
 CFLAGS      := -Werror -g -O0 -std=c++14 `sdl2-config --cflags`
 LIB         := -lSDL2 -lGLEW -lGL -lGLU -lX11 -lXxf86vm -lXrandr -lpthread -lXi -lXinerama -lXcursor -lfreetype -I/usr/include/freetype2
@@ -23,6 +24,11 @@ clean:
 	@mkdir $(BUILDDIR)
 	@rm -rf $(TARGETDIR)
 	@mkdir $(TARGETDIR)
+	@rm -rf $(DOCSDIR)
+	@mkdir $(DOCSDIR)
+
+docs:
+	./tools/doxygen/build/bin/doxygen Doxyfile
 
 # Pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
@@ -42,4 +48,4 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@rm -f $(BUILDDIR)/$*.d.tmp
 
 #Non-File Targets
-.PHONY: all remake clean cleaner
+.PHONY: all remake clean cleaner docs

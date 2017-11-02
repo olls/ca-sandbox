@@ -9,6 +9,16 @@
 #include "files.h"
 
 
+/// @file
+/// @brief %File handling functions
+
+
+/// Function for mmap-ing a file.
+///
+/// @param[in] filename
+/// @param[out] result  Pointer to File struct
+/// @param[in] write  Optional; defaults to false.
+/// @param[in] trunc_to  Optional; if specified file is truncated to trunc_to bytes before opening.
 b32
 open_file(const char *filename, File *result, b32 write, s32 trunc_to)
 {
@@ -96,6 +106,11 @@ open_file(const char *filename, File *result, b32 write, s32 trunc_to)
 }
 
 
+/// Closes a file opened with open_file()
+///
+/// @param[in] file  The file to close
+/// @param[in] trunc_to  Optional; if specified, the file will be truncated to trunc_to bytes after
+///                              closing.
 b32
 close_file(File *file, s32 trunc_to)
 {

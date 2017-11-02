@@ -4,6 +4,10 @@
 #include "types.h"
 
 
+/// @file
+/// @brief Vector structs and templates for operating on them
+
+
 struct vec2
 {
   r32 x;

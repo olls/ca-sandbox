@@ -16,7 +16,12 @@
 #include "simulate.h"
 
 
-const u32 SIM_FREQUENCEY = 10;
+/// @file
+///
+/// @brief Program root file.
+
+
+const u32 SIM_FREQUENCEY = 5;
 
 
 b32
@@ -90,7 +95,7 @@ main(int argc, const char *argv[])
 
         // TODO: Ensure stuff is destroyed / freed before re-init-ing
 
-        ImGui_ImplSdlGL3_Init(engine.sdl_window.window);
+        ImGui_ImplSdlGL3_Init(engine.window.sdl_window);
 
         opengl_create_general_buffers(&general_vertex_buffer, &general_index_buffer);
 
@@ -180,7 +185,7 @@ main(int argc, const char *argv[])
       //
 
       engine_frame_start(&engine);
-      ImGui_ImplSdlGL3_NewFrame(engine.sdl_window.window);
+      ImGui_ImplSdlGL3_NewFrame(engine.window.sdl_window);
 
       ImGuiIO& io = ImGui::GetIO();
 
@@ -206,11 +211,11 @@ main(int argc, const char *argv[])
       // Render
       //
 
-      glViewport(0, 0, engine.sdl_window.width, engine.sdl_window.height);
+      glViewport(0, 0, engine.window.width, engine.window.height);
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      r32 aspect = (r32)engine.sdl_window.height / engine.sdl_window.width;
+      r32 aspect = (r32)engine.window.height / engine.window.width;
       r32 projection_matrix[] = {
         aspect,  0,  0,  0,
         0,      -1,  0,  0,
@@ -257,8 +262,6 @@ main(int argc, const char *argv[])
       ImGui::Render();
 
       engine_frame_end(&engine);
-
-      sleep_us(1000000);
     }
   }
 

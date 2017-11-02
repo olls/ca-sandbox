@@ -7,25 +7,35 @@
 #include "timing.h"
 
 
-struct SDL_Window
+/// @file
+///
+
+
+/// Stores width and height of the window, as well as records of the SDL_window and OpenGL context.
+struct Window
 {
   u32 width;
   u32 height;
 
-  SDL_Window *window;
+  SDL_Window *sdl_window;
   SDL_GLContext gl_context;
 };
 
 
+/// Keeps track of state for the engine code, including frame timings.
 struct Engine
 {
-  SDL_Window sdl_window;
+  Window window;
 
   FPS_Counter fps;
 
+  /// Number of micro-seconds per frame, this fixed and calculated from FPS.
   u32 useconds_per_frame;
+
+  /// The number of micro-seconds the last frame took.
   u32 frame_dt;
 
+  /// The time (in useconds) when engine_frame_start() was called.
   u64 frame_start;
 };
 

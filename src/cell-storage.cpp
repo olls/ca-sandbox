@@ -7,6 +7,16 @@
 #include "cell-storage.h"
 
 
+/// @file
+///
+/// Implements functions for accessing the Universe.
+///
+
+
+/// Initialise the universe
+
+/// Sets the hashmap_size to INITIAL_CELL_HASHMAP_SIZE, and allocates the hashmap.
+///
 void
 init_cell_hashmap(Universe *universe)
 {
@@ -16,6 +26,13 @@ init_cell_hashmap(Universe *universe)
 }
 
 
+/// Initialise a CellBlock
+
+/// Sets the position member of the CellBlock to the given position, and initialises all of the
+///   Cell%s in the block.
+/// Cell%s are initialised by giving them their position within the CellBlock, initialising their
+///   state and previous_state.
+///
 void
 init_cell_block(CellBlock *cell_block, s32vec2 position)
 {
@@ -44,6 +61,14 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 }
 
 
+/// Returns the CellBlock from the hashmap.
+
+/// Indexes the Universe hashmap to retrieve the CellBlock at search_cell_block_position.  Creates a
+///   new CellBlock on the heap, if it doesn't exist, then initialise all of its Cell%s.
+///
+/// @param [in] universe                    Pointer to an initialised Universe.
+/// @param [in] search_cell_block_position  The position of the CellBlock to get.
+///
 CellBlock *
 get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 {
