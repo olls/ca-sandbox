@@ -94,6 +94,9 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 void
 upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 {
+  // Zero the buffer
+  cell_instancing->buffer.elements_used = 0;
+
   u32 i = 0;
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
@@ -168,25 +171,32 @@ test_draw_cell_blocks_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo
 
     if (cell_block != 0 && cell_block->initialised)
     {
-      s32vec2 square_vertices[] = {
-        vec2_add((s32vec2){0, 0}, cell_block->block_position),
-        vec2_add((s32vec2){1, 0}, cell_block->block_position),
-        vec2_add((s32vec2){1, 1}, cell_block->block_position),
-        vec2_add((s32vec2){0, 1}, cell_block->block_position)
-      };
+      do
+      {
+        s32vec2 square_vertices[] = {
+          vec2_add((s32vec2){0, 0}, cell_block->block_position),
+          vec2_add((s32vec2){1, 0}, cell_block->block_position),
+          vec2_add((s32vec2){1, 1}, cell_block->block_position),
+          vec2_add((s32vec2){0, 1}, cell_block->block_position)
+        };
 
-      GLushort index_a = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);
-      GLushort index_b = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 1);
-      GLushort index_c = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 2);
-      GLushort index_d = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 3);
+        GLushort index_a = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);
+        GLushort index_b = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 1);
+        GLushort index_c = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 2);
+        GLushort index_d = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 3);
 
-      opengl_buffer_new_element(cell_drawing_ibo, &index_a);
-      opengl_buffer_new_element(cell_drawing_ibo, &index_b);
-      opengl_buffer_new_element(cell_drawing_ibo, &index_c);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_a);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_b);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_c);
 
-      opengl_buffer_new_element(cell_drawing_ibo, &index_d);
-      opengl_buffer_new_element(cell_drawing_ibo, &index_a);
-      opengl_buffer_new_element(cell_drawing_ibo, &index_c);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_d);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_a);
+        opengl_buffer_new_element(cell_drawing_ibo, &index_c);
+
+        // Follow any hashmap collision chains
+        cell_block = cell_block->next_block;
+      }
+      while (cell_block != 0);
     }
   }
 }
