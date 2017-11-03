@@ -6,6 +6,10 @@
 #include "vectors.h"
 
 
+// HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
+// #define CA_TYPE_GROWTH
+
+
 /// @file
 /// @brief Defines the storage data structure for the Cell%s.
 ///

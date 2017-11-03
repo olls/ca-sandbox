@@ -2,6 +2,7 @@ var searchData=
 [
   ['ca_2dsandbox_2ecpp',['ca-sandbox.cpp',['../ca-sandbox_8cpp.html',1,'']]],
   ['cell',['Cell',['../structCell.html',1,'']]],
+  ['cell_2dblock_2dcoordinate_2dsystem_2ecpp',['cell-block-coordinate-system.cpp',['../cell-block-coordinate-system_8cpp.html',1,'']]],
   ['cell_2ddrawing_2ecpp',['cell-drawing.cpp',['../cell-drawing_8cpp.html',1,'']]],
   ['cell_2ddrawing_2eh',['cell-drawing.h',['../cell-drawing_8h.html',1,'']]],
   ['cell_2dstorage_2ecpp',['cell-storage.cpp',['../cell-storage_8cpp.html',1,'']]],
@@ -13,6 +14,8 @@ var searchData=
   ['cell_5fn_5findices',['cell_n_indices',['../structCellInstancing.html#a8d0a2efef9e6cdf49ac7f84af57a2d3a',1,'CellInstancing']]],
   ['cell_5fn_5fvertices',['cell_n_vertices',['../structCellInstancing.html#a698d199076077dff41cfd9390c9ef120',1,'CellInstancing']]],
   ['cell_5fposition',['cell_position',['../structCellInstance.html#a951c8eddde560f9e0fcf0feb5ecdb8bb',1,'CellInstance']]],
+  ['cell_5fposition_5fgreater_5fthan_5for_5fequal_5fto',['cell_position_greater_than_or_equal_to',['../cell-block-coordinate-system_8cpp.html#ae3deb1e0fee044fced7bd67ffd5aa467',1,'cell-block-coordinate-system.cpp']]],
+  ['cell_5fposition_5fless_5fthan',['cell_position_less_than',['../cell-block-coordinate-system_8cpp.html#aa6fe297e7ce5ff1485b257c92c5775a6',1,'cell-block-coordinate-system.cpp']]],
   ['cellblock',['CellBlock',['../structCellBlock.html',1,'']]],
   ['cellinstance',['CellInstance',['../structCellInstance.html',1,'']]],
   ['cellinstancing',['CellInstancing',['../structCellInstancing.html',1,'']]],

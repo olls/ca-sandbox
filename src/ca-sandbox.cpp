@@ -22,7 +22,7 @@
 
 
 /// The number of simulation frames per second.
-const u32 SIM_FREQUENCEY = 5;
+const u32 SIM_FREQUENCEY = 1;
 
 
 /// @brief Compile all the OpenGL shaders used in the program.
@@ -153,16 +153,16 @@ main(int argc, const char *argv[])
         Cell *cell;
         #define get_cell(x, y) (cell_block->cells + ((x) * CELL_BLOCK_DIM) + (y))
 
-        cell = get_cell(7, 7);
+        cell = get_cell(7, 8);
         cell->state = 1;
         cell = get_cell(8, 7);
         cell->state = 1;
         cell = get_cell(6, 7);
         cell->state = 1;
-        cell = get_cell(7, 8);
-        cell->state = 1;
-        cell = get_cell(7, 6);
-        cell->state = 1;
+        // cell = get_cell(7, 8);
+        // cell->state = 1;
+        // cell = get_cell(7, 6);
+        // cell->state = 1;
 
         #undef get_cell
 
@@ -228,7 +228,7 @@ main(int argc, const char *argv[])
         0,       0,  0,  1
       };
 
-#if 1
+#if 0
       //
       // Test cell blocks drawing
       //

@@ -52,7 +52,13 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
       Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
 
       cell->block_offset = (uvec2){cell_x, cell_y};
+
+#ifdef CA_TYPE_GROWTH
+      cell->state = 0;
+#else
       cell->state = rand()%2;
+#endif
+
       cell->previous_state = cell->state;
     }
   }
