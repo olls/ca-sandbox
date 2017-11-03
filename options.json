@@ -1,0 +1,4 @@
+{
+  "copy_to": "/home/git/ca-sandbox",
+  "build_cmd": ["rm /home/git/public_html/ca-sandbox-docs/* -rf", "mv docs/html/* /home/git/public_html/ca-sandbox-docs"]
+}
