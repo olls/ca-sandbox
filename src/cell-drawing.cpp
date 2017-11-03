@@ -181,7 +181,7 @@ draw_cell_instances(CellInstancing *cell_instancing)
 
 
 void
-test_draw_cell_blocks_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
+debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
 {
   u32 i = 0;
   for (u32 hash_slot = 0;
@@ -201,18 +201,19 @@ test_draw_cell_blocks_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo
           vec2_add((s32vec2){0, 1}, cell_block->block_position)
         };
 
-        GLushort index_a = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 0);
-        GLushort index_b = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 1);
-        GLushort index_c = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 2);
-        GLushort index_d = opengl_buffer_new_element(cell_drawing_vbo, square_vertices + 3);
+        GLushort index_a = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 0);
+        GLushort index_b = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 1);
+        GLushort index_c = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 2);
+        GLushort index_d = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 3);
 
-        opengl_buffer_new_element(cell_drawing_ibo, &index_a);
-        opengl_buffer_new_element(cell_drawing_ibo, &index_b);
-        opengl_buffer_new_element(cell_drawing_ibo, &index_c);
-
-        opengl_buffer_new_element(cell_drawing_ibo, &index_d);
-        opengl_buffer_new_element(cell_drawing_ibo, &index_a);
-        opengl_buffer_new_element(cell_drawing_ibo, &index_c);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_a);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_b);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_b);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_c);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_c);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_d);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_d);
+        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_a);
 
         // Follow any hashmap collision chains
         cell_block = cell_block->next_block;
@@ -224,12 +225,12 @@ test_draw_cell_blocks_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo
 
 
 void
-test_draw_cell_blocks(GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo)
+debug_cell_block_outline_draw(GLuint vao, OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
 {
   glBindVertexArray(vao);
 
-  glBindBuffer(cell_drawing_ibo->binding_target, cell_drawing_ibo->id);
-  glDrawElements(GL_TRIANGLES, cell_drawing_ibo->elements_used, GL_UNSIGNED_SHORT, 0);
+  glBindBuffer(debug_cell_block_outline_drawing_ibo->binding_target, debug_cell_block_outline_drawing_ibo->id);
+  glDrawElements(GL_LINES, debug_cell_block_outline_drawing_ibo->elements_used, GL_UNSIGNED_SHORT, 0);
 
   opengl_print_errors();
   glBindVertexArray(0);
