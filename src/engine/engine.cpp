@@ -16,7 +16,7 @@
 
 
 const u32 FPS = 60;
-const b32 FULLSCREEN = false;
+const b32 FULLSCREEN = true;
 const u32 WINDOW_WIDTH = 1280;
 const u32 WINDOW_HEIGHT = 720;
 
@@ -147,6 +147,9 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
     success = false;
     return success;
   }
+
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
 
   glViewport(0, 0, engine->window.width, engine->window.height);
 

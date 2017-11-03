@@ -139,10 +139,10 @@ simulate_cells(Universe *universe, u64 current_frame)
           if (cell_block->initialised &&
               cell_block->last_simulated_on_frame != current_frame)
           {
-            if (!((cell_block->block_position.x >= -4 &&
-                   cell_block->block_position.x <=  3) &&
-                  (cell_block->block_position.y >= -2 &&
-                   cell_block->block_position.y <= 1)))
+            if (!((cell_block->block_position.x >= -8 &&
+                   cell_block->block_position.x <=  7) &&
+                  (cell_block->block_position.y >= -4 &&
+                   cell_block->block_position.y <= 3)))
             {
               print("Hit boundary at %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
             }

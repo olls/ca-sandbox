@@ -21,7 +21,7 @@
 /// @brief Program root file.
 
 
-/// The number of simulations iterations per second.
+/// The number of simulation frames per second.
 const u32 SIM_FREQUENCEY = 5;
 
 
