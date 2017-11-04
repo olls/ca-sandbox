@@ -256,7 +256,7 @@ main(int argc, const char *argv[])
       glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
 
       // Re-initialise attributes in case instance buffer has been reallocated
-      init_cell_instances_buffer_attributes(&cell_instancing.buffer, &general_index_buffer, &general_vertex_buffer, cell_instance_drawing_shader_program);
+      init_cell_instances_buffer_attributes(&cell_instancing.buffer, &general_vertex_buffer, cell_instance_drawing_shader_program);
 
       draw_cell_instances(&cell_instancing);
 

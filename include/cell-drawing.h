@@ -54,7 +54,7 @@ init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex
 
 
 void
-init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer, GLuint cell_instance_drawing_shader_program);
+init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, OpenGL_Buffer *general_vertex_buffer, GLuint cell_instance_drawing_shader_program);
 
 
 void

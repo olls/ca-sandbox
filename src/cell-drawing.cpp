@@ -49,10 +49,9 @@ init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex
 
 /// Setup the attributes used by the instanced cell drawing for the cell-instancing.glvs shader.
 void
-init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer, GLuint cell_instance_drawing_shader_program)
+init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, OpenGL_Buffer *general_vertex_buffer, GLuint cell_instance_drawing_shader_program)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, general_index_buffer->id);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, general_vertex_buffer->id);
+  glBindBuffer(general_vertex_buffer->binding_target, general_vertex_buffer->id);
 
   GLuint attribute_vertex = glGetAttribLocation(cell_instance_drawing_shader_program, "vertex");
   if (attribute_vertex == -1)
