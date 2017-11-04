@@ -120,17 +120,12 @@ main(int argc, const char *argv[])
           glBindVertexArray(debug_cell_block_outline_drawing_vao);
 
           // Generate and Bind VBO
-          create_opengl_buffer(&debug_cell_block_outline_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+          create_opengl_buffer(&debug_cell_block_outline_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
           glBindBuffer(debug_cell_block_outline_drawing_vbo.binding_target, debug_cell_block_outline_drawing_vbo.id);
 
           // Generate and Bind IBO
-          create_opengl_buffer(&debug_cell_block_outline_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+          create_opengl_buffer(&debug_cell_block_outline_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STREAM_DRAW);
           glBindBuffer(debug_cell_block_outline_drawing_ibo.binding_target, debug_cell_block_outline_drawing_ibo.id);
-
-          // Get attribute locations
-          GLuint attrib_location_screen_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "s32_cell_block_position");
-          glEnableVertexAttribArray(attrib_location_screen_position);
-          glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
 
           opengl_print_errors();
           glBindVertexArray(0);
@@ -233,16 +228,19 @@ main(int argc, const char *argv[])
       // Test cell blocks drawing
       //
 
+      debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+
+      glBindVertexArray(debug_cell_block_outline_drawing_vao);
       glUseProgram(debug_cell_block_outline_drawing_shader_program);
       glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
 
-      debug_cell_block_outline_drawing_vbo.elements_used = 0;
-      debug_cell_block_outline_drawing_ibo.elements_used = 0;
-      debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+      // Get attribute locations
+      init_debug_cell_block_outline_drawing_attributes(&debug_cell_block_outline_drawing_vbo, debug_cell_block_outline_drawing_shader_program);
 
-      debug_cell_block_outline_draw(debug_cell_block_outline_drawing_vao, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+      debug_cell_block_outline_draw(&debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
 
       opengl_print_errors();
+      glBindVertexArray(0);
 #endif
 
       //

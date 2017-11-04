@@ -116,7 +116,6 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
   // Zero the buffer
   cell_instancing->buffer.elements_used = 0;
 
-  u32 i = 0;
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
        ++hash_slot)
@@ -180,9 +179,22 @@ draw_cell_instances(CellInstancing *cell_instancing)
 
 
 void
+init_debug_cell_block_outline_drawing_attributes(OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, GLuint debug_cell_block_outline_drawing_shader_program)
+{
+  glBindBuffer(debug_cell_block_outline_drawing_vbo->binding_target, debug_cell_block_outline_drawing_vbo->id);
+
+  GLuint attrib_location_screen_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "s32_cell_block_position");
+  glEnableVertexAttribArray(attrib_location_screen_position);
+  glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
+}
+
+
+void
 debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
 {
-  u32 i = 0;
+  debug_cell_block_outline_drawing_vbo->elements_used = 0;
+  debug_cell_block_outline_drawing_ibo->elements_used = 0;
+
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
        ++hash_slot)
@@ -224,13 +236,11 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
 
 
 void
-debug_cell_block_outline_draw(GLuint vao, OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
+debug_cell_block_outline_draw(OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
 {
-  glBindVertexArray(vao);
-
+  glBindBuffer(debug_cell_block_outline_drawing_vbo->binding_target, debug_cell_block_outline_drawing_vbo->id);
   glBindBuffer(debug_cell_block_outline_drawing_ibo->binding_target, debug_cell_block_outline_drawing_ibo->id);
   glDrawElements(GL_LINES, debug_cell_block_outline_drawing_ibo->elements_used, GL_UNSIGNED_SHORT, 0);
 
   opengl_print_errors();
-  glBindVertexArray(0);
 }

@@ -66,11 +66,15 @@ draw_cell_instances(CellInstancing *cell_instancing);
 
 
 void
+init_debug_cell_block_outline_drawing_attributes(OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, GLuint debug_cell_block_outline_drawing_shader_program);
+
+
+void
 debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
 
 
 void
-debug_cell_block_outline_draw(GLuint vao, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
+debug_cell_block_outline_draw(OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
 
 
 #endif
