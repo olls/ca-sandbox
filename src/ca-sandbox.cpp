@@ -87,6 +87,7 @@ main(int argc, const char *argv[])
     GLuint cell_instance_drawing_vao = 0;
     CellInstancing cell_instancing = {};
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
+    GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
 
     u64 last_sim_time = get_us();
 
@@ -110,6 +111,7 @@ main(int argc, const char *argv[])
         // Uniforms
         test_cell_blocks_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(debug_cell_block_outline_drawing_shader_program, "projection_matrix");
         cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
+        cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
 
 
         // Debug cell block drawing
@@ -252,6 +254,8 @@ main(int argc, const char *argv[])
       glBindVertexArray(cell_instance_drawing_vao);
       glUseProgram(cell_instance_drawing_shader_program);
       glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+
+      glUniform1i(cell_instance_drawing_cell_block_dim_uniform, CELL_BLOCK_DIM);
 
       // Re-initialise attributes in case instance buffer has been reallocated
       init_cell_instances_buffer_attributes(&cell_instancing.buffer, &general_vertex_buffer, cell_instance_drawing_shader_program);
