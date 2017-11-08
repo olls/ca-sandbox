@@ -203,9 +203,9 @@ main(int argc, const char *argv[])
       // Simulate
       //
 
-      if (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
+      while (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
       {
-        last_sim_time = engine.frame_start;
+        last_sim_time += 1000000*(1.0 / SIM_FREQUENCEY);
         simulate_cells(&universe, last_sim_time);
       }
 
