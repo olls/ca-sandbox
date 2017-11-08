@@ -78,7 +78,7 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position);
 
 
 Cell *
-get_cell_relative_to_block(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y);
+get_cell_from_block(CellBlock *cell_block, s32vec2 cell_coord);
 
 
 #endif

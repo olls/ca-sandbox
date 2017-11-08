@@ -203,10 +203,23 @@ main(int argc, const char *argv[])
       // Simulate
       //
 
+      SimulateOptions simulate_options = {
+        .border_type = BorderType::TORUS,
+
+        .border_min_corner_block = {-8, -5},
+        .border_min_corner_cell = {8, 8},
+
+        .border_max_corner_block = {7, 4},
+        .border_max_corner_cell = {8, 8},
+
+        .null_states = 0,
+        .n_null_states = 0
+      };
+
       while (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
       {
         last_sim_time += 1000000*(1.0 / SIM_FREQUENCEY);
-        simulate_cells(&universe, last_sim_time);
+        simulate_cells(&simulate_options, &universe, last_sim_time);
       }
 
       //

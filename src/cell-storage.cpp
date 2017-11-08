@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cell-storage.h"
+
 #include "types.h"
 #include "print.h"
+#include "assert.h"
 #include "cell.h"
-#include "cell-storage.h"
 
 
 /// @file
@@ -77,6 +79,8 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 CellBlock *
 get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 {
+  // TODO: Add a CellBlock cache here?
+
   // print("Getting CellBlock (%d, %d).\n", search_cell_block_position.x, search_cell_block_position.y);
   CellBlock *result = 0;
 
@@ -115,59 +119,18 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 }
 
 
-/// Retrieves a cell from within 1 CELL_BLOCK_DIM of the cell_block
-
-/// Gets a cell at a position relative to the `cell_block`; if the cell is not within the
-///   `cell_block` but it is within one of the `cell_block`s eight immediate neighbours, it will
-///   retrieve the neighbouring CellBlock and return the correct cell.
-///
-/// This is used to retrieve cells across CellBlock borders seamlessly.
-///
-/// @returns 0 on failure, this shouldn't happen as get_cell_block() will create new CellBlocks if
-///            they don't exist.
+/// Get a Cell from a position within the CellBlock
 Cell *
-get_cell_relative_to_block(Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
+get_cell_from_block(CellBlock *cell_block, s32vec2 cell_coord)
 {
-  // TODO: Cache CellBlocks
-
   Cell *result = 0;
 
-  s32vec2 relative_cell_block = {0, 0};
+  assert(cell_coord.x >= 0);
+  assert(cell_coord.y >= 0);
+  assert(cell_coord.x < CELL_BLOCK_DIM);
+  assert(cell_coord.y < CELL_BLOCK_DIM);
 
-  if (cell_x < 0)
-  {
-    relative_cell_block.x = -1;
-    cell_x += CELL_BLOCK_DIM;
-  }
-  if (cell_x >= CELL_BLOCK_DIM)
-  {
-    relative_cell_block.x = 1;
-    cell_x -= CELL_BLOCK_DIM;
-  }
-
-  if (cell_y < 0)
-  {
-    relative_cell_block.y = -1;
-    cell_y += CELL_BLOCK_DIM;
-  }
-  if (cell_y >= CELL_BLOCK_DIM)
-  {
-    relative_cell_block.y = 1;
-    cell_y -= CELL_BLOCK_DIM;
-  }
-
-  if (!vec2_eq(relative_cell_block, (s32vec2){0, 0}))
-  {
-    s32vec2 new_cell_block_position = vec2_add(relative_cell_block, cell_block->block_position);
-
-    CellBlock *new_cell_block = get_cell_block(universe, new_cell_block_position);
-    cell_block = new_cell_block;
-  }
-
-  if (cell_block != 0)
-  {
-    result = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
-  }
+  result = cell_block->cells + (cell_coord.y * CELL_BLOCK_DIM) + cell_coord.x;
 
   return result;
 }
