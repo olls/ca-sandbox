@@ -217,12 +217,13 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
+      r32 view_scale = 0.5;
       r32 aspect = (r32)engine.window.height / engine.window.width;
       r32 projection_matrix[] = {
-        aspect,  0,  0,  0,
-        0,      -1,  0,  0,
-        0,       0,  1,  0,
-        0,       0,  0,  1
+        aspect * view_scale,  0,               0,  0,
+        0,                   -1 * view_scale,  0,  0,
+        0,                    0,               1,  0,
+        0,                    0,               0,  1
       };
 
 #if 0
