@@ -6,6 +6,7 @@
 #include "types.h"
 #include "print.h"
 #include "assert.h"
+#include "allocate.h"
 #include "cell.h"
 
 
@@ -21,7 +22,7 @@ void
 init_cell_hashmap(Universe *universe)
 {
   universe->hashmap_size = INITIAL_CELL_HASHMAP_SIZE;
-  universe->hashmap = (CellBlock **)malloc(universe->hashmap_size * sizeof(CellBlock *));
+  universe->hashmap = allocate(CellBlock *, universe->hashmap_size);
   memset(universe->hashmap, 0, universe->hashmap_size * sizeof(CellBlock *));
 }
 
@@ -91,7 +92,7 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
   if (candidate_cell_block == 0)
   {
     // Hash slot was 0, allocate CellBlock
-    candidate_cell_block = (CellBlock *)malloc(sizeof(CellBlock));
+    candidate_cell_block = allocate(CellBlock, 1);
 
     // Store the pointer in the hash map!
     universe->hashmap[cell_block_hash] = candidate_cell_block;
@@ -106,7 +107,7 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
     // Allocate next_block if it doesn't exist, as the CellBlock __must__ be in this hash slot.
     if (candidate_cell_block->next_block == 0)
     {
-      candidate_cell_block->next_block = (CellBlock *)malloc(sizeof(CellBlock));
+      candidate_cell_block->next_block = allocate(CellBlock, 1);
       init_cell_block(candidate_cell_block->next_block, search_cell_block_position);
     }
 

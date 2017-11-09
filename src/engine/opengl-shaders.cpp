@@ -4,6 +4,7 @@
 #include "types.h"
 #include "print.h"
 #include "files.h"
+#include "allocate.h"
 
 
 b32
@@ -32,7 +33,7 @@ compile_shader(const char filename[], GLuint shader_type, GLuint *result)
       GLint log_size = 0;
       glGetShaderiv(*result, GL_INFO_LOG_LENGTH, &log_size);
 
-      GLchar *info_log = (GLchar *)malloc(sizeof(GLchar) * log_size);
+      GLchar *info_log = allocate(GLchar, log_size);
       glGetShaderInfoLog(*result, log_size, NULL, info_log);
 
       print("Shader compile error (%s): \"%s\"\n", filename, info_log);
@@ -48,7 +49,7 @@ compile_shader(const char filename[], GLuint shader_type, GLuint *result)
 
 
 b32
-create_shader_program(const char *filenames[], GLenum types[], s32 n_shaders, GLuint *result)
+create_shader_program(const char *filenames[], GLenum types[], u32 n_shaders, GLuint *result)
 {
   b32 success = true;
 
@@ -81,7 +82,7 @@ create_shader_program(const char *filenames[], GLenum types[], s32 n_shaders, GL
       GLint log_size = 0;
       glGetProgramiv(*result, GL_INFO_LOG_LENGTH, &log_size);
 
-      GLchar *info_log = (GLchar *)malloc(sizeof(GLchar) * log_size);
+      GLchar *info_log = allocate(GLchar, log_size);
       glGetShaderInfoLog(*result, log_size, NULL, info_log);
 
       print("Shader link error: \"%s\"\n", info_log);
