@@ -35,7 +35,7 @@ init_cell_hashmap(Universe *universe)
 ///   state and previous_state.
 ///
 void
-init_cell_block(CellBlock *cell_block, s32vec2 position)
+init_cell_block(CellInitialisationOptions *cell_initialisation_options, CellBlock *cell_block, s32vec2 position)
 {
   print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
   memset(cell_block, 0, sizeof(CellBlock));
@@ -56,11 +56,7 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 
       cell->block_offset = (uvec2){cell_x, cell_y};
 
-#ifdef CA_TYPE_GROWTH
-      cell->state = 0;
-#else
-      cell->state = rand()%2;
-#endif
+      cell->state = initialise_cell_state(cell_initialisation_options, position);
 
       cell->previous_state = cell->state;
     }
@@ -78,7 +74,7 @@ init_cell_block(CellBlock *cell_block, s32vec2 position)
 ///
 /// @returns 0 on error
 CellBlock *
-get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
+get_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position)
 {
   // TODO: Add a CellBlock cache here?
 
@@ -97,7 +93,7 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
     // Store the pointer in the hash map!
     universe->hashmap[cell_block_hash] = candidate_cell_block;
 
-    init_cell_block(candidate_cell_block, search_cell_block_position);
+    init_cell_block(cell_initialisation_options, candidate_cell_block, search_cell_block_position);
   }
 
   // Follow CellBlock linked list
@@ -108,7 +104,7 @@ get_cell_block(Universe *universe, s32vec2 search_cell_block_position)
     if (candidate_cell_block->next_block == 0)
     {
       candidate_cell_block->next_block = allocate(CellBlock, 1);
-      init_cell_block(candidate_cell_block->next_block, search_cell_block_position);
+      init_cell_block(cell_initialisation_options, candidate_cell_block->next_block, search_cell_block_position);
     }
 
     candidate_cell_block = candidate_cell_block->next_block;

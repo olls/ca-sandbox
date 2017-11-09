@@ -4,6 +4,10 @@
 #include "cell-storage.h"
 
 
+// HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
+#define CA_TYPE_GROWTH
+
+
 /// @file
 ///
 /// - NULL states indicate states which do not need simulating, these are used so an INFINITE border
@@ -49,7 +53,7 @@ struct SimulateOptions
 
 
 void
-simulate_cells(SimulateOptions *simulate_options, Universe *universe, u64 current_frame);
+simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame);
 
 
 #endif

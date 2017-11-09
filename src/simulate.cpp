@@ -70,7 +70,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell
 ///
 /// Operates directly on the Cell in the CellBlock.
 void
-test_transition_rule(SimulateOptions *simulate_options, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
+test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
 {
   // Test Von Neumann neighbourhood
 
@@ -113,14 +113,14 @@ test_transition_rule(SimulateOptions *simulate_options, Universe *universe, Cell
     wrap_cell_position_around_torus(simulate_options, &cell_north_west_block_position, &cell_north_west_coord);
   }
 
-  CellBlock *cell_north_block      = get_cell_block(universe, cell_north_block_position);
-  CellBlock *cell_east_block       = get_cell_block(universe, cell_east_block_position);
-  CellBlock *cell_south_block      = get_cell_block(universe, cell_south_block_position);
-  CellBlock *cell_west_block       = get_cell_block(universe, cell_west_block_position);
-  CellBlock *cell_north_east_block = get_cell_block(universe, cell_north_east_block_position);
-  CellBlock *cell_south_east_block = get_cell_block(universe, cell_south_east_block_position);
-  CellBlock *cell_south_west_block = get_cell_block(universe, cell_south_west_block_position);
-  CellBlock *cell_north_west_block = get_cell_block(universe, cell_north_west_block_position);
+  CellBlock *cell_north_block      = get_cell_block(universe, cell_initialisation_options, cell_north_block_position);
+  CellBlock *cell_east_block       = get_cell_block(universe, cell_initialisation_options, cell_east_block_position);
+  CellBlock *cell_south_block      = get_cell_block(universe, cell_initialisation_options, cell_south_block_position);
+  CellBlock *cell_west_block       = get_cell_block(universe, cell_initialisation_options, cell_west_block_position);
+  CellBlock *cell_north_east_block = get_cell_block(universe, cell_initialisation_options, cell_north_east_block_position);
+  CellBlock *cell_south_east_block = get_cell_block(universe, cell_initialisation_options, cell_south_east_block_position);
+  CellBlock *cell_south_west_block = get_cell_block(universe, cell_initialisation_options, cell_south_west_block_position);
+  CellBlock *cell_north_west_block = get_cell_block(universe, cell_initialisation_options, cell_north_west_block_position);
 
   Cell *cell_north      = get_cell_from_block(cell_north_block,      cell_north_coord);
   Cell *cell_east       = get_cell_from_block(cell_east_block,       cell_east_coord);
@@ -160,7 +160,7 @@ test_transition_rule(SimulateOptions *simulate_options, Universe *universe, Cell
 /// Simulates one frame of a CellBlock using test_transition_rule(). Also implements the CA bounds
 ///   check.
 void
-simulate_cell_block(SimulateOptions *simulate_options, Universe *universe, CellBlock *cell_block)
+simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *cell_block)
 {
   // print("Simulating CellBlock %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
 
@@ -183,7 +183,7 @@ simulate_cell_block(SimulateOptions *simulate_options, Universe *universe, CellB
               cell_position_less_than(cell_block->block_position, (s32vec2){cell_x, cell_y},
                                       simulate_options->border_max_corner_block, simulate_options->border_max_corner_cell))
           {
-            test_transition_rule(simulate_options, universe, cell_block, cell_x, cell_y);
+            test_transition_rule(simulate_options, cell_initialisation_options, universe, cell_block, cell_x, cell_y);
           }
           else
           {
@@ -213,7 +213,7 @@ simulate_cell_block(SimulateOptions *simulate_options, Universe *universe, CellB
 ///   during the simulation of a CellBlock, and the new CellBlock will still be simulated within the
 ///   same frame.
 void
-simulate_cells(SimulateOptions *simulate_options, Universe *universe, u64 current_frame)
+simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame)
 {
   // First copy all Cell states into previous_state
 
@@ -271,7 +271,7 @@ simulate_cells(SimulateOptions *simulate_options, Universe *universe, u64 curren
             cell_block->last_simulated_on_frame = current_frame;
             simulated_any_blocks = true;
 
-            simulate_cell_block(simulate_options, universe, cell_block);
+            simulate_cell_block(simulate_options, cell_initialisation_options, universe, cell_block);
           }
 
           // Follow any hashmap collision chains

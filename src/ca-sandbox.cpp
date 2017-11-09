@@ -3,6 +3,7 @@
 #include "types.h"
 #include "vectors.h"
 #include "print.h"
+#include "allocate.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"
@@ -89,6 +90,19 @@ main(int argc, const char *argv[])
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
     GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
 
+    CellInitialisationOptions cell_initialisation_options = {};
+    cell_initialisation_options.type = CellInitialisationType::RANDOM;
+#ifdef CA_TYPE_GROWTH
+    cell_initialisation_options.set_of_initial_states_size = 1;
+#else
+    cell_initialisation_options.set_of_initial_states_size = 2;
+#endif
+    cell_initialisation_options.set_of_initial_states = allocate(CellState, cell_initialisation_options.set_of_initial_states_size);
+    cell_initialisation_options.set_of_initial_states[0] = 0;
+#ifdef CA_TYPE_GROWTH
+    cell_initialisation_options.set_of_initial_states[1] = 1;
+#endif
+
     u64 last_sim_time = get_us();
 
     b32 init = true;
@@ -146,7 +160,7 @@ main(int argc, const char *argv[])
         init_cell_hashmap(&universe);
 
         // NOTE: Set a seed stating state
-        CellBlock *cell_block = get_cell_block(&universe, (s32vec2){0, 0});
+        CellBlock *cell_block = get_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, -1});
         Cell *cell;
         #define get_cell(x, y) (cell_block->cells + ((x) * CELL_BLOCK_DIM) + (y))
 
@@ -216,10 +230,13 @@ main(int argc, const char *argv[])
         .n_null_states = 0
       };
 
-      while (engine.frame_start >= last_sim_time + 1000000*(1.0 / SIM_FREQUENCEY))
+      while (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
       {
-        last_sim_time += 1000000*(1.0 / SIM_FREQUENCEY);
-        simulate_cells(&simulate_options, &universe, last_sim_time);
+        // TODO: If simulate cells takes longer than 1/SIM_FREQUENCY, it creates a negative feedback
+        //         loop processing more sim-frames every screen frame.
+
+        last_sim_time += (1000000.0 / SIM_FREQUENCY);
+        simulate_cells(&simulate_options, &cell_initialisation_options, &universe, last_sim_time);
       }
 
       //

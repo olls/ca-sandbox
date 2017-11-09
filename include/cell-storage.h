@@ -6,10 +6,6 @@
 #include "vectors.h"
 
 
-// HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
-// #define CA_TYPE_GROWTH
-
-
 /// @file
 /// @brief Defines the storage data structure for the Cell%s.
 ///
@@ -74,7 +70,7 @@ init_cell_hashmap(Universe *universe);
 
 
 CellBlock *
-get_cell_block(Universe *universe, s32vec2 search_cell_block_position);
+get_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
 
 
 Cell *

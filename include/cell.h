@@ -8,18 +8,40 @@
 /// @brief Definition of Cell
 
 
+typedef u32 CellState;
+
+
 /// An individual cell in a CA, stored in CellBlock%s.
 struct Cell
 {
   /// Integer position relative to the block
   uvec2 block_offset;
 
-  u32 state;
+  CellState state;
 
   /// Stores the previous state, so during a simulation frame, the state value can be updated
   ///   leaving the previous state for neighbouring Cell%s to use.
   u32 previous_state;
 };
+
+
+enum struct CellInitialisationType
+{
+  RANDOM
+};
+
+
+struct CellInitialisationOptions
+{
+  CellInitialisationType type;
+
+  CellState *set_of_initial_states;
+  u32 set_of_initial_states_size;
+};
+
+
+CellState
+initialise_cell_state(CellInitialisationOptions *cell_initialisation_options, s32vec2 position);
 
 
 #endif
