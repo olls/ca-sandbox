@@ -16,9 +16,16 @@
 
 
 const u32 FPS = 60;
+
+#ifdef GDB_DEBUG
+const b32 FULLSCREEN = false;
+const u32 WINDOW_WIDTH = 1920;
+const u32 WINDOW_HEIGHT = 1080;
+#else
 const b32 FULLSCREEN = true;
 const u32 WINDOW_WIDTH = 1280;
 const u32 WINDOW_HEIGHT = 720;
+#endif
 
 
 /// Should be called before the main-loop starts. Sets up the frame timing.

@@ -14,7 +14,7 @@ INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 
 
-SOURCES     := $(shell find $(SRCDIR) -type f -name *.cpp)
+SOURCES     := $(shell find $(SRCDIR) -type f -name '*.cpp')
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.cpp=.o))
 
 all: $(TARGET)
@@ -40,8 +40,8 @@ $(TARGET): $(OBJECTS)
 # Compile
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
-	@$(CC) $(CFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.cpp > $(BUILDDIR)/$*.d
+	$(CC) $(CFLAGS) $(USER_CFLAGS) $(INC) -c -o $@ $<
+	@$(CC) $(CFLAGS) $(USER_CFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.cpp > $(BUILDDIR)/$*.d
 	@cp -f $(BUILDDIR)/$*.d $(BUILDDIR)/$*.d.tmp
 	@sed -e 's|.*:|$(BUILDDIR)/$*.o:|' < $(BUILDDIR)/$*.d.tmp > $(BUILDDIR)/$*.d
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.d

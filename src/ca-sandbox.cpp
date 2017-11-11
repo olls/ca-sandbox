@@ -23,7 +23,11 @@
 
 
 /// The number of simulation frames per second.
-const u32 SIM_FREQUENCEY = 1;
+#ifdef GDB_DEBUG
+const u32 SIM_FREQUENCY = 1;
+#else
+const u32 SIM_FREQUENCY = 20;
+#endif
 
 
 /// @brief Compile all the OpenGL shaders used in the program.
@@ -230,7 +234,12 @@ main(int argc, const char *argv[])
         .n_null_states = 0
       };
 
+// When we are stepping through the code, we only want a maximum of one sim-frame per loop.
+#ifdef GDB_DEBUG
+      if (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
+#else
       while (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
+#endif
       {
         // TODO: If simulate cells takes longer than 1/SIM_FREQUENCY, it creates a negative feedback
         //         loop processing more sim-frames every screen frame.
