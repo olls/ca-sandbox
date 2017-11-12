@@ -94,18 +94,8 @@ main(int argc, const char *argv[])
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
     GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
 
-    CellInitialisationOptions cell_initialisation_options = {};
-    cell_initialisation_options.type = CellInitialisationType::RANDOM;
-#ifdef CA_TYPE_GROWTH
-    cell_initialisation_options.set_of_initial_states_size = 1;
-#else
-    cell_initialisation_options.set_of_initial_states_size = 2;
-#endif
-    cell_initialisation_options.set_of_initial_states = allocate(CellState, cell_initialisation_options.set_of_initial_states_size);
-    cell_initialisation_options.set_of_initial_states[0] = 0;
-#ifdef CA_TYPE_GROWTH
-    cell_initialisation_options.set_of_initial_states[1] = 1;
-#endif
+    SimulateOptions simulate_options;
+    CellInitialisationOptions cell_initialisation_options;
 
     u64 last_sim_time = get_us();
 
@@ -163,19 +153,49 @@ main(int argc, const char *argv[])
 
         init_cell_hashmap(&universe);
 
-        // NOTE: Set a seed stating state
-        CellBlock *cell_block = get_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, -1});
-        Cell *cell;
-        #define get_cell(x, y) (cell_block->cells + ((x) * CELL_BLOCK_DIM) + (y))
+        simulate_options.border_type = BorderType::TORUS;
+        simulate_options.neighbourhood_region_size = 1;
+        assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
 
-        cell = get_cell(7, 8);
+        simulate_options.border_min_corner_block = {-1, -1};
+        simulate_options.border_min_corner_cell = {8, 8};
+
+        simulate_options.border_max_corner_block = {1, 1};
+        simulate_options.border_max_corner_cell = {8, 8};
+
+        simulate_options.n_null_states = 1;
+        simulate_options.null_states = allocate(CellState, 1);
+        simulate_options.null_states[0] = 0;
+
+        cell_initialisation_options.type = CellInitialisationType::RANDOM;
+
+#ifdef CA_TYPE_GROWTH
+        cell_initialisation_options.set_of_initial_states_size = 1;
+#else
+        cell_initialisation_options.set_of_initial_states_size = 2;
+#endif
+
+        cell_initialisation_options.set_of_initial_states = allocate(CellState, cell_initialisation_options.set_of_initial_states_size);
+#ifdef CA_TYPE_GROWTH
+        cell_initialisation_options.set_of_initial_states[0] = 0;
+        cell_initialisation_options.set_of_initial_states[1] = 1;
+#else
+        cell_initialisation_options.set_of_initial_states[0] = 0;
+#endif
+
+        // NOTE: Set a seed stating state
+        CellBlock *cell_block = get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
+        Cell *cell;
+        #define get_cell(x, y) (cell_block->cells + ((y) * universe.cell_block_dim) + (x))
+
+        cell = get_cell(0, 1);
         cell->state = 1;
-        cell = get_cell(8, 7);
+        cell = get_cell(1, 2);
         cell->state = 1;
-        cell = get_cell(6, 7);
+        cell = get_cell(0, 3);
         cell->state = 1;
-        // cell = get_cell(7, 8);
-        // cell->state = 1;
+        cell = get_cell(1, 4);
+        cell->state = 1;
         // cell = get_cell(7, 6);
         // cell->state = 1;
 
@@ -220,19 +240,6 @@ main(int argc, const char *argv[])
       //
       // Simulate
       //
-
-      SimulateOptions simulate_options = {
-        .border_type = BorderType::TORUS,
-
-        .border_min_corner_block = {-8, -5},
-        .border_min_corner_cell = {8, 8},
-
-        .border_max_corner_block = {7, 4},
-        .border_max_corner_cell = {8, 8},
-
-        .null_states = 0,
-        .n_null_states = 0
-      };
 
 // When we are stepping through the code, we only want a maximum of one sim-frame per loop.
 #ifdef GDB_DEBUG
