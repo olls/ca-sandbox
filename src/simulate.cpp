@@ -520,7 +520,7 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
     {
       CellBlock *cell_block = universe->hashmap[hash_slot];
 
-      if (cell_block != 0 && cell_block->initialised)
+      if (cell_block != 0 && cell_block->slot_in_use)
       {
         // Follow the hashmap collision chain
         do
@@ -552,11 +552,11 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
       CellBlock *cell_block = universe->hashmap[hash_slot];
 
       if (cell_block != 0 &&
-          cell_block->initialised)
+          cell_block->slot_in_use)
       {
         do
         {
-          if (cell_block->initialised &&
+          if (cell_block->slot_in_use &&
               cell_block->last_simulated_on_frame != current_frame)
           {
             cell_block->last_simulated_on_frame = current_frame;

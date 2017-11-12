@@ -122,7 +122,7 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    if (cell_block != 0 && cell_block->initialised)
+    if (cell_block != 0 && cell_block->slot_in_use)
     {
       do
       {
@@ -205,7 +205,7 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    if (cell_block != 0 && cell_block->initialised)
+    if (cell_block != 0 && cell_block->slot_in_use)
     {
       do
       {

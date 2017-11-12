@@ -27,7 +27,7 @@ const u32 DEFAULT_CELL_BLOCK_DIM = 16;
 struct CellBlock
 {
   /// Used to determine whether a slot in the Universe hashmap is in use.
-  b32 initialised;
+  b32 slot_in_use;
 
   /// Used by simulation.cpp to ensure the block is only simulated once per frame.
   u64 last_simulated_on_frame;

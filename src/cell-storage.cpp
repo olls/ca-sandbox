@@ -45,7 +45,7 @@ init_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisati
   memset(result, 0, size);
 
   result->block_position = position;
-  result->initialised = true;
+  result->slot_in_use = true;
   result->last_simulated_on_frame = 0;
 
   for (u32 cell_y = 0;
@@ -97,7 +97,7 @@ create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisa
   }
 
   // Follow CellBlock linked list
-  while (candidate_cell_block->initialised &&
+  while (candidate_cell_block->slot_in_use &&
          !vec2_eq(candidate_cell_block->block_position, search_cell_block_position))
   {
     // Allocate next_block if it doesn't exist, as the CellBlock __must__ be in this hash slot.
@@ -143,7 +143,7 @@ get_or_create_cell_block(Universe *universe, CellInitialisationOptions *cell_ini
   }
 
   // Follow CellBlock linked list
-  while (candidate_cell_block->initialised &&
+  while (candidate_cell_block->slot_in_use &&
          !vec2_eq(candidate_cell_block->block_position, search_cell_block_position))
   {
     // Allocate next_block if it doesn't exist, as the CellBlock __must__ be in this hash slot.
@@ -181,7 +181,7 @@ get_existing_cell_block(Universe *universe, s32vec2 search_cell_block_position)
   if (result != 0)
   {
     // Follow CellBlock linked list
-    while (result->initialised &&
+    while (result->slot_in_use &&
            !vec2_eq(result->block_position, search_cell_block_position))
     {
       result = result->next_block;
