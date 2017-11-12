@@ -8,7 +8,7 @@ BUILDDIR    := obj
 TARGETDIR   := bin
 DOCSDIR     := docs
 
-CFLAGS      := -Werror -g -O0 -std=c++14 `sdl2-config --cflags`
+CFLAGS      := -Werror -Ofast -std=c++14 `sdl2-config --cflags`
 LIB         := -lSDL2 -lGLEW -lGL -lGLU -lX11 -lXxf86vm -lXrandr -lpthread -lXi -lXinerama -lXcursor -lfreetype -I/usr/include/freetype2
 INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
