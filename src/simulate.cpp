@@ -67,6 +67,18 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *uni
 }
 
 
+b32
+within_border(SimulateOptions *simulate_options, s32vec2 cell_block_position, s32vec2 cell_position)
+{
+  b32 result = (cell_position_greater_than_or_equal_to(cell_block_position, cell_position,
+                                                       simulate_options->border_min_corner_block, simulate_options->border_min_corner_cell) &&
+                cell_position_less_than(cell_block_position, cell_position,
+                                        simulate_options->border_max_corner_block, simulate_options->border_max_corner_cell));
+
+  return result;
+}
+
+
 /// @brief Placeholder function implementing a hard coded transition rule for a single Cell.
 ///
 /// Operates directly on the Cell in the CellBlock.
@@ -95,68 +107,160 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
   s32vec2 cell_south_west_block_position = cell_block->block_position;
   s32vec2 cell_north_west_block_position = cell_block->block_position;
 
-  normalise_cell_coord(&cell_north_block_position,      &cell_north_coord);
-  normalise_cell_coord(&cell_east_block_position,       &cell_east_coord);
-  normalise_cell_coord(&cell_south_block_position,      &cell_south_coord);
-  normalise_cell_coord(&cell_west_block_position,       &cell_west_coord);
-  normalise_cell_coord(&cell_north_east_block_position, &cell_north_east_coord);
-  normalise_cell_coord(&cell_south_east_block_position, &cell_south_east_coord);
-  normalise_cell_coord(&cell_south_west_block_position, &cell_south_west_coord);
-  normalise_cell_coord(&cell_north_west_block_position, &cell_north_west_coord);
+  normalise_cell_coord(universe, &cell_north_block_position,      &cell_north_coord);
+  normalise_cell_coord(universe, &cell_east_block_position,       &cell_east_coord);
+  normalise_cell_coord(universe, &cell_south_block_position,      &cell_south_coord);
+  normalise_cell_coord(universe, &cell_west_block_position,       &cell_west_coord);
+  normalise_cell_coord(universe, &cell_north_east_block_position, &cell_north_east_coord);
+  normalise_cell_coord(universe, &cell_south_east_block_position, &cell_south_east_coord);
+  normalise_cell_coord(universe, &cell_south_west_block_position, &cell_south_west_coord);
+  normalise_cell_coord(universe, &cell_north_west_block_position, &cell_north_west_coord);
 
   if (simulate_options->border_type == BorderType::TORUS)
   {
-    wrap_cell_position_around_torus(simulate_options, &cell_north_block_position, &cell_north_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_east_block_position, &cell_east_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_south_block_position, &cell_south_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_west_block_position, &cell_west_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_north_east_block_position, &cell_north_east_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_south_east_block_position, &cell_south_east_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_south_west_block_position, &cell_south_west_coord);
-    wrap_cell_position_around_torus(simulate_options, &cell_north_west_block_position, &cell_north_west_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_block_position, &cell_north_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_east_block_position, &cell_east_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_block_position, &cell_south_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_west_block_position, &cell_west_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_east_block_position, &cell_north_east_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_east_block_position, &cell_south_east_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_west_block_position, &cell_south_west_coord);
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_west_block_position, &cell_north_west_coord);
   }
 
-  CellBlock *cell_north_block      = get_cell_block(universe, cell_initialisation_options, cell_north_block_position);
-  CellBlock *cell_east_block       = get_cell_block(universe, cell_initialisation_options, cell_east_block_position);
-  CellBlock *cell_south_block      = get_cell_block(universe, cell_initialisation_options, cell_south_block_position);
-  CellBlock *cell_west_block       = get_cell_block(universe, cell_initialisation_options, cell_west_block_position);
-  CellBlock *cell_north_east_block = get_cell_block(universe, cell_initialisation_options, cell_north_east_block_position);
-  CellBlock *cell_south_east_block = get_cell_block(universe, cell_initialisation_options, cell_south_east_block_position);
-  CellBlock *cell_south_west_block = get_cell_block(universe, cell_initialisation_options, cell_south_west_block_position);
-  CellBlock *cell_north_west_block = get_cell_block(universe, cell_initialisation_options, cell_north_west_block_position);
-
-  Cell *cell_north      = get_cell_from_block(cell_north_block,      cell_north_coord);
-  Cell *cell_east       = get_cell_from_block(cell_east_block,       cell_east_coord);
-  Cell *cell_south      = get_cell_from_block(cell_south_block,      cell_south_coord);
-  Cell *cell_west       = get_cell_from_block(cell_west_block,       cell_west_coord);
-  Cell *cell_north_east = get_cell_from_block(cell_north_east_block, cell_north_east_coord);
-  Cell *cell_south_east = get_cell_from_block(cell_south_east_block, cell_south_east_coord);
-  Cell *cell_south_west = get_cell_from_block(cell_south_west_block, cell_south_west_coord);
-  Cell *cell_north_west = get_cell_from_block(cell_north_west_block, cell_north_west_coord);
-
-  Cell *cell = get_cell_from_block(cell_block, (s32vec2){cell_x, cell_y});
-
-  u32 n_enabled_neighbours = (cell_north->previous_state + cell_east->previous_state + cell_south->previous_state + cell_west->previous_state +
-                              cell_north_east->previous_state + cell_south_east->previous_state + cell_south_west->previous_state + cell_north_west->previous_state +
-                              cell->previous_state);
-
-#ifdef CA_TYPE_GROWTH
-  if (n_enabled_neighbours == 3 ||
-      n_enabled_neighbours == 7 ||
-      n_enabled_neighbours == 8)
+  // If any of the cell positions are outside of the border, don't simulate the Cell:
+  // - If using FIXED border, then these cells cannot be simulated an act as the "border-buffer"
+  // - If using TORUS border, then this condition should never be true, and there is a bug in
+  //     wrap_cell_position_around_torus.
+  if ((simulate_options->border_type == BorderType::FIXED ||
+        simulate_options->border_type == BorderType::TORUS) &&
+      (!within_border(simulate_options, cell_north_block_position     , cell_north_coord     ) ||
+       !within_border(simulate_options, cell_east_block_position      , cell_east_coord      ) ||
+       !within_border(simulate_options, cell_south_block_position     , cell_south_coord     ) ||
+       !within_border(simulate_options, cell_west_block_position      , cell_west_coord      ) ||
+       !within_border(simulate_options, cell_north_east_block_position, cell_north_east_coord) ||
+       !within_border(simulate_options, cell_south_east_block_position, cell_south_east_coord) ||
+       !within_border(simulate_options, cell_south_west_block_position, cell_south_west_coord) ||
+       !within_border(simulate_options, cell_north_west_block_position, cell_north_west_coord)))
   {
-    cell->state = 1;
-  }
-#else
-  if (n_enabled_neighbours <= 4)
-  {
-    cell->state = 0;
+    // Leave subject_cell in initial state
+
+    // NOTE: For debugging
+    subject_cell->state = 2;
   }
   else
   {
-    cell->state = 1;
-  }
+    CellBlock *cell_north_block      = get_existing_cell_block(universe, cell_north_block_position);
+    CellBlock *cell_east_block       = get_existing_cell_block(universe, cell_east_block_position);
+    CellBlock *cell_south_block      = get_existing_cell_block(universe, cell_south_block_position);
+    CellBlock *cell_west_block       = get_existing_cell_block(universe, cell_west_block_position);
+    CellBlock *cell_north_east_block = get_existing_cell_block(universe, cell_north_east_block_position);
+    CellBlock *cell_south_east_block = get_existing_cell_block(universe, cell_south_east_block_position);
+    CellBlock *cell_south_west_block = get_existing_cell_block(universe, cell_south_west_block_position);
+    CellBlock *cell_north_west_block = get_existing_cell_block(universe, cell_north_west_block_position);
+
+    // If any of the CellBlock%s don't exist, we assume they contain only NULL state Cell%s. This
+    //   assumption is valid because we ensure (in create_any_new_cell_blocks_needed() ) that all
+    //   Cell%s within the neighbourhood region of any neighbouring CellBlock%s are NULL Cell%s
+    //   (Which don't interact with other NULL Cell's), otherwise we create the neighbouring
+    //   CellBlock.
+
+    CellState cell_north_state = simulate_options->null_states[0];
+    CellState cell_east_state = simulate_options->null_states[0];
+    CellState cell_south_state = simulate_options->null_states[0];
+    CellState cell_west_state = simulate_options->null_states[0];
+    CellState cell_north_east_state = simulate_options->null_states[0];
+    CellState cell_south_east_state = simulate_options->null_states[0];
+    CellState cell_south_west_state = simulate_options->null_states[0];
+    CellState cell_north_west_state = simulate_options->null_states[0];
+
+    if (cell_north_block != 0)
+    {
+      Cell *cell_north = get_cell_from_block(universe, cell_north_block, cell_north_coord);
+      if (cell_north->previous_state == 1)
+      {
+        cell_north_state = 1;
+      }
+    }
+    if (cell_east_block != 0)
+    {
+      Cell *cell_east = get_cell_from_block(universe, cell_east_block, cell_east_coord);
+      if (cell_east->previous_state == 1)
+      {
+        cell_east_state = 1;
+      }
+    }
+    if (cell_south_block != 0)
+    {
+      Cell *cell_south = get_cell_from_block(universe, cell_south_block, cell_south_coord);
+      if (cell_south->previous_state == 1)
+      {
+        cell_south_state = 1;
+      }
+    }
+    if (cell_west_block != 0)
+    {
+      Cell *cell_west = get_cell_from_block(universe, cell_west_block, cell_west_coord);
+      if (cell_west->previous_state == 1)
+      {
+        cell_west_state = 1;
+      }
+    }
+    if (cell_north_east_block != 0)
+    {
+      Cell *cell_north_east = get_cell_from_block(universe, cell_north_east_block, cell_north_east_coord);
+      if (cell_north_east->previous_state == 1)
+      {
+        cell_north_east_state = 1;
+      }
+    }
+    if (cell_south_east_block != 0)
+    {
+      Cell *cell_south_east = get_cell_from_block(universe, cell_south_east_block, cell_south_east_coord);
+      if (cell_south_east->previous_state == 1)
+      {
+        cell_south_east_state = 1;
+      }
+    }
+    if (cell_south_west_block != 0)
+    {
+      Cell *cell_south_west = get_cell_from_block(universe, cell_south_west_block, cell_south_west_coord);
+      if (cell_south_west->previous_state == 1)
+      {
+        cell_south_west_state = 1;
+      }
+    }
+    if (cell_north_west_block != 0)
+    {
+      Cell *cell_north_west = get_cell_from_block(universe, cell_north_west_block, cell_north_west_coord);
+      if (cell_north_west->previous_state == 1)
+      {
+        cell_north_west_state = 1;
+      }
+    }
+
+    u32 n_enabled_neighbours = (cell_north_state + cell_east_state + cell_south_state + cell_west_state +
+                                cell_north_east_state + cell_south_east_state + cell_south_west_state + cell_north_west_state +
+                                subject_cell->previous_state);
+
+#ifdef CA_TYPE_GROWTH
+    if (n_enabled_neighbours == 3 ||
+        n_enabled_neighbours == 7 ||
+        n_enabled_neighbours == 8)
+    {
+      subject_cell->state = 1;
+    }
+#else
+    if (n_enabled_neighbours <= 4)
+    {
+      subject_cell->state = 0;
+    }
+    else
+    {
+      subject_cell->state = 1;
+    }
 #endif
+  }
 }
 
 
@@ -181,26 +285,210 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
         case (BorderType::FIXED):
         case (BorderType::TORUS):
         {
-          if (cell_position_greater_than_or_equal_to(cell_block->block_position, (s32vec2){cell_x, cell_y},
-                                                     simulate_options->border_min_corner_block, simulate_options->border_min_corner_cell) &&
-              cell_position_less_than(cell_block->block_position, (s32vec2){cell_x, cell_y},
-                                      simulate_options->border_max_corner_block, simulate_options->border_max_corner_cell))
+          // Don't simulate if we are not within the border.
+          if (within_border(simulate_options, cell_block->block_position, (s32vec2){cell_x, cell_y}))
           {
             test_transition_rule(simulate_options, cell_initialisation_options, universe, cell_block, cell_x, cell_y);
-          }
-          else
-          {
-            // print("Hit boundary at %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
           }
         } break;
 
         case (BorderType::INFINITE):
         {
-          print("BorderType::INFINITE Not currently implemented.\n");
+          test_transition_rule(simulate_options, cell_initialisation_options, universe, cell_block, cell_x, cell_y);
         } break;
       }
     }
   }
+}
+
+
+b32
+is_null_state(SimulateOptions *simulate_options, CellState state)
+{
+  b32 result = false;
+
+  for (u32 null_state_index = 0;
+       null_state_index < simulate_options->n_null_states;
+       ++null_state_index)
+  {
+    CellState null_state = simulate_options->null_states[null_state_index];
+    result |= state == null_state;
+  }
+
+  return result;
+}
+
+
+/// Creates new CellBlock%s around the passed in CellBlock IF:
+/// - If simulate_options->boder_type == FIXED or TORUS and the new CellBlock would contain Cells
+///     within the borders defined in simulate_options.
+///   - OR If simulate_options->border_type == INFINITE
+///     - Only create new CellBlock%s if an existing Cell __with a non-NULL state__ is within the
+///         neighbourhood-region of any of its cells.
+b32
+create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *subject_cell_block)
+{
+  b32 result = false;
+
+  s32vec2 cell_position;
+  for (cell_position.y = 0;
+       cell_position.y < universe->cell_block_dim;
+       ++cell_position.y)
+  {
+    for (cell_position.x = 0;
+         cell_position.x < universe->cell_block_dim;
+         ++cell_position.x)
+    {
+      Cell *cell = get_cell_from_block(universe, subject_cell_block, cell_position);
+      cell->previous_state = cell->state;
+
+      if (!is_null_state(simulate_options, cell->state))
+      {
+        // If within the neighbourhood region of any neighbouring CellBlocks:
+        // Create the CellBlock which can see this Cell.
+
+        b32 north_needed = cell_position.y < simulate_options->neighbourhood_region_size;
+        b32 east_needed = cell_position.x >= universe->cell_block_dim - simulate_options->neighbourhood_region_size;
+        b32 south_needed = cell_position.y >= universe->cell_block_dim - simulate_options->neighbourhood_region_size;
+        b32 west_needed = cell_position.x < simulate_options->neighbourhood_region_size;
+
+        if (north_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {0, -1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (east_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {1, 0});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (south_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {0, 1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (west_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {-1, 0});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (north_needed && east_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {1, -1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (south_needed && east_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {1, 1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (south_needed && west_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {-1, 1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        if (north_needed && west_needed)
+        {
+          s32vec2 cell_block_position = vec2_add(subject_cell_block->block_position, {-1, -1});
+          CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+          result |= new_block != 0;
+        }
+
+        // Have to check the borders for torus topology as well.
+        if (simulate_options->border_type == BorderType::TORUS)
+        {
+          // Check if the cell is within the neighbourhood_region_size of the border.
+
+          // Upper bound
+          s32vec2 max_corner_block = simulate_options->border_max_corner_block;
+          s32vec2 max_corner_cell = vec2_subtract(simulate_options->border_max_corner_cell, simulate_options->neighbourhood_region_size);
+          normalise_cell_coord(universe, &max_corner_block, &max_corner_cell);
+
+          // Lower bound
+          s32vec2 min_corner_block = simulate_options->border_min_corner_block;
+          s32vec2 min_corner_cell = vec2_add(simulate_options->border_min_corner_cell, simulate_options->neighbourhood_region_size);
+          normalise_cell_coord(universe, &min_corner_block, &min_corner_cell);
+
+          b32 wrapping_north_needed = !cell_position_less_than(subject_cell_block->block_position.y, cell_position.y, max_corner_block.y, max_corner_cell.y);
+          b32 wrapping_east_needed = !cell_position_greater_than_or_equal_to(subject_cell_block->block_position.x, cell_position.x, min_corner_block.x, min_corner_cell.x);
+          b32 wrapping_south_needed = !cell_position_greater_than_or_equal_to(subject_cell_block->block_position.y, cell_position.y, min_corner_block.y, min_corner_cell.y);
+          b32 wrapping_west_needed = !cell_position_less_than(subject_cell_block->block_position.x, cell_position.x, max_corner_block.x, max_corner_cell.x);
+
+          if (wrapping_north_needed)
+          {
+            s32vec2 cell_block_position = {subject_cell_block->block_position.x, simulate_options->border_min_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_east_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_max_corner_block.x, subject_cell_block->block_position.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_south_needed)
+          {
+            s32vec2 cell_block_position = {subject_cell_block->block_position.x, simulate_options->border_max_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_west_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_min_corner_block.x, subject_cell_block->block_position.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_north_needed && wrapping_east_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_max_corner_block.x, simulate_options->border_min_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_south_needed && wrapping_east_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_max_corner_block.x, simulate_options->border_max_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_south_needed && wrapping_west_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_min_corner_block.x, simulate_options->border_max_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+
+          if (wrapping_north_needed && wrapping_west_needed)
+          {
+            s32vec2 cell_block_position = {simulate_options->border_min_corner_block.x, simulate_options->border_max_corner_block.y};
+            CellBlock *new_block = create_cell_block(universe, cell_initialisation_options, cell_block_position);
+            result |= new_block != 0;
+          }
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 
@@ -211,43 +499,43 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
 ///
 /// First we iterate over every Cell in the Universe, copying its state into `Cell.previous_state`.
 ///   Next we iterate over every CellBlock and simulate it using simulate_cell_block() if it has not
-///   yet been simulated on this frame. We continue to iterate over all the CellBlocks until they
-///   have all been simulated on this frame; this is to allow for new CellBlocks to be created
+///   yet been simulated on this frame. We continue to iterate over all the CellBlock%s until they
+///   have all been simulated on this frame; this is to allow for new CellBlock%s to be created
 ///   during the simulation of a CellBlock, and the new CellBlock will still be simulated within the
 ///   same frame.
 void
 simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame)
 {
   // First copy all Cell states into previous_state
+  // Then initialise any new CellBlock%s needed.
 
-  for (u32 hash_slot = 0;
-       hash_slot < universe->hashmap_size;
-       ++hash_slot)
+  b32 created_new_blocks = true;
+  while (created_new_blocks)
   {
-    CellBlock *cell_block = universe->hashmap[hash_slot];
+    created_new_blocks = false;
 
-    if (cell_block != 0 && cell_block->initialised)
+    for (u32 hash_slot = 0;
+         hash_slot < universe->hashmap_size;
+         ++hash_slot)
     {
-      do
+      CellBlock *cell_block = universe->hashmap[hash_slot];
+
+      if (cell_block != 0 && cell_block->initialised)
       {
-        for (u32 cell_index = 0;
-             cell_index < CELL_BLOCK_DIM * CELL_BLOCK_DIM;
-             ++cell_index)
-        {
-          Cell *cell = cell_block->cells + cell_index;
-
-          cell->previous_state = cell->state;
-        }
-
         // Follow the hashmap collision chain
-        cell_block = cell_block->next_block;
+        do
+        {
+          created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, universe, cell_block);
+
+          cell_block = cell_block->next_block;
+        }
+        while (cell_block != 0);
       }
-      while (cell_block != 0);
     }
   }
 
-  // Loop through all CellBlocks, simulating them until they are all flagged as being
-  //  simulated on this frame. This is so that new CellBlocks - which have been created
+  // Loop through all CellBlock%s, simulating them until they are all flagged as being
+  //  simulated on this frame. This is so that new CellBlock%s - which have been created
   //  when the simulation reaches the edge of an existing CellBlock - are simulated in
   //  the same frame.
 
