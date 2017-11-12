@@ -1,5 +1,6 @@
 {
   "build_cmd": ["/home/git/doxygen/build/bin/doxygen Doxyfile"],
   "copy_from": "docs/html",
-  "copy_to": "/home/git/public_html/ca-sandbox-docs"
+  "copy_to": "/home/git/public_html/ca-sandbox-docs",
+  "url": "https://oliverfaircliff.com/~git/ca-sandbox-docs"
 }
