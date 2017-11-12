@@ -7,33 +7,33 @@
 ///
 
 
-/// Normalise a (cell block, cell position) so that the cell position is less than CELL_BLOCK_DIM
+/// Normalise a (cell block, cell position) so that the cell position is less than cell_block_dim
 void
-normalise_cell_coord(s32 *cell_block_coord, s32 *cell_coord)
+normalise_cell_coord(Universe *universe, s32 *cell_block_coord, s32 *cell_coord)
 {
   // Account for zero cross over
   s32 zero_offset_cell_coord;
   if (*cell_coord < 0)
   {
-    zero_offset_cell_coord = *cell_coord - CELL_BLOCK_DIM;
+    zero_offset_cell_coord = *cell_coord - universe->cell_block_dim;
   }
   else
   {
     zero_offset_cell_coord = *cell_coord;
   }
 
-  s32 delta_blocks = zero_offset_cell_coord / (s32)CELL_BLOCK_DIM;
+  s32 delta_blocks = zero_offset_cell_coord / (s32)universe->cell_block_dim;
 
   (*cell_block_coord) += delta_blocks;
-  (*cell_coord) -= delta_blocks * CELL_BLOCK_DIM;
+  (*cell_coord) -= delta_blocks * universe->cell_block_dim;
 }
 
 
 void
-normalise_cell_coord(s32vec2 *cell_block_coord, s32vec2 *cell_coord)
+normalise_cell_coord(Universe *universe, s32vec2 *cell_block_coord, s32vec2 *cell_coord)
 {
-  normalise_cell_coord(&cell_block_coord->x, &cell_coord->x);
-  normalise_cell_coord(&cell_block_coord->y, &cell_coord->y);
+  normalise_cell_coord(universe, &cell_block_coord->x, &cell_coord->x);
+  normalise_cell_coord(universe, &cell_block_coord->y, &cell_coord->y);
 }
 
 
@@ -51,22 +51,22 @@ normalise_cell_coord(s32vec2 *cell_block_coord, s32vec2 *cell_coord)
 ///                                          being converted.
 ///
 void
-small_global_cell_coord_to_cell_block_coords(s32vec2 small_global_cell_coord, s32vec2 *resulting_cell_block_coordinate, s32vec2 *resulting_cell_coordinate)
+small_global_cell_coord_to_cell_block_coords(Universe *universe, s32vec2 small_global_cell_coord, s32vec2 *resulting_cell_block_coordinate, s32vec2 *resulting_cell_coordinate)
 {
   // Account for zero cross over
   s32vec2 zero_offset_small_global_cell_coord = small_global_cell_coord;
   if (zero_offset_small_global_cell_coord.x < 0)
   {
-    zero_offset_small_global_cell_coord.x -= CELL_BLOCK_DIM;
+    zero_offset_small_global_cell_coord.x -= universe->cell_block_dim;
   }
   if (zero_offset_small_global_cell_coord.y < 0)
   {
-    zero_offset_small_global_cell_coord.y -= CELL_BLOCK_DIM;
+    zero_offset_small_global_cell_coord.y -= universe->cell_block_dim;
   }
 
-  *resulting_cell_block_coordinate = vec2_divide(zero_offset_small_global_cell_coord, (s32)CELL_BLOCK_DIM);
+  *resulting_cell_block_coordinate = vec2_divide(zero_offset_small_global_cell_coord, (s32)universe->cell_block_dim);
   *resulting_cell_coordinate = vec2_subtract(small_global_cell_coord,
-                                             vec2_multiply(*resulting_cell_block_coordinate, (s32)CELL_BLOCK_DIM));
+                                             vec2_multiply(*resulting_cell_block_coordinate, (s32)universe->cell_block_dim));
 }
 
 

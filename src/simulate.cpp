@@ -2,16 +2,17 @@
 
 #include "print.h"
 #include "types.h"
+#include "assert.h"
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
 
 
 /// @file
-/// @brief Contains functions for running the CA simulation on the CellBlocks.
+/// @brief Contains functions for running the CA simulation on the CellBlock%s.
 
 
 void
-wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell_block_position, s32vec2 *cell_position)
+wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *universe, s32vec2 *cell_block_position, s32vec2 *cell_position)
 {
   s32 wrapped_cell_block_x = cell_block_position->x;
   s32 wrapped_cell_block_y = cell_block_position->y;
@@ -29,7 +30,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell
     wrapped_cell_block_x = cell_block_position->x - delta_block.x;
     wrapped_cell_x = cell_position->x - delta_cell.x;
 
-    normalise_cell_coord(&wrapped_cell_block_x, &wrapped_cell_x);
+    normalise_cell_coord(universe, &wrapped_cell_block_x, &wrapped_cell_x);
   }
 
   if (cell_position_greater_than_or_equal_to(cell_block_position->y, cell_position->y,
@@ -38,7 +39,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell
     wrapped_cell_block_y = cell_block_position->y - delta_block.y;
     wrapped_cell_y = cell_position->y - delta_cell.y;
 
-    normalise_cell_coord(&wrapped_cell_block_y, &wrapped_cell_y);
+    normalise_cell_coord(universe, &wrapped_cell_block_y, &wrapped_cell_y);
   }
 
   // Wrap up to maximum bound
@@ -49,7 +50,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell
     wrapped_cell_block_x = cell_block_position->x + delta_block.x;
     wrapped_cell_x = cell_position->x + delta_cell.x;
 
-    normalise_cell_coord(&wrapped_cell_block_y, &wrapped_cell_y);
+    normalise_cell_coord(universe, &wrapped_cell_block_y, &wrapped_cell_y);
   }
 
   if (cell_position_less_than(cell_block_position->y, cell_position->y,
@@ -58,7 +59,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, s32vec2 *cell
     wrapped_cell_block_y = cell_block_position->y + delta_block.y;
     wrapped_cell_y = cell_position->y + delta_cell.y;
 
-    normalise_cell_coord(&wrapped_cell_block_y, &wrapped_cell_y);
+    normalise_cell_coord(universe, &wrapped_cell_block_y, &wrapped_cell_y);
   }
 
   *cell_block_position = (s32vec2){wrapped_cell_block_x, wrapped_cell_block_y};
@@ -73,6 +74,8 @@ void
 test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
 {
   // Test Von Neumann neighbourhood
+
+  Cell *subject_cell = get_cell_from_block(universe, cell_block, (s32vec2){cell_x, cell_y});
 
   s32vec2 cell_north_coord      = {cell_x,     cell_y - 1};
   s32vec2 cell_east_coord       = {cell_x + 1, cell_y};
@@ -165,11 +168,11 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
   // print("Simulating CellBlock %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
 
   for (s32 cell_y = 0;
-       cell_y < CELL_BLOCK_DIM;
+       cell_y < universe->cell_block_dim;
        ++cell_y)
   {
     for (s32 cell_x = 0;
-         cell_x < CELL_BLOCK_DIM;
+         cell_x < universe->cell_block_dim;
          ++cell_x)
     {
       // Bounds check

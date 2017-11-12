@@ -127,16 +127,16 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
       do
       {
         for (u32 cell_y = 0;
-             cell_y < CELL_BLOCK_DIM;
+             cell_y < universe->cell_block_dim;
              ++cell_y)
         {
           for (u32 cell_x = 0;
-               cell_x < CELL_BLOCK_DIM;
+               cell_x < universe->cell_block_dim;
                ++cell_x)
           {
-            Cell *cell = cell_block->cells + (cell_y * CELL_BLOCK_DIM) + cell_x;
+            Cell *cell = cell_block->cells + (cell_y * universe->cell_block_dim) + cell_x;
 
-            vec2 cell_position = vec2_divide(uvec2_to_vec2(cell->block_offset), CELL_BLOCK_DIM);
+            vec2 cell_position = vec2_divide((vec2){(r32)cell_x, (r32)cell_y}, universe->cell_block_dim);
 
             vec4 colour;
             if (cell->state == 1)

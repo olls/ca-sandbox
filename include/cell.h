@@ -14,9 +14,6 @@ typedef u32 CellState;
 /// An individual cell in a CA, stored in CellBlock%s.
 struct Cell
 {
-  /// Integer position relative to the block
-  uvec2 block_offset;
-
   CellState state;
 
   /// Stores the previous state, so during a simulation frame, the state value can be updated

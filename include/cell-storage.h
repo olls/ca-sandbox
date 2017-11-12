@@ -21,9 +21,7 @@
 ///     states.
 
 
-/// @brief The dimension of a CellBlock, ie. the CellBlock%s will contain a square of Cell%s with
-///          size CELL_BLOCK_DIM x CELL_BLOCK_DIM.
-const u32 CELL_BLOCK_DIM = 16;
+const u32 DEFAULT_CELL_BLOCK_DIM = 16;
 
 /// Storage for a square block of Cell%s
 struct CellBlock
@@ -37,12 +35,12 @@ struct CellBlock
   /// The position of the block relative to the origin of the CA, in block space.
   s32vec2 block_position;
 
-  /// Array of cells within the block.
-  Cell cells[CELL_BLOCK_DIM * CELL_BLOCK_DIM];
-
   /// The next CellBlock in this hash slot in the hashmap of Universe.  0 if this is the last
   ///   CellBlock in this slot.
   CellBlock *next_block;
+
+  /// Array of cells within the block. length of universe->cell_block_dim ^2
+  Cell cells[];
 };
 
 
@@ -57,6 +55,10 @@ const u32 INITIAL_CELL_HASHMAP_SIZE = 512;
 /// Stores a hashmap of CellBlock pointers.
 struct Universe
 {
+  /// The dimension of a CellBlock, ie. the CellBlock%s will contain a square of Cell%s with size
+  ///   cell_block_dim x cell_block_dim.
+  u32 cell_block_dim;
+
   /// Pointer to an array of CellBlock pointers.
   CellBlock **hashmap;
 
@@ -70,11 +72,19 @@ init_cell_hashmap(Universe *universe);
 
 
 CellBlock *
-get_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
+create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
+
+
+CellBlock *
+get_or_create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
+
+
+CellBlock *
+get_existing_cell_block(Universe *universe, s32vec2 search_cell_block_position);
 
 
 Cell *
-get_cell_from_block(CellBlock *cell_block, s32vec2 cell_coord);
+get_cell_from_block(Universe *universe, CellBlock *cell_block, s32vec2 cell_coord);
 
 
 #endif

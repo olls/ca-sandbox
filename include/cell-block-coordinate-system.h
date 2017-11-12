@@ -3,18 +3,19 @@
 
 #include "types.h"
 #include "vectors.h"
+#include "cell-storage.h"
 
 
 void
-normalise_cell_coord(s32 *cell_block_coord, s32 *cell_coord);
+normalise_cell_coord(Universe *universe, s32 *cell_block_coord, s32 *cell_coord);
 
 
 void
-normalise_cell_coord(s32vec2 *cell_block_coord, s32vec2 *cell_coord);
+normalise_cell_coord(Universe *universe, s32vec2 *cell_block_coord, s32vec2 *cell_coord);
 
 
 void
-small_global_cell_coord_to_cell_block_coords(s32vec2 small_global_cell_coord, s32vec2 *resulting_cell_block_coordinate, s32vec2 *resulting_cell_coordinate);
+small_global_cell_coord_to_cell_block_coords(Universe *universe, s32vec2 small_global_cell_coord, s32vec2 *resulting_cell_block_coordinate, s32vec2 *resulting_cell_coordinate);
 
 
 b32
