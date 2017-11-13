@@ -76,6 +76,10 @@ create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisa
 
 
 CellBlock *
+create_uninitialised_cell_block(Universe *universe, s32vec2 search_cell_block_position);
+
+
+CellBlock *
 get_or_create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
 
 

@@ -1,6 +1,7 @@
 #include "cell.h"
 
 #include "random.h"
+#include "vectors.h"
 
 
 CellState
