@@ -1,0 +1,64 @@
+#ifndef TEXT_H_DEF
+#define TEXT_H_DEF
+
+#include "types.h"
+
+
+struct String
+{
+  const char *start;
+  const char *current_position;
+  const char *end;
+};
+
+
+#define consume_while(string, func) while ((string)->current_position < (string)->end && func(*((string)->current_position))) ++((string)->current_position)
+#define consume_until(string, func) while ((string)->current_position < (string)->end && !func(*((string)->current_position))) ++((string)->current_position)
+#define consume_until_char(string, c) while ((string)->current_position < (string)->end && *((string)->current_position) != (c)) ++((string)->current_position)
+
+
+char *
+copy_string(char *dest, const char *source, u32 size);
+
+
+b32
+str_eq(const char *a, const char *b, u32 n);
+
+
+b32
+is_num(char character);
+
+
+b32
+is_num_or_sign(char character);
+
+
+b32
+is_letter(char character);
+
+
+b32
+is_newline(char character);
+
+
+b32
+is_whitespace(char character);
+
+
+b32
+is_whitespace_or_nl(char character);
+
+
+u32
+get_u32(String *string);
+
+
+s32
+get_s32(String *string);
+
+
+r32
+get_r32(String *string);
+
+
+#endif

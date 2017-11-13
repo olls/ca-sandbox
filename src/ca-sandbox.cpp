@@ -10,6 +10,7 @@
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
 #include "cell-storage.h"
+#include "load-universe.h"
 #include "cell-drawing.h"
 #include "simulate.h"
 
@@ -152,20 +153,22 @@ main(int argc, const char *argv[])
         }
 
         init_cell_hashmap(&universe);
+        load_universe_from_file("test-file.cells", &universe);
 
-        simulate_options.border_type = BorderType::TORUS;
+        simulate_options.border_type = BorderType::FIXED;
         simulate_options.neighbourhood_region_size = 1;
         assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
 
-        simulate_options.border_min_corner_block = {-1, -1};
-        simulate_options.border_min_corner_cell = {8, 8};
+        simulate_options.border_min_corner_block = {-2, -2};
+        simulate_options.border_min_corner_cell = {3, 3};
 
-        simulate_options.border_max_corner_block = {1, 1};
-        simulate_options.border_max_corner_cell = {8, 8};
+        simulate_options.border_max_corner_block = {2, 2};
+        simulate_options.border_max_corner_cell = {5, 5};
 
-        simulate_options.n_null_states = 1;
+        simulate_options.n_null_states = 2;
         simulate_options.null_states = allocate(CellState, 1);
         simulate_options.null_states[0] = 0;
+        simulate_options.null_states[1] = 2;
 
         cell_initialisation_options.type = CellInitialisationType::RANDOM;
 
@@ -182,24 +185,6 @@ main(int argc, const char *argv[])
 #else
         cell_initialisation_options.set_of_initial_states[0] = 0;
 #endif
-
-        // NOTE: Set a seed stating state
-        CellBlock *cell_block = get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
-        Cell *cell;
-        #define get_cell(x, y) (cell_block->cells + ((y) * universe.cell_block_dim) + (x))
-
-        cell = get_cell(0, 1);
-        cell->state = 1;
-        cell = get_cell(1, 2);
-        cell->state = 1;
-        cell = get_cell(0, 3);
-        cell->state = 1;
-        cell = get_cell(1, 4);
-        cell->state = 1;
-        // cell = get_cell(7, 6);
-        // cell->state = 1;
-
-        #undef get_cell
 
         opengl_print_errors();
       }
@@ -263,7 +248,7 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      r32 view_scale = 0.5;
+      r32 view_scale = 0.2;
       r32 aspect = (r32)engine.window.height / engine.window.width;
       r32 projection_matrix[] = {
         aspect * view_scale,  0,               0,  0,
