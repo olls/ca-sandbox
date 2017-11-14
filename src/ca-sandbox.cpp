@@ -233,11 +233,13 @@ main(int argc, const char *argv[])
       while (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
 #endif
       {
-        // TODO: If simulate cells takes longer than 1/SIM_FREQUENCY, it creates a negative feedback
-        //         loop processing more sim-frames every screen frame.
-
-        last_sim_time += (1000000.0 / SIM_FREQUENCY);
+        u64 start_sim_time = get_us();
         simulate_cells(&simulate_options, &cell_initialisation_options, &universe, last_sim_time);
+        u64 end_sim_time = get_us();
+
+        print("Simulation took %ldus\n", end_sim_time - start_sim_time);
+
+        last_sim_time = end_sim_time;
       }
 
       //
