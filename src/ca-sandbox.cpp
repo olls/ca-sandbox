@@ -94,6 +94,7 @@ main(int argc, const char *argv[])
     CellInstancing cell_instancing = {};
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
     GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
+    GLuint cell_instance_drawing_cell_width_uniform = 0;
 
     SimulateOptions simulate_options;
     CellInitialisationOptions cell_initialisation_options;
@@ -121,6 +122,7 @@ main(int argc, const char *argv[])
         test_cell_blocks_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(debug_cell_block_outline_drawing_shader_program, "projection_matrix");
         cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
         cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
+        cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
 
 
         // Debug cell block drawing
@@ -250,11 +252,14 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      r32 view_scale = 0.2;
+      r32 cell_width = 1;
+      vec2 offset = {-0.05, 0.1};
+
+      r32 view_scale = 0.05;
       r32 aspect = (r32)engine.window.height / engine.window.width;
       r32 projection_matrix[] = {
-        aspect * view_scale,  0,               0,  0,
-        0,                   -1 * view_scale,  0,  0,
+        aspect * view_scale,  0,               0,  offset.x,
+        0,                   -1 * view_scale,  0,  offset.y,
         0,                    0,               1,  0,
         0,                    0,               0,  1
       };
@@ -290,6 +295,7 @@ main(int argc, const char *argv[])
       glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
 
       glUniform1i(cell_instance_drawing_cell_block_dim_uniform, universe.cell_block_dim);
+      glUniform1f(cell_instance_drawing_cell_width_uniform, cell_width);
 
       // Re-initialise attributes in case instance buffer has been reallocated
       init_cell_instances_buffer_attributes(&cell_instancing.buffer, &general_vertex_buffer, cell_instance_drawing_shader_program);

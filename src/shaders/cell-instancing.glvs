@@ -3,6 +3,7 @@
 
 uniform mat4 projection_matrix;
 uniform int cell_block_dim;
+uniform float cell_width;
 
 in vec2 vertex;
 
@@ -19,7 +20,7 @@ main(void)
 {
   vec2 local_block_position = vec2(s32_block_position_x, s32_block_position_y);
   local_block_position += cell_position;
-  local_block_position += vertex * 1/cell_block_dim * 0.8;
+  local_block_position += vertex * 1/cell_block_dim * cell_width;
   vec2 scaled_block_position = local_block_position;
 
 
