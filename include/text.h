@@ -13,6 +13,14 @@ struct String
 };
 
 
+struct WriteString
+{
+  char *start;
+  char *current_position;
+  char *end;
+};
+
+
 #define consume_while(string, func) while ((string)->current_position < (string)->end && func(*((string)->current_position))) ++((string)->current_position)
 #define consume_until(string, func) while ((string)->current_position < (string)->end && !func(*((string)->current_position))) ++((string)->current_position)
 #define consume_until_char(string, c) while ((string)->current_position < (string)->end && *((string)->current_position) != (c)) ++((string)->current_position)

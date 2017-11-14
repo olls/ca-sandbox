@@ -13,7 +13,6 @@ LIB         := -lSDL2 -lGLEW -lGL -lGLU -lX11 -lXxf86vm -lXrandr -lpthread -lXi 
 INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 
-
 SOURCES     := $(shell find $(SRCDIR) -type f -name '*.cpp')
 OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.cpp=.o))
 
@@ -34,8 +33,12 @@ docs:
 -include $(OBJECTS:.o=.d)
 
 # Link
+
 $(TARGET): $(OBJECTS)
 	$(CC) -o $(TARGETDIR)/$(TARGET) $^ $(LIB)
+
+rle-to-cells: $(filter-out $(BUILDDIR)/ca-sandbox.o, $(OBJECTS)) $(BUILDDIR)/rle-to-cells.o
+	$(CC) -o $(TARGETDIR)/rle-to-cells $^ $(LIB)
 
 # Compile
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
@@ -47,5 +50,9 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.d
 	@rm -f $(BUILDDIR)/$*.d.tmp
 
-#Non-File Targets
+$(BUILDDIR)/rle-to-cells.o: rle-to-cells/rle-to-cells.cpp
+	$(CC) $(CFLAGS) $(USER_CFLAGS) $(INC) -c -o $@ $<
+
+
+# Non-File Targets
 .PHONY: all remake clean cleaner docs

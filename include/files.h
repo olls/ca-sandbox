@@ -20,7 +20,7 @@ struct File
 
   /// @brief Pointer to writeable file-data, this pointer is only set if `write` is set to true when
   ///          opening the file.
-  u8 *write_ptr;
+  char *write_ptr;
 
   /// Length of the open file in bytes.
   s32 size;

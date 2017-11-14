@@ -83,7 +83,7 @@ open_file(const char *filename, File *result, b32 write, s32 trunc_to)
 
         if (write)
         {
-          result->write_ptr = (u8 *)file_ptr;
+          result->write_ptr = (char *)file_ptr;
         }
         else
         {
