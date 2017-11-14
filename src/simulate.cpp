@@ -7,6 +7,7 @@
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
 
+#define DEBUG_STATE 9999
 
 /// @file
 /// @brief Contains functions for running the CA simulation on the CellBlock%s.
@@ -169,7 +170,7 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
     // Leave subject_cell in initial state
 
     // NOTE: For debugging
-    subject_cell->state = 2;
+    subject_cell->state = DEBUG_STATE;
   }
   else
   {
@@ -200,65 +201,65 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
     if (cell_north_block != 0)
     {
       Cell *cell_north = get_cell_from_block(universe, cell_north_block, cell_north_coord);
-      if (cell_north->previous_state == 1)
+      if (cell_north->previous_state != DEBUG_STATE)
       {
-        cell_north_state = 1;
+        cell_north_state = cell_north->previous_state;
       }
     }
     if (cell_east_block != 0)
     {
       Cell *cell_east = get_cell_from_block(universe, cell_east_block, cell_east_coord);
-      if (cell_east->previous_state == 1)
+      if (cell_east->previous_state != DEBUG_STATE)
       {
-        cell_east_state = 1;
+        cell_east_state = cell_east->previous_state;
       }
     }
     if (cell_south_block != 0)
     {
       Cell *cell_south = get_cell_from_block(universe, cell_south_block, cell_south_coord);
-      if (cell_south->previous_state == 1)
+      if (cell_south->previous_state != DEBUG_STATE)
       {
-        cell_south_state = 1;
+        cell_south_state = cell_south->previous_state;
       }
     }
     if (cell_west_block != 0)
     {
       Cell *cell_west = get_cell_from_block(universe, cell_west_block, cell_west_coord);
-      if (cell_west->previous_state == 1)
+      if (cell_west->previous_state != DEBUG_STATE)
       {
-        cell_west_state = 1;
+        cell_west_state = cell_west->previous_state;
       }
     }
     if (cell_north_east_block != 0)
     {
       Cell *cell_north_east = get_cell_from_block(universe, cell_north_east_block, cell_north_east_coord);
-      if (cell_north_east->previous_state == 1)
+      if (cell_north_east->previous_state != DEBUG_STATE)
       {
-        cell_north_east_state = 1;
+        cell_north_east_state = cell_north_east->previous_state;
       }
     }
     if (cell_south_east_block != 0)
     {
       Cell *cell_south_east = get_cell_from_block(universe, cell_south_east_block, cell_south_east_coord);
-      if (cell_south_east->previous_state == 1)
+      if (cell_south_east->previous_state != DEBUG_STATE)
       {
-        cell_south_east_state = 1;
+        cell_south_east_state = cell_south_east->previous_state;
       }
     }
     if (cell_south_west_block != 0)
     {
       Cell *cell_south_west = get_cell_from_block(universe, cell_south_west_block, cell_south_west_coord);
-      if (cell_south_west->previous_state == 1)
+      if (cell_south_west->previous_state != DEBUG_STATE)
       {
-        cell_south_west_state = 1;
+        cell_south_west_state = cell_south_west->previous_state;
       }
     }
     if (cell_north_west_block != 0)
     {
       Cell *cell_north_west = get_cell_from_block(universe, cell_north_west_block, cell_north_west_coord);
-      if (cell_north_west->previous_state == 1)
+      if (cell_north_west->previous_state != DEBUG_STATE)
       {
-        cell_north_west_state = 1;
+        cell_north_west_state = cell_north_west->previous_state;
       }
     }
 
