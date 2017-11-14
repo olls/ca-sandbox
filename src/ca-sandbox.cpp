@@ -155,22 +155,21 @@ main(int argc, const char *argv[])
         }
 
         init_cell_hashmap(&universe);
-        load_universe_from_file("test-file.cells", &universe);
 
-        simulate_options.border_type = BorderType::FIXED;
-        simulate_options.neighbourhood_region_size = 1;
+        simulate_options = default_simulation_options();
+
+        if (argc >= 2)
+        {
+          const char *filename = argv[1];
+          print("Loading file: %s\n", filename);
+          success = load_universe_from_file(filename, &universe, &simulate_options);
+          if (!success)
+          {
+            break;
+          }
+        }
+
         assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
-
-        simulate_options.border_min_corner_block = {-2, -2};
-        simulate_options.border_min_corner_cell = {3, 3};
-
-        simulate_options.border_max_corner_block = {2, 2};
-        simulate_options.border_max_corner_cell = {5, 5};
-
-        simulate_options.n_null_states = 2;
-        simulate_options.null_states = allocate(CellState, 1);
-        simulate_options.null_states[0] = 0;
-        simulate_options.null_states[1] = 2;
 
         cell_initialisation_options.type = CellInitialisationType::RANDOM;
 

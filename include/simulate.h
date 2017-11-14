@@ -55,6 +55,10 @@ struct SimulateOptions
 };
 
 
+SimulateOptions
+default_simulation_options();
+
+
 void
 simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame);
 

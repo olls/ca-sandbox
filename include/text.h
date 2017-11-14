@@ -2,6 +2,7 @@
 #define TEXT_H_DEF
 
 #include "types.h"
+#include "vectors.h"
 
 
 struct String
@@ -38,6 +39,14 @@ is_letter(char character);
 
 
 b32
+is_lower_case_letter(char character);
+
+
+b32
+is_upper_case_letter(char character);
+
+
+b32
 is_newline(char character);
 
 
@@ -47,6 +56,14 @@ is_whitespace(char character);
 
 b32
 is_whitespace_or_nl(char character);
+
+
+String
+get_line(String *string);
+
+
+b32
+string_equals(String string, const char *search);
 
 
 u32
@@ -59,6 +76,10 @@ get_s32(String *string);
 
 r32
 get_r32(String *string);
+
+
+b32
+get_vector(String string, s32vec2 *result);
 
 
 #endif

@@ -3,9 +3,11 @@
 #include "util.h"
 #include "print.h"
 #include "text.h"
+#include "parsing.h"
 #include "files.h"
 #include "allocate.h"
 #include "cell-storage.h"
+#include "simulate.h"
 
 
 b32
@@ -18,49 +20,7 @@ is_label_char(char character)
 
 
 b32
-label_equals(String label, const char *search)
-{
-  // Zero length label always returns false (Do we want two zero length strings to match?)
-  b32 result = false;
-
-  for (const char *c = label.start;
-       c < label.end;
-       ++c, ++search)
-  {
-    if (search == 0 || *c != *search)
-    {
-      result = false;
-      break;
-    }
-    else
-    {
-      result = true;
-    }
-  }
-
-  return result;
-}
-
-
-/// Returns String marking the next line in string, advances string.current_position to end of line.
-String
-get_line(String *string)
-{
-  String result;
-
-  // Find the end of the line
-  result.start = string->current_position;
-  result.current_position = string->current_position;
-
-  consume_until(string, is_newline);
-  result.end = string->current_position;
-
-  return result;
-}
-
-
-b32
-find_label(String file_string, const char *search_label, s32 *result)
+find_label_value(String file_string, const char *search_label, String *value_result)
 {
   b32 success = true;
 
@@ -80,7 +40,7 @@ find_label(String file_string, const char *search_label, s32 *result)
     consume_while(&line, is_label_char);
     label.end = line.current_position;
 
-    if (label_equals(label, search_label))
+    if (string_equals(label, search_label))
     {
       found_label = true;
     }
@@ -107,22 +67,37 @@ find_label(String file_string, const char *search_label, s32 *result)
     }
 
     ++line.current_position;
-    consume_until(&line, is_num_or_sign);
+    consume_while(&line, is_whitespace);
 
-    if (line.current_position == line.end)
-    {
-      success = false;
-      return success;
-    }
+    value_result->start = line.current_position;
+    value_result->current_position = line.current_position;
+    value_result->end = line.end;
+  }
 
-    const char *num_start = line.current_position;
+  return success;
+}
 
-    *result = get_s32(&line);
 
-    if (num_start == line.current_position)
-    {
-      success = false;
-    }
+b32
+read_border_type_value(String border_type_string, BorderType *result)
+{
+  b32 success = true;
+
+  if (string_equals(border_type_string, "FIXED"))
+  {
+    *result = BorderType::FIXED;
+  }
+  else if (string_equals(border_type_string, "TORUS"))
+  {
+    *result = BorderType::TORUS;
+  }
+  else if (string_equals(border_type_string, "INFINITE"))
+  {
+    *result = BorderType::INFINITE;
+  }
+  else
+  {
+    success = false;
   }
 
   return success;
@@ -146,7 +121,7 @@ read_cell_block(String *file_string, Universe *universe)
     consume_while(&line, is_label_char);
     label.end = line.current_position;
 
-    if (label_equals(label, "CellBlock"))
+    if (string_equals(label, "CellBlock"))
     {
       found_cell_block = true;
     }
@@ -207,8 +182,13 @@ read_cell_block(String *file_string, Universe *universe)
 }
 
 
+/// Loads a Universe and SimulateOptions with Cell values from a .cell file.
+
+/// @param[in] universe  Universe to fill in
+/// @param[in] simulate_options  SimulateOptions to fill in (Unspecified values are left alone, so
+///                                fill in with defaults before calling)
 b32
-load_universe_from_file(const char filename[], Universe *universe)
+load_universe_from_file(const char filename[], Universe *universe, SimulateOptions *simulate_options)
 {
   b32 success = true;
 
@@ -228,13 +208,65 @@ load_universe_from_file(const char filename[], Universe *universe)
     .end = file.read_ptr + file.size
   };
 
-  s32 cell_block_dim;
-  s32 n_cell_blocks;
+  String cell_block_dim_string;
+  String n_cell_blocks_string;
 
-  success &= find_label(file_string, "cell_block_dim", &cell_block_dim);
-  success &= find_label(file_string, "n_cell_blocks", &n_cell_blocks);
+  success &= find_label_value(file_string, "cell_block_dim", &cell_block_dim_string);
+  success &= find_label_value(file_string, "n_cell_blocks", &n_cell_blocks_string);
 
-  if (success)
+  s32 cell_block_dim = get_s32(&cell_block_dim_string);
+  s32 n_cell_blocks = get_s32(&n_cell_blocks_string);
+
+  String border_type_string = {};
+  String border_min_block_string = {};
+  String border_min_cell_string = {};
+  String border_max_block_string = {};
+  String border_max_cell_string = {};
+
+  b32 border_defined = true;
+  border_defined &= find_label_value(file_string, "border_type", &border_type_string);
+  border_defined &= find_label_value(file_string, "border_min_block", &border_min_block_string);
+  border_defined &= find_label_value(file_string, "border_min_cell", &border_min_cell_string);
+  border_defined &= find_label_value(file_string, "border_max_block", &border_max_block_string);
+  border_defined &= find_label_value(file_string, "border_max_cell", &border_max_cell_string);
+
+  if (border_defined)
+  {
+    success &= read_border_type_value(border_type_string, &simulate_options->border_type);
+    success &= get_vector(border_min_block_string, &simulate_options->border_min_corner_block);
+    success &= get_vector(border_min_cell_string, &simulate_options->border_min_corner_cell);
+    success &= get_vector(border_max_block_string, &simulate_options->border_max_corner_block);
+    success &= get_vector(border_max_cell_string, &simulate_options->border_max_corner_cell);
+  }
+
+  String null_states_string = {};
+  b32 null_states_defined = find_label_value(file_string, "null_states", &null_states_string);
+  if (null_states_defined)
+  {
+    simulate_options->n_null_states = read_u32_list(null_states_string, (u32 **)&simulate_options->null_states);
+    if (simulate_options->n_null_states == 0)
+    {
+      success &= false;
+    }
+    else
+    {
+      print("null_states: ", simulate_options->n_null_states);
+      for (u32 i = 0;
+           i < simulate_options->n_null_states;
+           ++i)
+      {
+        print(" %d", simulate_options->null_states[i]);
+      }
+      print("\n");
+
+    }
+  }
+
+  if (!success)
+  {
+    print("Missing/erroneous values in file\n");
+  }
+  else
   {
     print("cell_block_dim: %d\n", cell_block_dim);
     print("n_cell_blocks: %d\n", n_cell_blocks);

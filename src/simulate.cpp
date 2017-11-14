@@ -3,12 +3,35 @@
 #include "print.h"
 #include "types.h"
 #include "assert.h"
+#include "allocate.h"
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
 
 
 /// @file
 /// @brief Contains functions for running the CA simulation on the CellBlock%s.
+
+
+SimulateOptions
+default_simulation_options()
+{
+  SimulateOptions result;
+
+  result.border_type = BorderType::TORUS;
+  result.neighbourhood_region_size = 1;
+
+  result.border_min_corner_block = {0, 0};
+  result.border_min_corner_cell = {0, 0};
+
+  result.border_max_corner_block = {10, 10};
+  result.border_max_corner_cell = {0, 0};
+
+  result.n_null_states = 1;
+  result.null_states = allocate(CellState, 1);
+  result.null_states[0] = 0;
+
+  return result;
+}
 
 
 void

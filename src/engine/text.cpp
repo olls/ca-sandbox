@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "maths.h"
+#include "vectors.h"
 
 
 char *
@@ -54,6 +55,22 @@ is_letter(char character)
 
 
 b32
+is_lower_case_letter(char character)
+{
+  b32 result = ((character >= 'a') && (character <= 'z'));
+  return result;
+}
+
+
+b32
+is_upper_case_letter(char character)
+{
+  b32 result = ((character >= 'A') && (character <= 'Z'));
+  return result;
+}
+
+
+b32
 is_newline(char character)
 {
   b32 result = (character == '\n') || (character == '\r');
@@ -73,6 +90,48 @@ b32
 is_whitespace_or_nl(char character)
 {
   b32 result = is_whitespace(character) || is_newline(character);
+  return result;
+}
+
+
+/// Returns String marking the next line in string, advances string.current_position to end of line.
+String
+get_line(String *string)
+{
+  String result;
+
+  // Find the end of the line
+  result.start = string->current_position;
+  result.current_position = string->current_position;
+
+  consume_until(string, is_newline);
+  result.end = string->current_position;
+
+  return result;
+}
+
+
+b32
+string_equals(String string, const char *search)
+{
+  // Zero length string always returns false (Do we want two zero length strings to match?)
+  b32 result = false;
+
+  for (const char *c = string.start;
+       c < string.end;
+       ++c, ++search)
+  {
+    if (search == 0 || *c != *search)
+    {
+      result = false;
+      break;
+    }
+    else
+    {
+      result = true;
+    }
+  }
+
   return result;
 }
 
@@ -167,4 +226,52 @@ get_r32(String *string)
   }
 
   return result;
+}
+
+
+b32
+get_vector(String string, s32vec2 *result)
+{
+  b32 success = true;
+
+  consume_until(&string, is_num_or_sign);
+
+  if (string.current_position == string.end)
+  {
+    success = false;
+  }
+  else
+  {
+    const char *num_start = string.current_position;
+
+    result->x = get_s32(&string);
+
+    if (num_start == string.current_position)
+    {
+      success = false;
+    }
+  }
+
+  if (success)
+  {
+    consume_until(&string, is_num_or_sign);
+
+    if (string.current_position == string.end)
+    {
+      success = false;
+    }
+    else
+    {
+      const char *num_start = string.current_position;
+
+      result->y = get_s32(&string);
+
+      if (num_start == string.current_position)
+      {
+        success = false;
+      }
+    }
+  }
+
+  return success;
 }

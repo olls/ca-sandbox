@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "cell-storage.h"
+#include "simulate.h"
 
 
 /// Universe files are text files, containing a directory of CellBlock.
@@ -18,7 +19,7 @@
 
 
 b32
-load_universe_from_file(const char *filename, Universe *universe);
+load_universe_from_file(const char *filename, Universe *universe, SimulateOptions *simulate_options);
 
 
 #endif
