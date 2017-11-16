@@ -1,5 +1,5 @@
 #!/bin/bash
 
 make clean;
-make USER_CFLAGS='-DGDB_DEBUG -g -O0' && gdb --args bin/ca-sandbox;
+make USER_CFLAGS='-DGDB_DEBUG -g -O0' && gdb --args bin/ca-sandbox cells/boomerang.cells;
 make clean;

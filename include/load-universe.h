@@ -2,6 +2,7 @@
 #define LOAD_UNIVERSE_H_DEF
 
 #include "types.h"
+#include "text.h"
 #include "cell-storage.h"
 #include "simulate.h"
 
@@ -19,7 +20,15 @@
 
 
 b32
-load_universe_from_file(const char *filename, Universe *universe, SimulateOptions *simulate_options);
+load_universe_from_file(String file_string, Universe *universe);
+
+
+b32
+load_simulate_options(String file_string, SimulateOptions *simulate_options);
+
+
+b32
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options);
 
 
 #endif

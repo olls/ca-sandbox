@@ -78,32 +78,6 @@ find_label_value(String file_string, const char *search_label, String *value_res
 }
 
 
-b32
-read_border_type_value(String border_type_string, BorderType *result)
-{
-  b32 success = true;
-
-  if (string_equals(border_type_string, "FIXED"))
-  {
-    *result = BorderType::FIXED;
-  }
-  else if (string_equals(border_type_string, "TORUS"))
-  {
-    *result = BorderType::TORUS;
-  }
-  else if (string_equals(border_type_string, "INFINITE"))
-  {
-    *result = BorderType::INFINITE;
-  }
-  else
-  {
-    success = false;
-  }
-
-  return success;
-}
-
-
 void
 read_cell_block(String *file_string, Universe *universe)
 {
@@ -182,31 +156,14 @@ read_cell_block(String *file_string, Universe *universe)
 }
 
 
-/// Loads a Universe and SimulateOptions with Cell values from a .cell file.
+/// Loads a Universe object from a .cell file.
 
-/// @param[in] universe  Universe to fill in
-/// @param[in] simulate_options  SimulateOptions to fill in (Unspecified values are left alone, so
-///                                fill in with defaults before calling)
+/// @param[in] file_string  String containing the contents of the .cell file
+/// @param[out] universe  Universe to fill in
 b32
-load_universe_from_file(const char filename[], Universe *universe, SimulateOptions *simulate_options)
+load_universe_from_file(String file_string, Universe *universe)
 {
   b32 success = true;
-
-  print("Loading universe from file: %s\n", filename);
-
-  File file;
-  if (!open_file(filename, &file))
-  {
-    print("Failed to open file: %s\n", filename);
-    success = false;
-    return success;
-  }
-
-  String file_string = {
-    .start = file.read_ptr,
-    .current_position = file.read_ptr,
-    .end = file.read_ptr + file.size
-  };
 
   String cell_block_dim_string;
   String n_cell_blocks_string;
@@ -216,6 +173,65 @@ load_universe_from_file(const char filename[], Universe *universe, SimulateOptio
 
   s32 cell_block_dim = get_s32(&cell_block_dim_string);
   s32 n_cell_blocks = get_s32(&n_cell_blocks_string);
+
+  if (!success)
+  {
+    print("Missing/erroneous values in file\n");
+  }
+  else
+  {
+    print("cell_block_dim: %d\n", cell_block_dim);
+    print("n_cell_blocks: %d\n", n_cell_blocks);
+
+    universe->cell_block_dim = cell_block_dim;
+
+    for (u32 cell_block_index = 0;
+         cell_block_index < n_cell_blocks;
+         ++cell_block_index)
+    {
+      read_cell_block(&file_string, universe);
+    }
+  }
+
+  return success;
+}
+
+
+b32
+read_border_type_value(String border_type_string, BorderType *result)
+{
+  b32 success = true;
+
+  if (string_equals(border_type_string, "FIXED"))
+  {
+    *result = BorderType::FIXED;
+  }
+  else if (string_equals(border_type_string, "TORUS"))
+  {
+    *result = BorderType::TORUS;
+  }
+  else if (string_equals(border_type_string, "INFINITE"))
+  {
+    *result = BorderType::INFINITE;
+  }
+  else
+  {
+    success = false;
+  }
+
+  return success;
+}
+
+
+/// Loads a SimulateOptions object from a .cell file.
+
+/// @param[in] file_string  String containing the contents of the .cell file
+/// @param[out] simulate_options  SimulateOptions to fill in (Unspecified values are left alone, so
+///                                 fill in with defaults before calling)
+b32
+load_simulate_options(String file_string, SimulateOptions *simulate_options)
+{
+  b32 success = true;
 
   String border_type_string = {};
   String border_min_block_string = {};
@@ -262,22 +278,65 @@ load_universe_from_file(const char filename[], Universe *universe, SimulateOptio
     }
   }
 
-  if (!success)
+  return success;
+}
+
+
+b32
+read_cell_initialisation_type_value(String intialisation_type_string, CellInitialisationType *result)
+{
+  b32 success = true;
+
+  if (string_equals(intialisation_type_string, "RANDOM"))
   {
-    print("Missing/erroneous values in file\n");
+    *result = CellInitialisationType::RANDOM;
   }
   else
   {
-    print("cell_block_dim: %d\n", cell_block_dim);
-    print("n_cell_blocks: %d\n", n_cell_blocks);
+    success = false;
+  }
 
-    universe->cell_block_dim = cell_block_dim;
+  return success;
+}
 
-    for (u32 cell_block_index = 0;
-         cell_block_index < n_cell_blocks;
-         ++cell_block_index)
+
+/// Loads a CellInitialisationOptions object from a .cell file.
+
+/// @param[in] file_string  String containing the contents of the .cell file
+/// @param[out] cell_intialisation_options  CellInitialisationOptions object to fill in
+b32
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options)
+{
+  b32 success = true;
+
+  String initial_states_string = {};
+  b32 initial_states_defined = find_label_value(file_string, "initial_states", &initial_states_string);
+
+  String initialisation_type_string = {};
+  b32 initialisation_type_defined = find_label_value(file_string, "initialisation_type", &initialisation_type_string);
+
+  if (initial_states_defined && initialisation_type_defined)
+  {
+    success &= read_cell_initialisation_type_value(initialisation_type_string, &cell_initialisation_options->type);
+
+    if (success)
     {
-      read_cell_block(&file_string, universe);
+      cell_initialisation_options->set_of_initial_states_size = read_u32_list(initial_states_string, (u32 **)&cell_initialisation_options->set_of_initial_states);
+      if (cell_initialisation_options->set_of_initial_states_size == 0)
+      {
+        success &= false;
+      }
+      else
+      {
+        print("initial_states: ", cell_initialisation_options->set_of_initial_states_size);
+        for (u32 i = 0;
+             i < cell_initialisation_options->set_of_initial_states_size;
+             ++i)
+        {
+          print(" %d", cell_initialisation_options->set_of_initial_states[i]);
+        }
+        print("\n");
+      }
     }
   }
 

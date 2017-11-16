@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "vectors.h"
+#include "files.h"
 
 
 struct String
@@ -24,6 +25,10 @@ struct WriteString
 #define consume_while(string, func) while ((string)->current_position < (string)->end && func(*((string)->current_position))) ++((string)->current_position)
 #define consume_until(string, func) while ((string)->current_position < (string)->end && !func(*((string)->current_position))) ++((string)->current_position)
 #define consume_until_char(string, c) while ((string)->current_position < (string)->end && *((string)->current_position) != (c)) ++((string)->current_position)
+
+
+String
+get_file_string(const char *filename, File *file);
 
 
 char *

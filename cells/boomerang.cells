@@ -11,6 +11,9 @@ border_max_cell: 0, 0
 
 null_states: 0
 
+initial_states: 0
+initialisation_type: RANDOM
+
 
 CellBlock: 2, 2
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0

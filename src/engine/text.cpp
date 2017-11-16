@@ -5,6 +5,29 @@
 #include "types.h"
 #include "maths.h"
 #include "vectors.h"
+#include "files.h"
+
+
+String
+get_file_string(const char *filename, File *file)
+{
+  String result;
+
+  if (!open_file(filename, file))
+  {
+    result = {};
+  }
+  else
+  {
+    result = {
+      .start = file->read_ptr,
+      .current_position = file->read_ptr,
+      .end = file->read_ptr + file->size
+    };
+  }
+
+  return result;
+}
 
 
 char *

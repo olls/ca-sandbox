@@ -41,4 +41,8 @@ CellState
 initialise_cell_state(CellInitialisationOptions *cell_initialisation_options, s32vec2 position);
 
 
+CellInitialisationOptions
+default_cell_initialisation_options();
+
+
 #endif

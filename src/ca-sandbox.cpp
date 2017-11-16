@@ -4,6 +4,8 @@
 #include "vectors.h"
 #include "print.h"
 #include "allocate.h"
+#include "files.h"
+#include "text.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"
@@ -157,12 +159,22 @@ main(int argc, const char *argv[])
         init_cell_hashmap(&universe);
 
         simulate_options = default_simulation_options();
+        cell_initialisation_options = default_cell_initialisation_options();
 
         if (argc >= 2)
         {
           const char *filename = argv[1];
-          print("Loading file: %s\n", filename);
-          success = load_universe_from_file(filename, &universe, &simulate_options);
+          print("Loading universe file: %s\n", filename);
+
+          File universe_file;
+          String universe_file_string = get_file_string(filename, &universe_file);
+
+          success &= load_universe_from_file(universe_file_string, &universe);
+          success &= load_simulate_options(universe_file_string, &simulate_options);
+          success &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options);
+
+          close_file(&universe_file);
+
           if (!success)
           {
             break;
@@ -170,22 +182,6 @@ main(int argc, const char *argv[])
         }
 
         assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
-
-        cell_initialisation_options.type = CellInitialisationType::RANDOM;
-
-#ifdef CA_TYPE_GROWTH
-        cell_initialisation_options.set_of_initial_states_size = 1;
-#else
-        cell_initialisation_options.set_of_initial_states_size = 2;
-#endif
-
-        cell_initialisation_options.set_of_initial_states = allocate(CellState, cell_initialisation_options.set_of_initial_states_size);
-#ifdef CA_TYPE_GROWTH
-        cell_initialisation_options.set_of_initial_states[0] = 0;
-        cell_initialisation_options.set_of_initial_states[1] = 1;
-#else
-        cell_initialisation_options.set_of_initial_states[0] = 0;
-#endif
 
         opengl_print_errors();
       }
