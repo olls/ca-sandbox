@@ -153,7 +153,7 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
   }
 
   // If any of the cell positions are outside of the border, don't simulate the Cell:
-  // - If using FIXED border, then these cells cannot be simulated an act as the "border-buffer"
+  // - If using FIXED border, then these cells cannot be simulated and act as the "border-buffer"
   // - If using TORUS border, then this condition should never be true, and there is a bug in
   //     wrap_cell_position_around_torus.
   if ((simulate_options->border_type == BorderType::FIXED ||
@@ -366,7 +366,8 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
       Cell *cell = get_cell_from_block(universe, subject_cell_block, cell_position);
       cell->previous_state = cell->state;
 
-      if (!is_null_state(simulate_options, cell->state))
+      if (!is_null_state(simulate_options, cell->state) &&
+          within_border(simulate_options, subject_cell_block->block_position, cell_position))
       {
         // If within the neighbourhood region of any neighbouring CellBlocks:
         // Create the CellBlock which can see this Cell.
