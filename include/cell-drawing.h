@@ -3,6 +3,7 @@
 
 #include "opengl-buffer.h"
 #include "cell-storage.h"
+#include "simulate.h"
 
 
 /// @file
@@ -58,7 +59,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 
 
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing);
+upload_cell_instances(Universe *universe, Border border, CellInstancing *cell_instancing);
 
 
 void

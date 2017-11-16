@@ -248,11 +248,11 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
 
   if (border_defined)
   {
-    success &= read_border_type_value(border_type_string, &simulate_options->border_type);
-    success &= get_vector(border_min_block_string, &simulate_options->border_min_corner_block);
-    success &= get_vector(border_min_cell_string, &simulate_options->border_min_corner_cell);
-    success &= get_vector(border_max_block_string, &simulate_options->border_max_corner_block);
-    success &= get_vector(border_max_cell_string, &simulate_options->border_max_corner_cell);
+    success &= read_border_type_value(border_type_string, &simulate_options->border.type);
+    success &= get_vector(border_min_block_string, &simulate_options->border.min_corner_block);
+    success &= get_vector(border_min_cell_string, &simulate_options->border.min_corner_cell);
+    success &= get_vector(border_max_block_string, &simulate_options->border.max_corner_block);
+    success &= get_vector(border_max_cell_string, &simulate_options->border.max_corner_cell);
   }
 
   String null_states_string = {};

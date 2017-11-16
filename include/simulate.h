@@ -2,6 +2,7 @@
 #define SIMULATE_H_DEF
 
 #include "cell-storage.h"
+#include "cell-block-coordinate-system.h"
 
 
 // HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
@@ -34,19 +35,23 @@ enum struct BorderType
 /// - FIXED: A fixed border from border_min_corner_{block,cell} to border_max_corner_{block,cell}
 /// - INFINITE: Automata expands infinitely
 /// - TORUS: Wraps around from top to bottom and side to side, at the borders.
+struct Border
+{
+  BorderType type;
+  s32vec2 min_corner_block;
+  s32vec2 min_corner_cell;
+  s32vec2 max_corner_block;
+  s32vec2 max_corner_cell;
+};
+
+
 struct SimulateOptions
 {
   /// The manhattan distance from a cell to its neighbourhood region edge, e.g: a value of 1 would
   ///   mean the Cell has one one cell on all sides in its neighbourhood region
   u32 neighbourhood_region_size;
 
-  BorderType border_type;
-
-  s32vec2 border_min_corner_block;
-  s32vec2 border_min_corner_cell;
-
-  s32vec2 border_max_corner_block;
-  s32vec2 border_max_corner_cell;
+  Border border;
 
   /// Array of state values which are NULL states
   u32 *null_states;
@@ -61,6 +66,10 @@ default_simulation_options();
 
 void
 simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame);
+
+
+b32
+within_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position);
 
 
 #endif
