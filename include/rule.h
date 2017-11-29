@@ -12,10 +12,13 @@ enum struct NeighbourhoodRegionShape
 };
 
 
-const u32 NEIGHBOURHOOD_REGION_SIZES[] = {
-  8,  // VON_NEUMANN
-  4,  // MOORE
-  2   // ONE_DIM
+struct RuleConfiguration
+{
+  NeighbourhoodRegionShape neighbourhood_region_shape;
+  u32 neighbourhood_region_size;
+  u32 n_states;
+
+  CellState (*transition_function)(u32 n_inputs, CellState inputs[]);
 };
 
 
@@ -53,13 +56,10 @@ struct RuleNode
 ///
 struct Rule
 {
-  NeighbourhoodRegionShape neighbourhood_region_shape;
-  u32 n_states;
+  RuleConfiguration config;
 
   /// Number of inputs to the transition function, i.e: number of neighbours + centre cell
   u32 n_inputs;
-
-  CellState (*transition_function)(u32 n_inputs, CellState inputs[]);
 
   /// Size in bytes of one RuleNode for this n_states value
   u32 rule_node_size;
@@ -72,8 +72,16 @@ struct Rule
 };
 
 
+u32
+get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size);
+
+
 void
-dummy_make_hardcoded_rule_tree(Rule *result);
+build_rule_tree(RuleConfiguration rule_configuration, Rule *result);
+
+
+void
+dummy_make_rule30_rule_tree(Rule *result);
 
 
 #endif

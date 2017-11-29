@@ -6,14 +6,18 @@
 #include "allocate.h"
 #include "files.h"
 #include "text.h"
+#include "extendable-array.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
+
 #include "cell-storage.h"
 #include "load-universe.h"
 #include "cell-drawing.h"
+#include "rule.h"
+#include "load-rule.h"
 #include "simulate.h"
 
 #include "imgui.h"
@@ -161,27 +165,48 @@ main(int argc, const char *argv[])
         simulate_options = default_simulation_options();
         cell_initialisation_options = default_cell_initialisation_options();
 
-        if (argc >= 2)
+        if (argc >= 3)
         {
-          const char *filename = argv[1];
-          print("Loading universe file: %s\n", filename);
+          const char *universe_filename = argv[1];
+          print("\nLoading universe file: %s\n", universe_filename);
 
           File universe_file;
-          String universe_file_string = get_file_string(filename, &universe_file);
+          String universe_file_string = get_file_string(universe_filename, &universe_file);
 
-          success &= load_universe_from_file(universe_file_string, &universe);
-          success &= load_simulate_options(universe_file_string, &simulate_options);
-          success &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options);
+          running &= load_universe_from_file(universe_file_string, &universe);
+          running &= load_simulate_options(universe_file_string, &simulate_options);
+          running &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options);
 
           close_file(&universe_file);
 
-          if (!success)
-          {
-            break;
-          }
+          const char *rule_filename = argv[2];
+
+          print("\nLoading rule file: %s\n", rule_filename);
+          ExtendableArray rule_patterns = {};
+          running &= load_rule_file(rule_filename, &rule_patterns);
+
+          Rule rule_tree;
+          dummy_make_rule30_rule_tree(&rule_tree);
+
+          print("\n");
+        }
+        else
+        {
+          print("Not enough command line arguments supplied.\n");
+          print("Usage: ./ca-sandbox [universe-file-path] [rule-file-path]\n\n");
+          running &= false;
         }
 
-        assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
+        if (!running)
+        {
+          break;
+        }
+        else
+        {
+          assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
+
+          get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
+        }
 
         opengl_print_errors();
       }

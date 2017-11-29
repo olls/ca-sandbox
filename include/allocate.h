@@ -4,11 +4,19 @@
 #include "types.h"
 
 
-#define allocate(type, n) ((type *)_allocate(sizeof(type), (n)))
+#define allocate(type, n) ((type *)allocate_size(sizeof(type), (n)))
 
 
 void *
-_allocate(u32 size, u32 n);
+allocate_size(u32 size, u32 n);
+
+
+void *
+re_allocate(void *pointer, u32 new_size);
+
+
+void
+un_allocate(void *pointer);
 
 
 #endif

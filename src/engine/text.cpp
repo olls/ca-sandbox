@@ -134,10 +134,12 @@ get_line(String *string)
 }
 
 
+/// Returns true if string is a prefix of search
+///
+/// Zero length string always returns false (Do we want two zero length strings to match?)
 b32
 string_equals(String string, const char *search)
 {
-  // Zero length string always returns false (Do we want two zero length strings to match?)
   b32 result = false;
 
   for (const char *c = string.start;

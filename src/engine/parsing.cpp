@@ -53,3 +53,98 @@ read_u32_list(String string, u32 **list_result)
 
   return n_items;
 }
+
+
+b32
+is_label_char(char character)
+{
+  b32 result = (is_letter(character) ||
+                character == '_');
+  return result;
+}
+
+
+/// Searches the string for a label identifier, and returns its value
+///
+/// A label is formatted as `label_name: label value\n`
+///
+/// This function puts the bounds of the label value into the value_result string. (Trimming white
+///   space from the start of the value)
+b32
+find_label_value(String file_string, const char *search_label, String *value_result)
+{
+  b32 success = true;
+
+  String line;
+  String label;
+
+  b32 found_label = false;
+  while (!found_label)
+  {
+    line = get_line(&file_string);
+
+    // Read label
+
+    consume_until(&line, is_letter);
+    label.start = line.current_position;
+
+    consume_while(&line, is_label_char);
+    label.end = line.current_position;
+
+    if (string_equals(label, search_label))
+    {
+      found_label = true;
+    }
+
+    if (file_string.current_position == file_string.end)
+    {
+      success = false;
+      break;
+    }
+    else
+    {
+      // Move past \n character.
+      consume_while(&file_string, is_newline);
+    }
+  }
+
+  if (found_label)
+  {
+    consume_until_char(&line, ':');
+    if (line.current_position == line.end)
+    {
+      success = false;
+      return success;
+    }
+
+    ++line.current_position;
+    consume_while(&line, is_whitespace);
+
+    value_result->start = line.current_position;
+    value_result->current_position = line.current_position;
+    value_result->end = line.end;
+  }
+
+  return success;
+}
+
+
+/// Convenience function for finding a label, then getting the u32 value from it's value string.
+b32
+find_label_value_u32(String file_string, const char *search_label, u32 *result)
+{
+  b32 success = true;
+
+  String value_string = {};
+  b32 label_found = find_label_value(file_string, "neighbourhood_region_size", &value_string);
+  if (label_found)
+  {
+    *result = get_u32(&value_string);
+  }
+  else
+  {
+    success = false;
+  }
+
+  return success;
+}

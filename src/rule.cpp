@@ -5,6 +5,61 @@
 #include "allocate.h"
 #include "assert.h"
 #include "print.h"
+#include "maths.h"
+
+
+u32
+get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
+{
+  u32 result = 0;
+
+  switch (shape)
+  {
+    case (NeighbourhoodRegionShape::VON_NEUMANN):
+    {
+      // 1 -> 4
+      //   #
+      // #   #
+      //   #
+      //
+      // 2 -> 8
+      //     #
+      //     #
+      // # #   # #
+      //     #
+      //     #
+      result = size * 4;
+    } break;
+
+    case (NeighbourhoodRegionShape::MOORE):
+    {
+      // 1 -> 8
+      // # # #
+      // #   #
+      // # # #
+      //
+      // 2 -> 24
+      // # # # # #
+      // # # # # #
+      // # #   # #
+      // # # # # #
+      // # # # # #
+      result = pow(((size*2) + 1), 2) - 1;
+    } break;
+
+    case (NeighbourhoodRegionShape::ONE_DIM):
+    {
+      // 1 -> 2
+      // #   #
+      //
+      // 2 -> 4
+      // # #   # #
+      result = size * 2;
+    } break;
+  }
+
+  return result;
+}
 
 
 u32
@@ -26,6 +81,14 @@ new_node(Rule *rule)
 }
 
 
+RuleNode *
+get_rule_node(Rule *rule, u32 index)
+{
+  // Have to do this indexing in bytes, because the RuleNodes are a variable sized struct.
+  return (RuleNode *)((char *)(rule->rule_nodes_table) + (index * rule->rule_node_size));
+}
+
+
 s32
 find_node(Rule *rule, RuleNode *node)
 {
@@ -35,7 +98,7 @@ find_node(Rule *rule, RuleNode *node)
        node_n < rule->next_free_rule_node_position;
        ++node_n)
   {
-    RuleNode *test_node = rule->rule_nodes_table + node_n;
+    RuleNode *test_node = get_rule_node(rule, node_n);
 
     if (node->is_leaf && test_node->is_leaf &&
         node->leaf_value == test_node->leaf_value)
@@ -47,7 +110,7 @@ find_node(Rule *rule, RuleNode *node)
     {
       b32 all_children_match = true;
       for (u32 child_n = 0;
-           child_n < rule->n_states;
+           child_n < rule->config.n_states;
            ++child_n)
       {
         if (node->children[child_n] != test_node->children[child_n])
@@ -82,7 +145,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
   if (depth == rule->n_inputs)
   {
     node->is_leaf = true;
-    node->leaf_value = rule->transition_function(rule->n_inputs, tree_path);
+    node->leaf_value = rule->config.transition_function(rule->n_inputs, tree_path);
 
     print("Leaf(%d)", node->leaf_value);
   }
@@ -94,7 +157,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
 
     // Generate all children by iterating over all states for this level/neighbour
     for (CellState child_n = 0;
-         child_n < rule->n_states;
+         child_n < rule->config.n_states;
          ++child_n)
     {
       tree_path[depth] = child_n;
@@ -114,18 +177,11 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
   else
   {
     node_position = new_node(rule);
-    RuleNode *new_node = rule->rule_nodes_table + node_position;
+    RuleNode *new_node = get_rule_node(rule, node_position);
 
-    if (node->is_leaf)
-    {
-      new_node->is_leaf = node->is_leaf;
-      new_node->leaf_value = node->leaf_value;
-    }
-    else
-    {
-      new_node->is_leaf = false;
-      memcpy(new_node->children, node->children, rule->n_states*sizeof(u32));
-    }
+    memcpy(new_node, node, rule->rule_node_size);
+
+    u32 a = 0;
   }
 
   print("\n%*sEnding node %d", 2*depth, "", node_position);
@@ -137,20 +193,22 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
 
 
 void
-make_rule_tree(Rule *rule_tree)
+build_rule_tree(RuleConfiguration rule_configuration, Rule *result)
 {
   print("\nConstructing Rule Tree\n");
 
-  rule_tree->rule_node_size = sizeof(RuleNode) + rule_tree->n_states;
+  result->config = rule_configuration;
 
-  rule_tree->rule_nodes_table_size = 16;
-  rule_tree->rule_nodes_table = (RuleNode *)allocate_size(rule_tree->rule_node_size, rule_tree->rule_nodes_table_size);
-  rule_tree->next_free_rule_node_position = 0;
+  result->rule_node_size = sizeof(RuleNode) + (result->config.n_states * sizeof(u32));
 
-  rule_tree->n_inputs = NEIGHBOURHOOD_REGION_SIZES[(u32)rule_tree->neighbourhood_region_shape] + 1;
+  result->rule_nodes_table_size = 16;
+  result->rule_nodes_table = (RuleNode *)allocate_size(result->rule_node_size, result->rule_nodes_table_size);
+  result->next_free_rule_node_position = 0;
 
-  CellState *tree_path = allocate(CellState, rule_tree->n_inputs);
-  rule_tree->root_node = add_node_to_rule_tree(rule_tree, 0, tree_path);
+  result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size) + 1;
+
+  CellState *tree_path = allocate(CellState, result->n_inputs);
+  result->root_node = add_node_to_rule_tree(result, 0, tree_path);
 
   print("\n");
 }
@@ -161,7 +219,7 @@ print_node(Rule *rule, u32 node_position, u32 depth)
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
-  RuleNode *rule_node = rule->rule_nodes_table + node_position;
+  RuleNode *rule_node = get_rule_node(rule, node_position);
 
   if (rule_node->is_leaf)
   {
@@ -171,7 +229,7 @@ print_node(Rule *rule, u32 node_position, u32 depth)
   {
     print("Node");
     for (CellState child_n = 0;
-         child_n < rule->n_states;
+         child_n < rule->config.n_states;
          ++child_n)
     {
       print_node(rule, rule_node->children[child_n], depth+1);
@@ -253,15 +311,25 @@ rule30_transition_function(u32 n_inputs, CellState inputs[])
 
 
 void
-dummy_make_hardcoded_rule_tree(Rule *result)
+dummy_make_rule30_rule_tree(Rule *result)
 {
-  result->n_states = 2;
-  result->neighbourhood_region_shape = NeighbourhoodRegionShape::ONE_DIM;
+  RuleConfiguration rule_configuration;
+  rule_configuration.n_states = 2;
+  rule_configuration.neighbourhood_region_shape = NeighbourhoodRegionShape::ONE_DIM;
+  rule_configuration.neighbourhood_region_size = 1;
 
-  result->transition_function = rule30_transition_function;
+  rule_configuration.transition_function = rule30_transition_function;
 
-  make_rule_tree(result);
+  build_rule_tree(rule_configuration, result);
+
   print_rule_tree(result);
+}
+
+
+void
+build_rule_tree()
+{
+
 }
 
 

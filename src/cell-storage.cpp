@@ -33,7 +33,7 @@ allocate_cell_block(Universe *universe, s32vec2 position)
 {
   u32 size = sizeof(CellBlock) + (sizeof(Cell) * universe->cell_block_dim * universe->cell_block_dim);
 
-  CellBlock *result = (CellBlock *)_allocate(size, 1);
+  CellBlock *result = (CellBlock *)allocate_size(size, 1);
   memset(result, 0, size);
 
   result->block_position = position;

@@ -10,74 +10,6 @@
 #include "simulate.h"
 
 
-b32
-is_label_char(char character)
-{
-  b32 result = (is_letter(character) ||
-                character == '_');
-  return result;
-}
-
-
-b32
-find_label_value(String file_string, const char *search_label, String *value_result)
-{
-  b32 success = true;
-
-  String line;
-  String label;
-
-  b32 found_label = false;
-  while (!found_label)
-  {
-    line = get_line(&file_string);
-
-    // Read label
-
-    consume_until(&line, is_letter);
-    label.start = line.current_position;
-
-    consume_while(&line, is_label_char);
-    label.end = line.current_position;
-
-    if (string_equals(label, search_label))
-    {
-      found_label = true;
-    }
-
-    if (file_string.current_position == file_string.end)
-    {
-      success = false;
-      break;
-    }
-    else
-    {
-      // Move past \n character.
-      consume_while(&file_string, is_newline);
-    }
-  }
-
-  if (found_label)
-  {
-    consume_until_char(&line, ':');
-    if (line.current_position == line.end)
-    {
-      success = false;
-      return success;
-    }
-
-    ++line.current_position;
-    consume_while(&line, is_whitespace);
-
-    value_result->start = line.current_position;
-    value_result->current_position = line.current_position;
-    value_result->end = line.end;
-  }
-
-  return success;
-}
-
-
 void
 read_cell_block(String *file_string, Universe *universe)
 {
@@ -111,6 +43,8 @@ read_cell_block(String *file_string, Universe *universe)
     }
   }
 
+  file_string->current_position = line.end;
+
   if (found_cell_block)
   {
     consume_until_char(&line, ':');
@@ -137,8 +71,6 @@ read_cell_block(String *file_string, Universe *universe)
     s32 y = get_s32(&line);
 
     print("CellBlock: %d, %d\n", x, y);
-
-    file_string->current_position = line.end;
 
     CellBlock *cell_block = create_uninitialised_cell_block(universe, (s32vec2){x, y});
 
