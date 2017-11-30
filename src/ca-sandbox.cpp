@@ -182,11 +182,12 @@ main(int argc, const char *argv[])
           const char *rule_filename = argv[2];
 
           print("\nLoading rule file: %s\n", rule_filename);
-          ExtendableArray rule_patterns = {};
-          running &= load_rule_file(rule_filename, &rule_patterns);
+          Rule loaded_rule = {};
 
-          Rule rule_tree;
-          dummy_make_rule30_rule_tree(&rule_tree);
+          running &= load_rule_file(rule_filename, &loaded_rule.config);
+
+          build_rule_tree(&loaded_rule);
+          print_rule_tree(&loaded_rule);
 
           print("\n");
         }

@@ -1,6 +1,8 @@
 #ifndef RULE_H_DEF
 #define RULE_H_DEF
 
+#include "extendable-array.h"
+
 #include "cell.h"
 
 
@@ -18,7 +20,7 @@ struct RuleConfiguration
   u32 neighbourhood_region_size;
   u32 n_states;
 
-  CellState (*transition_function)(u32 n_inputs, CellState inputs[]);
+  ExtendableArray rule_patterns;
 };
 
 
@@ -77,7 +79,11 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size);
 
 
 void
-build_rule_tree(RuleConfiguration rule_configuration, Rule *result);
+build_rule_tree(Rule *result);
+
+
+void
+print_rule_tree(Rule *rule_tree);
 
 
 void

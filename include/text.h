@@ -48,6 +48,10 @@ is_num_or_sign(char character);
 
 
 b32
+is_comparison_op(char character);
+
+
+b32
 is_letter(char character);
 
 

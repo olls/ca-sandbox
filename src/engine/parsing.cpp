@@ -71,7 +71,7 @@ is_label_char(char character)
 /// This function puts the bounds of the label value into the value_result string. (Trimming white
 ///   space from the start of the value)
 b32
-find_label_value(String file_string, const char *search_label, String *value_result)
+find_label_value(String block, const char *search_label, String *value_result)
 {
   b32 success = true;
 
@@ -81,7 +81,7 @@ find_label_value(String file_string, const char *search_label, String *value_res
   b32 found_label = false;
   while (!found_label)
   {
-    line = get_line(&file_string);
+    line = get_line(&block);
 
     // Read label
 
@@ -95,16 +95,18 @@ find_label_value(String file_string, const char *search_label, String *value_res
     {
       found_label = true;
     }
-
-    if (file_string.current_position == file_string.end)
-    {
-      success = false;
-      break;
-    }
     else
     {
-      // Move past \n character.
-      consume_while(&file_string, is_newline);
+      if (block.current_position == block.end)
+      {
+        success = false;
+        break;
+      }
+      else
+      {
+        // Move past \n character.
+        consume_while(&block, is_newline);
+      }
     }
   }
 
@@ -136,7 +138,7 @@ find_label_value_u32(String file_string, const char *search_label, u32 *result)
   b32 success = true;
 
   String value_string = {};
-  b32 label_found = find_label_value(file_string, "neighbourhood_region_size", &value_string);
+  b32 label_found = find_label_value(file_string, search_label, &value_string);
   if (label_found)
   {
     *result = get_u32(&value_string);

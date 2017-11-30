@@ -6,6 +6,9 @@
 #include "assert.h"
 #include "print.h"
 #include "maths.h"
+#include "extendable-array.h"
+
+#include "load-rule.h"
 
 
 u32
@@ -56,6 +59,86 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
       // # #   # #
       result = size * 2;
     } break;
+  }
+
+  return result;
+}
+
+
+/// Matches the input against the RulePatterns, finds the first matching rule pattern and uses that
+///   output.
+CellState
+use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellState inputs[])
+{
+  CellState result;
+  b32 found_match = false;
+
+  for (u32 pattern_n = 0;
+       pattern_n < config->rule_patterns.next_free_element_position;
+       ++pattern_n)
+  {
+    RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&config->rule_patterns, pattern_n);
+
+    b32 matches = true;
+    u32 count_matching_state_n = 0;
+
+    for (u32 input_n = 0;
+         input_n < n_inputs;
+         ++input_n)
+    {
+      CellState in = inputs[input_n];
+      CellStateWildcard pattern_input = rule_pattern->cell_states[input_n];
+
+      if (!pattern_input.wildcard)
+      {
+        if (pattern_input.state != in)
+        {
+          matches = false;
+          break;
+        }
+      }
+      else if (rule_pattern->count_matching_enabled)
+      {
+        if (in == rule_pattern->count_matching_state)
+        {
+          ++count_matching_state_n;
+        }
+      }
+    }
+
+    // Now test the wildcard constraints
+    if (matches && rule_pattern->count_matching_enabled)
+    {
+      if (rule_pattern->count_matching_comparison == ComparisonOp::GREATER_THAN)
+      {
+        matches = count_matching_state_n > rule_pattern->count_matching_n;
+      }
+      else if (rule_pattern->count_matching_comparison == ComparisonOp::LESS_THAN)
+      {
+        matches = count_matching_state_n < rule_pattern->count_matching_n;
+      }
+      else if (rule_pattern->count_matching_comparison == ComparisonOp::EQUALS)
+      {
+        matches = count_matching_state_n == rule_pattern->count_matching_n;
+      }
+    }
+
+    if (matches)
+    {
+      found_match = true;
+      result = rule_pattern->result;
+      break;
+    }
+  }
+
+  if (!found_match)
+  {
+    // Default rule, keep previous state
+
+    // TODO: Is this always correct?
+    u32 center_position = n_inputs / 2;
+
+    result = inputs[center_position];
   }
 
   return result;
@@ -135,8 +218,6 @@ find_node(Rule *rule, RuleNode *node)
 u32
 add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
 {
-  print("\n%*s", 2*depth, "");
-
   u32 node_position;
 
   // Temporary storage for the node
@@ -145,14 +226,10 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
   if (depth == rule->n_inputs)
   {
     node->is_leaf = true;
-    node->leaf_value = rule->config.transition_function(rule->n_inputs, tree_path);
-
-    print("Leaf(%d)", node->leaf_value);
+    node->leaf_value = use_rule_patterns_to_get_result(&rule->config, rule->n_inputs, tree_path);
   }
   else
   {
-    print("Node");
-
     node->is_leaf = false;
 
     // Generate all children by iterating over all states for this level/neighbour
@@ -184,21 +261,16 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
     u32 a = 0;
   }
 
-  print("\n%*sEnding node %d", 2*depth, "", node_position);
-
   un_allocate(node);
 
   return node_position;
 }
 
 
+/// Set Rule.config values before calling!
 void
-build_rule_tree(RuleConfiguration rule_configuration, Rule *result)
+build_rule_tree(Rule *result)
 {
-  print("\nConstructing Rule Tree\n");
-
-  result->config = rule_configuration;
-
   result->rule_node_size = sizeof(RuleNode) + (result->config.n_states * sizeof(u32));
 
   result->rule_nodes_table_size = 16;
@@ -209,13 +281,11 @@ build_rule_tree(RuleConfiguration rule_configuration, Rule *result)
 
   CellState *tree_path = allocate(CellState, result->n_inputs);
   result->root_node = add_node_to_rule_tree(result, 0, tree_path);
-
-  print("\n");
 }
 
 
 void
-print_node(Rule *rule, u32 node_position, u32 depth)
+print_node(Rule *rule, u32 node_position, u32 depth, u32 n_inputs, CellState inputs[])
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
@@ -223,7 +293,15 @@ print_node(Rule *rule, u32 node_position, u32 depth)
 
   if (rule_node->is_leaf)
   {
-    print("Leaf(%d)", rule_node->leaf_value);
+    print("Leaf(%d) <- ", rule_node->leaf_value);
+
+    // Print inputs (path to node)
+    for (u32 input_n = 0;
+         input_n < n_inputs;
+         ++input_n)
+    {
+      print("%d ", inputs[input_n]);
+    }
   }
   else
   {
@@ -232,7 +310,8 @@ print_node(Rule *rule, u32 node_position, u32 depth)
          child_n < rule->config.n_states;
          ++child_n)
     {
-      print_node(rule, rule_node->children[child_n], depth+1);
+      inputs[depth] = child_n;
+      print_node(rule, rule_node->children[child_n], depth+1, n_inputs, inputs);
     }
   }
 }
@@ -243,7 +322,10 @@ print_rule_tree(Rule *rule_tree)
 {
   print("\nPrinting Rule Tree\n");
 
-  print_node(rule_tree, rule_tree->root_node, 0);
+  CellState inputs[rule_tree->n_inputs];
+  print_node(rule_tree, rule_tree->root_node, 0, rule_tree->n_inputs, inputs);
+
+  print("\n");
 }
 
 
@@ -313,23 +395,15 @@ rule30_transition_function(u32 n_inputs, CellState inputs[])
 void
 dummy_make_rule30_rule_tree(Rule *result)
 {
-  RuleConfiguration rule_configuration;
-  rule_configuration.n_states = 2;
-  rule_configuration.neighbourhood_region_shape = NeighbourhoodRegionShape::ONE_DIM;
-  rule_configuration.neighbourhood_region_size = 1;
+  result->config.n_states = 2;
+  result->config.neighbourhood_region_shape = NeighbourhoodRegionShape::ONE_DIM;
+  result->config.neighbourhood_region_size = 1;
 
-  rule_configuration.transition_function = rule30_transition_function;
+  // result->config.transition_function = rule30_transition_function;
 
-  build_rule_tree(rule_configuration, result);
+  build_rule_tree(result);
 
   print_rule_tree(result);
-}
-
-
-void
-build_rule_tree()
-{
-
 }
 
 

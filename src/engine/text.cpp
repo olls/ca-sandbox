@@ -69,6 +69,16 @@ is_num_or_sign(char character)
 
 
 b32
+is_comparison_op(char character)
+{
+  b32 result = (character == '>' ||
+                character == '<' ||
+                character == '=');
+  return result;
+}
+
+
+b32
 is_letter(char character)
 {
   b32 result = (((character >= 'a') && (character <= 'z')) ||
