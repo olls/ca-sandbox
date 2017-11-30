@@ -330,94 +330,37 @@ print_rule_tree(Rule *rule_tree)
 
 
 CellState
-rule30_transition_function(u32 n_inputs, CellState inputs[])
-{
-  CellState result = inputs[1];
-
-  assert(n_inputs == 3);
-
-  // 111 110 101 100 011 010 001 000
-  // 0   0   0   1   1   1   1   0
-
-  if (inputs[0] == 1 &&
-      inputs[1] == 1 &&
-      inputs[2] == 1)
-  {
-    result = 0;
-  }
-  else if (inputs[0] == 1 &&
-           inputs[1] == 1 &&
-           inputs[2] == 0)
-  {
-    result = 0;
-  }
-  else if (inputs[0] == 1 &&
-           inputs[1] == 0 &&
-           inputs[2] == 1)
-  {
-    result = 0;
-  }
-  else if (inputs[0] == 1 &&
-           inputs[1] == 0 &&
-           inputs[2] == 0)
-  {
-    result = 1;
-  }
-  else if (inputs[0] == 0 &&
-           inputs[1] == 1 &&
-           inputs[2] == 1)
-  {
-    result = 1;
-  }
-  else if (inputs[0] == 0 &&
-           inputs[1] == 1 &&
-           inputs[2] == 0)
-  {
-    result = 1;
-  }
-  else if (inputs[0] == 0 &&
-           inputs[1] == 0 &&
-           inputs[2] == 1)
-  {
-    result = 1;
-  }
-  else if (inputs[0] == 0 &&
-           inputs[1] == 0 &&
-           inputs[2] == 0)
-  {
-    result = 0;
-  }
-
-  return result;
-}
-
-
-void
-dummy_make_rule30_rule_tree(Rule *result)
-{
-  result->config.n_states = 2;
-  result->config.neighbourhood_region_shape = NeighbourhoodRegionShape::ONE_DIM;
-  result->config.neighbourhood_region_size = 1;
-
-  // result->config.transition_function = rule30_transition_function;
-
-  build_rule_tree(result);
-
-  print_rule_tree(result);
-}
-
-
-void
 execute_transition_function(Rule *rule, CellState *cell_states)
 {
-  // cell_states is an array of all the neighbours top-to-bottom left-to-right, with the central
-  //   cell moved to the first position.  (Length = NEIGHBOURHOOD_REGION_SIZES[rule.neighbourhood_region_shape])
-  //
+  // cell_states is an array of all the neighbours top-to-bottom left-to-right, including the
+  //   central cell.
+
   // TODO: Might want to move the getting of the cell-states into here, so that we only get them
   //       when they are needed.
 
+  CellState result;
 
+  RuleNode *node = get_rule_node(rule, rule->root_node);
 
+  u32 input_n = 0;
+  b32 reached_result = false;
+  while (!reached_result)
+  {
+    if (node->is_leaf)
+    {
+      reached_result = true;
+    }
+    else
+    {
+      CellState current_state = cell_states[input_n];
+      u32 next_node_position = node->children[current_state];
+      node = get_rule_node(rule, next_node_position);
+      ++input_n;
+    }
+  }
 
+  assert(input_n == rule->n_inputs);
 
+  result = node->leaf_value;
+  return result;
 }

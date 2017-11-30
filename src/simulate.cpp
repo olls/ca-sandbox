@@ -6,6 +6,7 @@
 #include "allocate.h"
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
+#include "rule.h"
 
 #define DEBUG_STATE 9999
 
@@ -108,7 +109,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *uni
 ///
 /// Operates directly on the Cell in the CellBlock.
 void
-test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
+test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
 {
   // Test Von Neumann neighbourhood
 
@@ -264,27 +265,38 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
       }
     }
 
-    u32 n_enabled_neighbours = (cell_north_state + cell_east_state + cell_south_state + cell_west_state +
-                                cell_north_east_state + cell_south_east_state + cell_south_west_state + cell_north_west_state +
-                                subject_cell->previous_state);
-
-#ifdef CA_TYPE_GROWTH
-    if (n_enabled_neighbours == 3 ||
-        n_enabled_neighbours == 7 ||
-        n_enabled_neighbours == 8)
+    // TODO: Integrate this with the above code.
+    CellState neighbours[9];
+    switch (rule->config.neighbourhood_region_shape)
     {
-      subject_cell->state = 1;
+      case (NeighbourhoodRegionShape::MOORE):
+      {
+        neighbours[0] = cell_north_west_state;
+        neighbours[1] = cell_north_state;
+        neighbours[2] = cell_north_east_state;
+        neighbours[3] = cell_west_state;
+        neighbours[4] = subject_cell->previous_state;
+        neighbours[5] = cell_east_state;
+        neighbours[6] = cell_south_west_state;
+        neighbours[7] = cell_south_state;
+        neighbours[8] = cell_south_east_state;
+      } break;
+      case (NeighbourhoodRegionShape::VON_NEUMANN):
+      {
+        neighbours[0] = cell_north_state;
+        neighbours[1] = cell_west_state;
+        neighbours[2] = subject_cell->previous_state;
+        neighbours[3] = cell_east_state;
+        neighbours[4] = cell_south_state;
+      } break;
+      case (NeighbourhoodRegionShape::ONE_DIM):
+      {
+        neighbours[0] = cell_west_state;
+        neighbours[1] = subject_cell->previous_state;
+        neighbours[2] = cell_east_state;
+      } break;
     }
-#else
-    if (n_enabled_neighbours <= 4)
-    {
-      subject_cell->state = 0;
-    }
-    else
-    {
-      subject_cell->state = 1;
-    }
-#endif
+    subject_cell->state = execute_transition_function(rule, neighbours);
   }
 }
 
@@ -292,7 +304,7 @@ test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOption
 /// Simulates one frame of a CellBlock using test_transition_rule(). Also implements the CA bounds
 ///   check.
 void
-simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *cell_block)
+simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, CellBlock *cell_block)
 {
   // print("Simulating CellBlock %d %d\n", cell_block->block_position.x, cell_block->block_position.y);
 
@@ -313,13 +325,13 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
           // Don't simulate if we are not within the border.
           if (within_border(simulate_options->border, cell_block->block_position, (s32vec2){cell_x, cell_y}))
           {
-            test_transition_rule(simulate_options, cell_initialisation_options, universe, cell_block, cell_x, cell_y);
+            test_transition_rule(simulate_options, cell_initialisation_options, rule, universe, cell_block, cell_x, cell_y);
           }
         } break;
 
         case (BorderType::INFINITE):
         {
-          test_transition_rule(simulate_options, cell_initialisation_options, universe, cell_block, cell_x, cell_y);
+          test_transition_rule(simulate_options, cell_initialisation_options, rule, universe, cell_block, cell_x, cell_y);
         } break;
       }
     }
@@ -530,7 +542,7 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
 ///   during the simulation of a CellBlock, and the new CellBlock will still be simulated within the
 ///   same frame.
 void
-simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame)
+simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, u64 current_frame)
 {
   // First copy all Cell states into previous_state
   // Then initialise any new CellBlock%s needed.
@@ -588,7 +600,7 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
             cell_block->last_simulated_on_frame = current_frame;
             simulated_any_blocks = true;
 
-            simulate_cell_block(simulate_options, cell_initialisation_options, universe, cell_block);
+            simulate_cell_block(simulate_options, cell_initialisation_options, rule, universe, cell_block);
           }
 
           // Follow any hashmap collision chains

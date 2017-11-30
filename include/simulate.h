@@ -7,6 +7,7 @@
 
 // HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
 #define CA_TYPE_GROWTH
+#include "rule.h"
 
 
 /// @file
@@ -47,6 +48,7 @@ struct Border
 
 struct SimulateOptions
 {
+  // TODO: This is duplicated in the Rule, probably should only be there.
   /// The manhattan distance from a cell to its neighbourhood region edge, e.g: a value of 1 would
   ///   mean the Cell has one one cell on all sides in its neighbourhood region
   u32 neighbourhood_region_size;
@@ -65,7 +67,7 @@ default_simulation_options();
 
 
 void
-simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, u64 current_frame);
+simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, u64 current_frame);
 
 
 b32

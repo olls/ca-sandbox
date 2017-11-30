@@ -52,9 +52,7 @@ struct RuleNode
 ///   next tree node.  To start the traversal you start at the root node, and the central cell.
 ///
 /// The use of a tree allows the direct representation of all the nodes, whilst keeping the memory
-///   usage viable as identical sub-trees can be merged.
-///
-/// TODO: Insert comment about how compression is achieved on the tree after implementation!
+///   usage viable as identical sub-trees are represented by the same memory.
 ///
 struct Rule
 {
@@ -86,8 +84,8 @@ void
 print_rule_tree(Rule *rule_tree);
 
 
-void
-dummy_make_rule30_rule_tree(Rule *result);
+CellState
+execute_transition_function(Rule *rule, CellState *cell_states);
 
 
 #endif

@@ -105,6 +105,8 @@ main(int argc, const char *argv[])
     SimulateOptions simulate_options;
     CellInitialisationOptions cell_initialisation_options;
 
+    Rule loaded_rule = {};
+
     u64 last_sim_time = get_us();
 
     b32 init = true;
@@ -182,7 +184,6 @@ main(int argc, const char *argv[])
           const char *rule_filename = argv[2];
 
           print("\nLoading rule file: %s\n", rule_filename);
-          Rule loaded_rule = {};
 
           running &= load_rule_file(rule_filename, &loaded_rule.config);
 
@@ -257,7 +258,7 @@ main(int argc, const char *argv[])
 #endif
       {
         u64 start_sim_time = get_us();
-        simulate_cells(&simulate_options, &cell_initialisation_options, &universe, last_sim_time);
+        simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
         u64 end_sim_time = get_us();
 
         print("Simulation took %ldus\n", end_sim_time - start_sim_time);
