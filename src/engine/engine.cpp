@@ -160,8 +160,8 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   glViewport(0, 0, engine->window.width, engine->window.height);
 
-#define DEBUG
-#ifdef DEBUG
+#define OPEN_GL_DEBUG
+#ifdef OPEN_GL_DEBUG
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   glDebugMessageCallback(opengl_debug_output_callback, NULL);

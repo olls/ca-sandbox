@@ -4,7 +4,7 @@ TARGET      := ca-sandbox
 
 SRCDIR      := src
 INCDIR      := include
-BUILDDIR    := obj
+OBJ_DIR     := obj
 TARGETDIR   := bin
 DOCSDIR     := docs
 
@@ -14,15 +14,24 @@ INC         := -I$(INCDIR) -I/usr/local/include
 INCDEP      := -I$(INCDIR)
 
 SOURCES     := $(shell find $(SRCDIR) -type f -name '*.cpp')
-OBJECTS     := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.cpp=.o))
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+	BUILD_DIR = debug-build
+	CFLAGS += -O0 -g
+else
+  BUILD_DIR = build
+endif
+
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(patsubst $(SRCDIR)/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o)))
 
 all: $(TARGET)
 
 clean:
-	@rm -rf $(BUILDDIR)
-	@mkdir $(BUILDDIR)
-	@rm -rf $(TARGETDIR)
-	@mkdir $(TARGETDIR)
+	@rm -rf $(BUILD_DIR)/$(OBJ_DIR)
+	@mkdir $(BUILD_DIR)/$(OBJ_DIR)
+	@rm -rf $(BUILD_DIR)/$(TARGETDIR)
+	@mkdir $(BUILD_DIR)/$(TARGETDIR)
 	@rm -rf $(DOCSDIR)
 	@mkdir $(DOCSDIR)
 
@@ -35,24 +44,17 @@ docs:
 # Link
 
 $(TARGET): $(OBJECTS)
-	$(CC) -o $(TARGETDIR)/$(TARGET) $^ $(LIB)
-
-rle-to-cells: $(filter-out $(BUILDDIR)/ca-sandbox.o, $(OBJECTS)) $(BUILDDIR)/rle-to-cells.o
-	$(CC) -o $(TARGETDIR)/rle-to-cells $^ $(LIB)
+	$(CC) -o $(BUILD_DIR)/$(TARGETDIR)/$(TARGET) $^ $(LIB)
 
 # Compile
-$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
+$(BUILD_DIR)/$(OBJ_DIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(USER_CFLAGS) $(INC) -c -o $@ $<
-	@$(CC) $(CFLAGS) $(USER_CFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.cpp > $(BUILDDIR)/$*.d
-	@cp -f $(BUILDDIR)/$*.d $(BUILDDIR)/$*.d.tmp
-	@sed -e 's|.*:|$(BUILDDIR)/$*.o:|' < $(BUILDDIR)/$*.d.tmp > $(BUILDDIR)/$*.d
-	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILDDIR)/$*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILDDIR)/$*.d
-	@rm -f $(BUILDDIR)/$*.d.tmp
-
-$(BUILDDIR)/rle-to-cells.o: rle-to-cells/rle-to-cells.cpp
-	$(CC) $(CFLAGS) $(USER_CFLAGS) $(INC) -c -o $@ $<
-
+	@$(CC) $(CFLAGS) $(USER_CFLAGS) $(INCDEP) -MM $(SRCDIR)/$*.cpp > $(BUILD_DIR)/$(OBJ_DIR)/$*.d
+	@cp -f $(BUILD_DIR)/$(OBJ_DIR)/$*.d $(BUILD_DIR)/$(OBJ_DIR)/$*.d.tmp
+	@sed -e 's|.*:|$(BUILD_DIR)/$(OBJ_DIR)/$*.o:|' < $(BUILD_DIR)/$(OBJ_DIR)/$*.d.tmp > $(BUILD_DIR)/$(OBJ_DIR)/$*.d
+	@sed -e 's/.*://' -e 's/\\$$//' < $(BUILD_DIR)/$(OBJ_DIR)/$*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(BUILD_DIR)/$(OBJ_DIR)/$*.d
+	@rm -f $(BUILD_DIR)/$(OBJ_DIR)/$*.d.tmp
 
 # Non-File Targets
 .PHONY: all remake clean cleaner docs
