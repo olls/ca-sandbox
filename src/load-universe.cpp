@@ -171,16 +171,20 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
   String border_max_block_string = {};
   String border_max_cell_string = {};
 
-  b32 border_defined = true;
-  border_defined &= find_label_value(file_string, "border_type", &border_type_string);
-  border_defined &= find_label_value(file_string, "border_min_block", &border_min_block_string);
-  border_defined &= find_label_value(file_string, "border_min_cell", &border_min_cell_string);
-  border_defined &= find_label_value(file_string, "border_max_block", &border_max_block_string);
-  border_defined &= find_label_value(file_string, "border_max_cell", &border_max_cell_string);
-
-  if (border_defined)
+  b32 border_type_defined = find_label_value(file_string, "border_type", &border_type_string);
+  if (border_type_defined)
   {
     success &= read_border_type_value(border_type_string, &simulate_options->border.type);
+  }
+
+  b32 border_limits_defined = true;
+  border_limits_defined &= find_label_value(file_string, "border_min_block", &border_min_block_string);
+  border_limits_defined &= find_label_value(file_string, "border_min_cell", &border_min_cell_string);
+  border_limits_defined &= find_label_value(file_string, "border_max_block", &border_max_block_string);
+  border_limits_defined &= find_label_value(file_string, "border_max_cell", &border_max_cell_string);
+
+  if (border_limits_defined)
+  {
     success &= get_vector(border_min_block_string, &simulate_options->border.min_corner_block);
     success &= get_vector(border_min_cell_string, &simulate_options->border.min_corner_cell);
     success &= get_vector(border_max_block_string, &simulate_options->border.max_corner_block);
