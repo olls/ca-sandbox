@@ -188,7 +188,6 @@ main(int argc, const char *argv[])
           running &= load_rule_file(rule_filename, &loaded_rule.config);
 
           build_rule_tree(&loaded_rule);
-          print_rule_tree(&loaded_rule);
 
           print("\n");
         }
@@ -275,9 +274,9 @@ main(int argc, const char *argv[])
       glClear(GL_COLOR_BUFFER_BIT);
 
       r32 cell_width = 1;
-      vec2 offset = {-0.05, 0.1};
+      vec2 offset = {0, 0};
 
-      r32 view_scale = 0.05;
+      r32 view_scale = 0.15;
       r32 aspect = (r32)engine.window.height / engine.window.width;
       r32 projection_matrix[] = {
         aspect * view_scale,  0,               0,  offset.x,

@@ -3,10 +3,6 @@
 
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
-
-
-// HACK: Doesn't make any sense for this to be defined here; won't be needed anyway...
-#define CA_TYPE_GROWTH
 #include "rule.h"
 
 
