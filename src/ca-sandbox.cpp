@@ -310,7 +310,7 @@ main(int argc, const char *argv[])
       // Cell instance drawing
       //
 
-      upload_cell_instances(&universe, simulate_options.border, &cell_instancing);
+      upload_cell_instances(&universe, &cell_instancing);
 
       glBindVertexArray(cell_instance_drawing_vao);
       glUseProgram(cell_instance_drawing_shader_program);

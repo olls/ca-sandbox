@@ -1,13 +1,13 @@
 cell_block_dim: 16
 n_cell_blocks: 1
 
-border_type: INFINITE
+border_type: FIXED
 
 border_min_block: 0, 0
 border_min_cell: 0, 0
 
 border_max_block: 5, 5
-border_max_cell: 0, 0
+border_max_cell: 1, 1
 
 null_states: 0
 
