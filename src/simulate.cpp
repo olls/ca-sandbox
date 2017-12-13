@@ -88,7 +88,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *uni
     wrapped_cell_block_x = cell_block_position->x + delta_block.x;
     wrapped_cell_x = cell_position->x + delta_cell.x;
 
-    normalise_cell_coord(universe, &wrapped_cell_block_y, &wrapped_cell_y);
+    normalise_cell_coord(universe, &wrapped_cell_block_x, &wrapped_cell_x);
   }
 
   if (cell_position_less_than(cell_block_position->y, cell_position->y,
