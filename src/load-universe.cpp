@@ -155,6 +155,30 @@ read_border_type_value(String border_type_string, BorderType *result)
 }
 
 
+void
+debug_print_simulate_options(SimulateOptions *simulate_options)
+{
+  const char *border_types[] = {"FIXED", "INFINITE", "TORUS"};
+  print("border.type: %s\n", border_types[(u32)simulate_options->border.type]);
+
+  print("border.min_corner_block: (%d, %d)\n", simulate_options->border.min_corner_block.x, simulate_options->border.min_corner_block.y);
+  print("border.min_corner_cell:  (%d, %d)\n", simulate_options->border.min_corner_cell.x, simulate_options->border.min_corner_cell.y);
+  print("border.max_corner_block: (%d, %d)\n", simulate_options->border.max_corner_block.x, simulate_options->border.max_corner_block.y);
+  print("border.max_corner_cell:  (%d, %d)\n", simulate_options->border.max_corner_cell.x, simulate_options->border.max_corner_cell.y);
+
+  print("n_null_states: %u\n", simulate_options->n_null_states);
+  print("null_states: ", simulate_options->n_null_states);
+  for (u32 i = 0;
+       i < simulate_options->n_null_states;
+       ++i)
+  {
+    print(" %d", simulate_options->null_states[i]);
+  }
+  print("\n");
+
+}
+
+
 /// Loads a SimulateOptions object from a .cell file.
 
 /// @param[in] file_string  String containing the contents of the .cell file
@@ -200,18 +224,15 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
     {
       success &= false;
     }
-    else
-    {
-      print("null_states: ", simulate_options->n_null_states);
-      for (u32 i = 0;
-           i < simulate_options->n_null_states;
-           ++i)
-      {
-        print(" %d", simulate_options->null_states[i]);
-      }
-      print("\n");
+  }
 
-    }
+  if (success)
+  {
+      debug_print_simulate_options(simulate_options);
+  }
+  else
+  {
+    print("Error whilst parsing simulate options\n");
   }
 
   return success;
@@ -233,6 +254,25 @@ read_cell_initialisation_type_value(String intialisation_type_string, CellInitia
   }
 
   return success;
+}
+
+
+void
+debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initialisation_options)
+{
+  const char *cell_initialisation_types[] = {"RANDOM"};
+  print("cell_initialisation_type: %s\n", cell_initialisation_types[(u32)cell_initialisation_options->type]);
+
+  print("set_of_initial_states_size: %u\n", cell_initialisation_options->set_of_initial_states_size);
+
+  print("initial_states: ", cell_initialisation_options->set_of_initial_states_size);
+  for (u32 i = 0;
+       i < cell_initialisation_options->set_of_initial_states_size;
+       ++i)
+  {
+    print(" %d", cell_initialisation_options->set_of_initial_states[i]);
+  }
+  print("\n");
 }
 
 
@@ -262,18 +302,12 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
       {
         success &= false;
       }
-      else
-      {
-        print("initial_states: ", cell_initialisation_options->set_of_initial_states_size);
-        for (u32 i = 0;
-             i < cell_initialisation_options->set_of_initial_states_size;
-             ++i)
-        {
-          print(" %d", cell_initialisation_options->set_of_initial_states[i]);
-        }
-        print("\n");
-      }
     }
+  }
+
+  if (success)
+  {
+    debug_print_cell_initialisation_options(cell_initialisation_options);
   }
 
   return success;
