@@ -13,6 +13,7 @@ read_u32_list(String string, u32 **list_result)
 {
   u32 n_items = 0;
   u32 list_size = 0;
+  *list_result = 0;
 
   while (string.current_position != string.end)
   {

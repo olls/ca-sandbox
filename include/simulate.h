@@ -4,6 +4,10 @@
 #include "cell-storage.h"
 #include "cell-block-coordinate-system.h"
 #include "rule.h"
+#include "border.h"
+
+
+#define DEBUG_STATE 9999
 
 
 /// @file
@@ -18,28 +22,6 @@
 ///     - It is still in its initial state
 ///     - There are no non-NULL state Cells within the rule neighbourhood of the CellBlock's border.
 ///
-
-
-enum struct BorderType
-{
-  FIXED,
-  INFINITE,
-  TORUS
-};
-
-
-/// Border types:
-/// - FIXED: A fixed border from border_min_corner_{block,cell} to border_max_corner_{block,cell}
-/// - INFINITE: Automata expands infinitely
-/// - TORUS: Wraps around from top to bottom and side to side, at the borders.
-struct Border
-{
-  BorderType type;
-  s32vec2 min_corner_block;
-  s32vec2 min_corner_cell;
-  s32vec2 max_corner_block;
-  s32vec2 max_corner_cell;
-};
 
 
 struct SimulateOptions
@@ -59,10 +41,6 @@ default_simulation_options();
 
 void
 simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, u64 current_frame);
-
-
-b32
-within_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position);
 
 
 #endif

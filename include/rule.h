@@ -4,6 +4,7 @@
 #include "extendable-array.h"
 
 #include "cell.h"
+#include "border.h"
 
 
 enum struct NeighbourhoodRegionShape
@@ -85,7 +86,7 @@ print_rule_tree(Rule *rule_tree);
 
 
 CellState
-execute_transition_function(Rule *rule, CellState *cell_states);
+execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position, CellState null_state_0);
 
 
 #endif

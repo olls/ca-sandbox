@@ -9,6 +9,7 @@
 #include "extendable-array.h"
 
 #include "load-rule.h"
+#include "simulate.h"
 
 
 u32
@@ -330,15 +331,54 @@ print_rule_tree(Rule *rule_tree)
 
 
 CellState
-execute_transition_function(Rule *rule, CellState *cell_states)
+execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position, CellState null_state_0)
 {
   // cell_states is an array of all the neighbours top-to-bottom left-to-right, including the
   //   central cell.
 
-  // TODO: Might want to move the getting of the cell-states into here, so that we only get them
-  //       when they are needed.  (i.e: only pass the neighbour positions in)
-
   CellState result;
+
+  s32vec2 *neighbour_positions = allocate(s32vec2, rule->n_inputs);
+
+  s32vec2 cell_centre_coord     = { 0,  0};
+  s32vec2 cell_north_coord      = { 0, -1};
+  s32vec2 cell_east_coord       = { 1,  0};
+  s32vec2 cell_south_coord      = { 0,  1};
+  s32vec2 cell_west_coord       = {-1,  0};
+  s32vec2 cell_north_east_coord = { 1, -1};
+  s32vec2 cell_south_east_coord = { 1,  1};
+  s32vec2 cell_south_west_coord = {-1,  1};
+  s32vec2 cell_north_west_coord = {-1, -1};
+
+  switch (rule->config.neighbourhood_region_shape)
+  {
+    case (NeighbourhoodRegionShape::MOORE):
+    {
+      neighbour_positions[0] = cell_north_west_coord;
+      neighbour_positions[1] = cell_north_coord;
+      neighbour_positions[2] = cell_north_east_coord;
+      neighbour_positions[3] = cell_west_coord;
+      neighbour_positions[4] = cell_centre_coord;
+      neighbour_positions[5] = cell_east_coord;
+      neighbour_positions[6] = cell_south_west_coord;
+      neighbour_positions[7] = cell_south_coord;
+      neighbour_positions[8] = cell_south_east_coord;
+    } break;
+    case (NeighbourhoodRegionShape::VON_NEUMANN):
+    {
+      neighbour_positions[0] = cell_north_coord;
+      neighbour_positions[1] = cell_west_coord;
+      neighbour_positions[2] = cell_centre_coord;
+      neighbour_positions[3] = cell_east_coord;
+      neighbour_positions[4] = cell_south_coord;
+    } break;
+    case (NeighbourhoodRegionShape::ONE_DIM):
+    {
+      neighbour_positions[0] = cell_west_coord;
+      neighbour_positions[1] = cell_centre_coord;
+      neighbour_positions[2] = cell_east_coord;
+    } break;
+  }
 
   RuleNode *node = get_rule_node(rule, rule->root_node);
 
@@ -352,15 +392,39 @@ execute_transition_function(Rule *rule, CellState *cell_states)
     }
     else
     {
-      CellState current_state = cell_states[input_n];
+      s32vec2 current_input_position = neighbour_positions[input_n];
+
+      // If get_neighbouring_cell_state doesn't set current_state, the cell is not currently loaded
+      //   because it is a null state.  Therefore, use a null state as the current state instead.
+      //   If there are no null states, the cell should always exist as
+      //   create_any_new_cell_blocks_needed will create all the cell blocks.
+      CellState current_state = null_state_0;
+      b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_position, cell_block_position, cell_position, &current_state);
+
+      if (!simulate_cell)
+      {
+        // Neighbour is outside the simulation region border, therefore do not simulate the cell.
+
+        break;
+      }
+
+      // Select the next node based on this input's state
       u32 next_node_position = node->children[current_state];
       node = get_rule_node(rule, next_node_position);
       ++input_n;
     }
   }
 
-  assert(input_n == rule->n_inputs);
+  if (reached_result)
+  {
+    assert(input_n == rule->n_inputs);
 
-  result = node->leaf_value;
+    result = node->leaf_value;
+  }
+  else
+  {
+    result = DEBUG_STATE;
+  }
+
   return result;
 }
