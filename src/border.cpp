@@ -9,13 +9,16 @@
 #include "rule.h"
 
 
+/// Checks the cell position against the border, if the border is infinite, the check always returns
+///   true.
 b32
-within_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position)
+check_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position)
 {
-  b32 result = (cell_position_greater_than_or_equal_to(cell_block_position, cell_position,
-                                                       border.min_corner_block, border.min_corner_cell) &&
-                cell_position_less_than(cell_block_position, cell_position,
-                                        border.max_corner_block, border.max_corner_cell));
+  b32 result = (border.type == BorderType::INFINITE ||
+                (cell_position_greater_than_or_equal_to(cell_block_position, cell_position,
+                                                        border.min_corner_block, border.min_corner_cell) &&
+                 cell_position_less_than(cell_block_position, cell_position,
+                                         border.max_corner_block, border.max_corner_cell)));
 
   return result;
 }
@@ -115,7 +118,7 @@ get_neighbouring_cell_state(Border *border, Universe *universe, s32vec2 neighbou
   // - If using TORUS border, then this condition should never be true, and there is a bug in
   //     wrap_cell_position_around_torus.
 
-  b32 outside_border = !within_border(*border, cell_block_position, cell_coord);
+  b32 outside_border = !check_border(*border, cell_block_position, cell_coord);
 
   if (outside_border && border->type == BorderType::FIXED)
   {

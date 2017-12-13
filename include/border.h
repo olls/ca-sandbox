@@ -29,7 +29,7 @@ struct Border
 
 
 b32
-within_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position);
+check_border(Border border, s32vec2 cell_block_position, s32vec2 cell_position);
 
 
 bool
