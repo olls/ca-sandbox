@@ -1,7 +1,12 @@
 cell_block_dim: 9
 n_cell_blocks: 5
 
-border_type: INFINITE
+border_type: TORUS
+border_min_block: -2, -2
+border_min_cell: 0, 0
+border_max_block: 5, 5
+border_max_cell: 0, 0
+
 null_states: 0
 
 CellBlock: 0, 0

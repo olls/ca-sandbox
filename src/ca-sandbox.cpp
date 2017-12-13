@@ -198,16 +198,18 @@ main(int argc, const char *argv[])
           running &= false;
         }
 
+        if (loaded_rule.config.neighbourhood_region_size >= universe.cell_block_dim)
+        {
+          print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
+          running &= false;
+        }
+
         if (!running)
         {
           break;
         }
-        else
-        {
-          assert(simulate_options.neighbourhood_region_size < universe.cell_block_dim);
 
-          get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
-        }
+        get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
 
         opengl_print_errors();
       }

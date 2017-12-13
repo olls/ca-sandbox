@@ -31,8 +31,6 @@ default_simulation_options()
 {
   SimulateOptions result;
 
-  result.neighbourhood_region_size = 1;
-
   result.border.type = BorderType::TORUS;
 
   result.border.min_corner_block = {0, 0};
@@ -363,7 +361,7 @@ is_null_state(SimulateOptions *simulate_options, CellState state)
 ///     - Only create new CellBlock%s if an existing Cell __with a non-NULL state__ is within the
 ///         neighbourhood-region of any of its cells.
 b32
-create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Universe *universe, CellBlock *subject_cell_block)
+create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_configuration, Universe *universe, CellBlock *subject_cell_block)
 {
   b32 result = false;
 
@@ -385,10 +383,10 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
         // If within the neighbourhood region of any neighbouring CellBlocks:
         // Create the CellBlock which can see this Cell.
 
-        b32 north_needed = cell_position.y < simulate_options->neighbourhood_region_size;
-        b32 east_needed = cell_position.x >= universe->cell_block_dim - simulate_options->neighbourhood_region_size;
-        b32 south_needed = cell_position.y >= universe->cell_block_dim - simulate_options->neighbourhood_region_size;
-        b32 west_needed = cell_position.x < simulate_options->neighbourhood_region_size;
+        b32 north_needed = cell_position.y < rule_configuration->neighbourhood_region_size;
+        b32 east_needed = cell_position.x >= universe->cell_block_dim - rule_configuration->neighbourhood_region_size;
+        b32 south_needed = cell_position.y >= universe->cell_block_dim - rule_configuration->neighbourhood_region_size;
+        b32 west_needed = cell_position.x < rule_configuration->neighbourhood_region_size;
 
         if (north_needed)
         {
@@ -453,12 +451,12 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
 
           // Upper bound
           s32vec2 max_corner_block = simulate_options->border.max_corner_block;
-          s32vec2 max_corner_cell = vec2_subtract(simulate_options->border.max_corner_cell, simulate_options->neighbourhood_region_size);
+          s32vec2 max_corner_cell = vec2_subtract(simulate_options->border.max_corner_cell, rule_configuration->neighbourhood_region_size);
           normalise_cell_coord(universe, &max_corner_block, &max_corner_cell);
 
           // Lower bound
           s32vec2 min_corner_block = simulate_options->border.min_corner_block;
-          s32vec2 min_corner_cell = vec2_add(simulate_options->border.min_corner_cell, simulate_options->neighbourhood_region_size);
+          s32vec2 min_corner_cell = vec2_add(simulate_options->border.min_corner_cell, rule_configuration->neighbourhood_region_size);
           normalise_cell_coord(universe, &min_corner_block, &min_corner_cell);
 
           b32 wrapping_north_needed = !cell_position_less_than(subject_cell_block->block_position.y, cell_position.y, max_corner_block.y, max_corner_cell.y);
@@ -563,7 +561,7 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
         // Follow the hashmap collision chain
         do
         {
-          created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, universe, cell_block);
+          created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, &rule->config, universe, cell_block);
 
           cell_block = cell_block->next_block;
         }

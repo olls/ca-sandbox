@@ -44,11 +44,6 @@ struct Border
 
 struct SimulateOptions
 {
-  // TODO: This is duplicated in the Rule, probably should only be there.
-  /// The manhattan distance from a cell to its neighbourhood region edge, e.g: a value of 1 would
-  ///   mean the Cell has one one cell on all sides in its neighbourhood region
-  u32 neighbourhood_region_size;
-
   Border border;
 
   /// Array of state values which are NULL states
