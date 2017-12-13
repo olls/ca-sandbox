@@ -129,7 +129,9 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
       cell->previous_state = cell->state;
 
       if (!is_null_state(simulate_options, cell->state) &&
-          within_border(simulate_options->border, subject_cell_block->block_position, cell_position))
+          (((simulate_options->border.type == BorderType::TORUS || simulate_options->border.type == BorderType::FIXED) &&
+            within_border(simulate_options->border, subject_cell_block->block_position, cell_position)) ||
+           simulate_options->border.type == BorderType::INFINITE))
       {
         // If within the neighbourhood region of any neighbouring CellBlocks:
         // Create the CellBlock which can see this Cell.
