@@ -55,6 +55,7 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *uni
   s32 wrapped_cell_x = cell_position->x;
   s32 wrapped_cell_y = cell_position->y;
 
+  // Size of the simulated area
   s32vec2 delta_block = vec2_subtract(simulate_options->border.max_corner_block, simulate_options->border.min_corner_block);
   s32vec2 delta_cell = vec2_subtract(simulate_options->border.max_corner_cell, simulate_options->border.min_corner_cell);
 
@@ -103,199 +104,156 @@ wrap_cell_position_around_torus(SimulateOptions *simulate_options, Universe *uni
 }
 
 
-/// @brief Placeholder function implementing a hard coded transition rule for a single Cell.
+/// Get a neighbouring cell's state using a cell delta from the subject cell
+///
+/// This function handles the border conditions:
+/// - Wrap around the torus border
+/// - Returns false if the neighbouring cell is outside of the border, indicating the subject cell
+///     should not be simulated.
+///
+/// @param[in] simulate_options
+/// @param[in] universe
+/// @param[in] neighbouring_cell_delta  A delta in cells from the subject_block
+/// @param[in] subject_block  The position of the block containing the subject_cell
+/// @param[in] subject_cell  The cell to base the delta off of
+///
+/// @returns Boolean indicating whether the subject cell should be simulated.
+bool
+get_neighbouring_cell_state(SimulateOptions *simulate_options, Universe *universe, s32vec2 neighbouring_cell_delta, s32vec2 subject_block, s32vec2 subject_cell, CellState *resulting_state)
+{
+  b32 result = true;
+
+  // Calculate the absolute position of the neighbouring cell
+  s32vec2 cell_coord = vec2_add(subject_cell, neighbouring_cell_delta);
+  s32vec2 cell_block_position = subject_block;
+
+  // Normalise position to ensure it is a valid position (i.e: The cell coord is less than the cell_block_dim)
+  normalise_cell_coord(universe, &cell_block_position, &cell_coord);
+
+  if (simulate_options->border.type == BorderType::TORUS)
+  {
+    wrap_cell_position_around_torus(simulate_options, universe, &cell_block_position, &cell_coord);
+  }
+
+  // If the cell position is outside of the border, don't simulate the Cell:
+  // - If using FIXED border, then these cells cannot be simulated and act as the "border-buffer"
+  // - If using TORUS border, then this condition should never be true, and there is a bug in
+  //     wrap_cell_position_around_torus.
+
+  b32 outside_border = !within_border(simulate_options->border, cell_block_position, cell_coord);
+
+  if (outside_border && simulate_options->border.type == BorderType::FIXED)
+  {
+    result = false;
+  }
+  else if (outside_border && simulate_options->border.type == BorderType::TORUS)
+  {
+    print("Error: Attempting to use cell outside border whilst in TORUS mode.\n");
+    assert(0);
+    result = false;
+  }
+  else
+  {
+    CellBlock *cell_block = get_existing_cell_block(universe, cell_block_position);
+
+    // If the CellBlock doesn't exist, we will assume it contains only NULL state Cell%s, and set
+    //   the result to null state 0.  This assumption is valid because we ensure (in
+    //   create_any_new_cell_blocks_needed() ) that all Cell%s within the neighbourhood region of
+    //   any neighbouring CellBlock%s are NULL Cell%s (Which don't interact with other NULL Cell's),
+    //   otherwise we create the neighbouring CellBlock.
+
+    *resulting_state = simulate_options->null_states[0];
+    if (cell_block != 0)
+    {
+      Cell *cell = get_cell_from_block(universe, cell_block, cell_coord);
+      if (cell->previous_state != DEBUG_STATE)
+      {
+        *resulting_state = cell->previous_state;
+      }
+    }
+  }
+
+  return result;
+}
+
+
+/// Generate array of all the neighbour's states needed, then execute the transition function on
+///   them.
 ///
 /// Operates directly on the Cell in the CellBlock.
 void
 test_transition_rule(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, CellBlock *cell_block, s32 cell_x, s32 cell_y)
 {
-  // Test Von Neumann neighbourhood
+  s32vec2 subject_cell_coord = {cell_x, cell_y};
+  Cell *subject_cell = get_cell_from_block(universe, cell_block, subject_cell_coord);
 
-  Cell *subject_cell = get_cell_from_block(universe, cell_block, (s32vec2){cell_x, cell_y});
+  u32 n_neighbours = rule->n_inputs;
+  s32vec2 *neighbour_positions = allocate(s32vec2, n_neighbours);
 
-  s32vec2 cell_north_coord      = {cell_x,     cell_y - 1};
-  s32vec2 cell_east_coord       = {cell_x + 1, cell_y};
-  s32vec2 cell_south_coord      = {cell_x,     cell_y + 1};
-  s32vec2 cell_west_coord       = {cell_x - 1, cell_y};
-  s32vec2 cell_north_east_coord = {cell_x + 1, cell_y - 1};
-  s32vec2 cell_south_east_coord = {cell_x + 1, cell_y + 1};
-  s32vec2 cell_south_west_coord = {cell_x - 1, cell_y + 1};
-  s32vec2 cell_north_west_coord = {cell_x - 1, cell_y - 1};
+  s32vec2 cell_centre_coord     = { 0,  0};
+  s32vec2 cell_north_coord      = { 0, -1};
+  s32vec2 cell_east_coord       = { 1,  0};
+  s32vec2 cell_south_coord      = { 0,  1};
+  s32vec2 cell_west_coord       = {-1,  0};
+  s32vec2 cell_north_east_coord = { 1, -1};
+  s32vec2 cell_south_east_coord = { 1,  1};
+  s32vec2 cell_south_west_coord = {-1,  1};
+  s32vec2 cell_north_west_coord = {-1, -1};
 
-  s32vec2 cell_north_block_position      = cell_block->block_position;
-  s32vec2 cell_east_block_position       = cell_block->block_position;
-  s32vec2 cell_south_block_position      = cell_block->block_position;
-  s32vec2 cell_west_block_position       = cell_block->block_position;
-  s32vec2 cell_north_east_block_position = cell_block->block_position;
-  s32vec2 cell_south_east_block_position = cell_block->block_position;
-  s32vec2 cell_south_west_block_position = cell_block->block_position;
-  s32vec2 cell_north_west_block_position = cell_block->block_position;
-
-  normalise_cell_coord(universe, &cell_north_block_position,      &cell_north_coord);
-  normalise_cell_coord(universe, &cell_east_block_position,       &cell_east_coord);
-  normalise_cell_coord(universe, &cell_south_block_position,      &cell_south_coord);
-  normalise_cell_coord(universe, &cell_west_block_position,       &cell_west_coord);
-  normalise_cell_coord(universe, &cell_north_east_block_position, &cell_north_east_coord);
-  normalise_cell_coord(universe, &cell_south_east_block_position, &cell_south_east_coord);
-  normalise_cell_coord(universe, &cell_south_west_block_position, &cell_south_west_coord);
-  normalise_cell_coord(universe, &cell_north_west_block_position, &cell_north_west_coord);
-
-  if (simulate_options->border.type == BorderType::TORUS)
+  switch (rule->config.neighbourhood_region_shape)
   {
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_block_position, &cell_north_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_east_block_position, &cell_east_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_block_position, &cell_south_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_west_block_position, &cell_west_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_east_block_position, &cell_north_east_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_east_block_position, &cell_south_east_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_south_west_block_position, &cell_south_west_coord);
-    wrap_cell_position_around_torus(simulate_options, universe, &cell_north_west_block_position, &cell_north_west_coord);
+    case (NeighbourhoodRegionShape::MOORE):
+    {
+      neighbour_positions[0] = cell_north_west_coord;
+      neighbour_positions[1] = cell_north_coord;
+      neighbour_positions[2] = cell_north_east_coord;
+      neighbour_positions[3] = cell_west_coord;
+      neighbour_positions[4] = cell_centre_coord;
+      neighbour_positions[5] = cell_east_coord;
+      neighbour_positions[6] = cell_south_west_coord;
+      neighbour_positions[7] = cell_south_coord;
+      neighbour_positions[8] = cell_south_east_coord;
+    } break;
+    case (NeighbourhoodRegionShape::VON_NEUMANN):
+    {
+      neighbour_positions[0] = cell_north_coord;
+      neighbour_positions[1] = cell_west_coord;
+      neighbour_positions[2] = cell_centre_coord;
+      neighbour_positions[3] = cell_east_coord;
+      neighbour_positions[4] = cell_south_coord;
+    } break;
+    case (NeighbourhoodRegionShape::ONE_DIM):
+    {
+      neighbour_positions[0] = cell_west_coord;
+      neighbour_positions[1] = cell_centre_coord;
+      neighbour_positions[2] = cell_east_coord;
+    } break;
   }
 
-  // If any of the cell positions are outside of the border, don't simulate the Cell:
-  // - If using FIXED border, then these cells cannot be simulated and act as the "border-buffer"
-  // - If using TORUS border, then this condition should never be true, and there is a bug in
-  //     wrap_cell_position_around_torus.
-  if ((simulate_options->border.type == BorderType::FIXED ||
-        simulate_options->border.type == BorderType::TORUS) &&
-      (!within_border(simulate_options->border, cell_north_block_position     , cell_north_coord     ) ||
-       !within_border(simulate_options->border, cell_east_block_position      , cell_east_coord      ) ||
-       !within_border(simulate_options->border, cell_south_block_position     , cell_south_coord     ) ||
-       !within_border(simulate_options->border, cell_west_block_position      , cell_west_coord      ) ||
-       !within_border(simulate_options->border, cell_north_east_block_position, cell_north_east_coord) ||
-       !within_border(simulate_options->border, cell_south_east_block_position, cell_south_east_coord) ||
-       !within_border(simulate_options->border, cell_south_west_block_position, cell_south_west_coord) ||
-       !within_border(simulate_options->border, cell_north_west_block_position, cell_north_west_coord)))
-  {
-    // Leave subject_cell in initial state
+  CellState *neighbour_states = allocate(CellState, n_neighbours);
 
-    // NOTE: For debugging
+  b32 simulate_cell = true;
+  for (u32 neighbour_n = 0;
+       neighbour_n < n_neighbours;
+       ++neighbour_n)
+  {
+    s32vec2 this_neighbour_position = neighbour_positions[neighbour_n];
+    CellState *this_neighbour_state = neighbour_states + neighbour_n;
+
+    simulate_cell &= get_neighbouring_cell_state(simulate_options, universe, this_neighbour_position, cell_block->block_position, subject_cell_coord, this_neighbour_state);
+  }
+
+  if (!simulate_cell)
+  {
     subject_cell->state = DEBUG_STATE;
   }
   else
   {
-    CellBlock *cell_north_block      = get_existing_cell_block(universe, cell_north_block_position);
-    CellBlock *cell_east_block       = get_existing_cell_block(universe, cell_east_block_position);
-    CellBlock *cell_south_block      = get_existing_cell_block(universe, cell_south_block_position);
-    CellBlock *cell_west_block       = get_existing_cell_block(universe, cell_west_block_position);
-    CellBlock *cell_north_east_block = get_existing_cell_block(universe, cell_north_east_block_position);
-    CellBlock *cell_south_east_block = get_existing_cell_block(universe, cell_south_east_block_position);
-    CellBlock *cell_south_west_block = get_existing_cell_block(universe, cell_south_west_block_position);
-    CellBlock *cell_north_west_block = get_existing_cell_block(universe, cell_north_west_block_position);
-
-    // If any of the CellBlock%s don't exist, we assume they contain only NULL state Cell%s. This
-    //   assumption is valid because we ensure (in create_any_new_cell_blocks_needed() ) that all
-    //   Cell%s within the neighbourhood region of any neighbouring CellBlock%s are NULL Cell%s
-    //   (Which don't interact with other NULL Cell's), otherwise we create the neighbouring
-    //   CellBlock.
-
-    CellState cell_north_state = simulate_options->null_states[0];
-    CellState cell_east_state = simulate_options->null_states[0];
-    CellState cell_south_state = simulate_options->null_states[0];
-    CellState cell_west_state = simulate_options->null_states[0];
-    CellState cell_north_east_state = simulate_options->null_states[0];
-    CellState cell_south_east_state = simulate_options->null_states[0];
-    CellState cell_south_west_state = simulate_options->null_states[0];
-    CellState cell_north_west_state = simulate_options->null_states[0];
-
-    if (cell_north_block != 0)
-    {
-      Cell *cell_north = get_cell_from_block(universe, cell_north_block, cell_north_coord);
-      if (cell_north->previous_state != DEBUG_STATE)
-      {
-        cell_north_state = cell_north->previous_state;
-      }
-    }
-    if (cell_east_block != 0)
-    {
-      Cell *cell_east = get_cell_from_block(universe, cell_east_block, cell_east_coord);
-      if (cell_east->previous_state != DEBUG_STATE)
-      {
-        cell_east_state = cell_east->previous_state;
-      }
-    }
-    if (cell_south_block != 0)
-    {
-      Cell *cell_south = get_cell_from_block(universe, cell_south_block, cell_south_coord);
-      if (cell_south->previous_state != DEBUG_STATE)
-      {
-        cell_south_state = cell_south->previous_state;
-      }
-    }
-    if (cell_west_block != 0)
-    {
-      Cell *cell_west = get_cell_from_block(universe, cell_west_block, cell_west_coord);
-      if (cell_west->previous_state != DEBUG_STATE)
-      {
-        cell_west_state = cell_west->previous_state;
-      }
-    }
-    if (cell_north_east_block != 0)
-    {
-      Cell *cell_north_east = get_cell_from_block(universe, cell_north_east_block, cell_north_east_coord);
-      if (cell_north_east->previous_state != DEBUG_STATE)
-      {
-        cell_north_east_state = cell_north_east->previous_state;
-      }
-    }
-    if (cell_south_east_block != 0)
-    {
-      Cell *cell_south_east = get_cell_from_block(universe, cell_south_east_block, cell_south_east_coord);
-      if (cell_south_east->previous_state != DEBUG_STATE)
-      {
-        cell_south_east_state = cell_south_east->previous_state;
-      }
-    }
-    if (cell_south_west_block != 0)
-    {
-      Cell *cell_south_west = get_cell_from_block(universe, cell_south_west_block, cell_south_west_coord);
-      if (cell_south_west->previous_state != DEBUG_STATE)
-      {
-        cell_south_west_state = cell_south_west->previous_state;
-      }
-    }
-    if (cell_north_west_block != 0)
-    {
-      Cell *cell_north_west = get_cell_from_block(universe, cell_north_west_block, cell_north_west_coord);
-      if (cell_north_west->previous_state != DEBUG_STATE)
-      {
-        cell_north_west_state = cell_north_west->previous_state;
-      }
-    }
-
-    // TODO: Integrate this with the above code.
-    CellState neighbours[9];
-    switch (rule->config.neighbourhood_region_shape)
-    {
-      case (NeighbourhoodRegionShape::MOORE):
-      {
-        neighbours[0] = cell_north_west_state;
-        neighbours[1] = cell_north_state;
-        neighbours[2] = cell_north_east_state;
-        neighbours[3] = cell_west_state;
-        neighbours[4] = subject_cell->previous_state;
-        neighbours[5] = cell_east_state;
-        neighbours[6] = cell_south_west_state;
-        neighbours[7] = cell_south_state;
-        neighbours[8] = cell_south_east_state;
-      } break;
-      case (NeighbourhoodRegionShape::VON_NEUMANN):
-      {
-        neighbours[0] = cell_north_state;
-        neighbours[1] = cell_west_state;
-        neighbours[2] = subject_cell->previous_state;
-        neighbours[3] = cell_east_state;
-        neighbours[4] = cell_south_state;
-      } break;
-      case (NeighbourhoodRegionShape::ONE_DIM):
-      {
-        neighbours[0] = cell_west_state;
-        neighbours[1] = subject_cell->previous_state;
-        neighbours[2] = cell_east_state;
-      } break;
-    }
-    subject_cell->state = execute_transition_function(rule, neighbours);
+    subject_cell->state = execute_transition_function(rule, neighbour_states);
   }
+
+  un_allocate(neighbour_states);
+  un_allocate(neighbour_positions);
 }
 
 

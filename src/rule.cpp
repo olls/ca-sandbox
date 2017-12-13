@@ -336,7 +336,7 @@ execute_transition_function(Rule *rule, CellState *cell_states)
   //   central cell.
 
   // TODO: Might want to move the getting of the cell-states into here, so that we only get them
-  //       when they are needed.
+  //       when they are needed.  (i.e: only pass the neighbour positions in)
 
   CellState result;
 
