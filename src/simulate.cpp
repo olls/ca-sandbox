@@ -27,10 +27,6 @@ default_simulation_options()
   result.border.max_corner_block = {10, 10};
   result.border.max_corner_cell = {0, 0};
 
-  result.n_null_states = 0;
-  // result.null_states = 0;
-  // result.null_states[0] = 0;
-
   return result;
 }
 
@@ -51,36 +47,11 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
     {
       if (check_border(simulate_options->border, cell_block->block_position, cell_position))
       {
-        // If there are 0 null states, then null_state_0 will never be used because
-        //   create_any_new_cell_blocks_needed should ensure all input cells exist.
-        CellState null_state_0;
-        if (simulate_options->n_null_states > 0)
-        {
-          null_state_0 = simulate_options->null_states[0];
-        }
-
         Cell *subject_cell = get_cell_from_block(universe, cell_block, cell_position);
-        subject_cell->state = execute_transition_function(&simulate_options->border, universe, rule, cell_block->block_position, cell_position, null_state_0);
+        subject_cell->state = execute_transition_function(&simulate_options->border, universe, rule, cell_block->block_position, cell_position);
       }
     }
   }
-}
-
-
-b32
-is_null_state(SimulateOptions *simulate_options, CellState state)
-{
-  b32 result = false;
-
-  for (u32 null_state_index = 0;
-       null_state_index < simulate_options->n_null_states;
-       ++null_state_index)
-  {
-    CellState null_state = simulate_options->null_states[null_state_index];
-    result |= state == null_state;
-  }
-
-  return result;
 }
 
 
@@ -107,7 +78,7 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
       Cell *cell = get_cell_from_block(universe, subject_cell_block, cell_position);
       cell->previous_state = cell->state;
 
-      if (!is_null_state(simulate_options, cell->state) &&
+      if (!is_null_state(rule_configuration, cell->state) &&
           check_border(simulate_options->border, subject_cell_block->block_position, cell_position))
       {
         // If within the neighbourhood region of any neighbouring CellBlocks:

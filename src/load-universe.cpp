@@ -165,17 +165,6 @@ debug_print_simulate_options(SimulateOptions *simulate_options)
   print("border.min_corner_cell:  (%d, %d)\n", simulate_options->border.min_corner_cell.x, simulate_options->border.min_corner_cell.y);
   print("border.max_corner_block: (%d, %d)\n", simulate_options->border.max_corner_block.x, simulate_options->border.max_corner_block.y);
   print("border.max_corner_cell:  (%d, %d)\n", simulate_options->border.max_corner_cell.x, simulate_options->border.max_corner_cell.y);
-
-  print("n_null_states: %u\n", simulate_options->n_null_states);
-  print("null_states: ", simulate_options->n_null_states);
-  for (u32 i = 0;
-       i < simulate_options->n_null_states;
-       ++i)
-  {
-    print(" %d", simulate_options->null_states[i]);
-  }
-  print("\n");
-
 }
 
 
@@ -213,17 +202,6 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
     success &= get_vector(border_min_cell_string, &simulate_options->border.min_corner_cell);
     success &= get_vector(border_max_block_string, &simulate_options->border.max_corner_block);
     success &= get_vector(border_max_cell_string, &simulate_options->border.max_corner_cell);
-  }
-
-  String null_states_string = {};
-  b32 null_states_defined = find_label_value(file_string, "null_states", &null_states_string);
-  if (null_states_defined)
-  {
-    simulate_options->n_null_states = read_u32_list(null_states_string, (u32 **)&simulate_options->null_states);
-    if (simulate_options->n_null_states == 0)
-    {
-      success &= false;
-    }
   }
 
   if (success)

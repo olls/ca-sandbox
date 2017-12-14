@@ -66,6 +66,23 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
 }
 
 
+b32
+is_null_state(RuleConfiguration *rule_configuration, CellState state)
+{
+  b32 result = false;
+
+  for (u32 null_state_index = 0;
+       null_state_index < rule_configuration->n_null_states;
+       ++null_state_index)
+  {
+    CellState null_state = rule_configuration->null_states[null_state_index];
+    result |= state == null_state;
+  }
+
+  return result;
+}
+
+
 /// Matches the input against the RulePatterns, finds the first matching rule pattern and uses that
 ///   output.
 CellState
@@ -330,8 +347,17 @@ print_rule_tree(Rule *rule_tree)
 }
 
 
+/// Executes the transition function by traversing the rule tree taking inputs from the universe as
+///   needed
+///
+/// @param[in] border  Universe border config
+/// @param[in] universe  The universe
+/// @param[in] rule  The rule tree to use
+/// @param[in] cell_block_position  The position of the block containing the cell to transition
+/// @param[in] cell_position  The position of the cell to transition within the given cell block
+/// @param[in] null_state_0  The null state to use with this rule for cells which are not loaded
 CellState
-execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position, CellState null_state_0)
+execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position)
 {
   // cell_states is an array of all the neighbours top-to-bottom left-to-right, including the
   //   central cell.
@@ -394,11 +420,17 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
     {
       s32vec2 current_input_position = neighbour_positions[input_n];
 
+      CellState current_state;
+
       // If get_neighbouring_cell_state doesn't set current_state, the cell is not currently loaded
-      //   because it is a null state.  Therefore, use a null state as the current state instead.
-      //   If there are no null states, the cell should always exist as
+      //   because it is a null state.  Therefore, use the first null state as the current state
+      //   instead.  If there are no null states, the cell should always exist as
       //   create_any_new_cell_blocks_needed will create all the cell blocks.
-      CellState current_state = null_state_0;
+      if (rule->config.n_null_states > 0)
+      {
+        current_state = rule->config.null_states[0];
+      }
+
       b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_position, cell_block_position, cell_position, &current_state);
 
       if (!simulate_cell)

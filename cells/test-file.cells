@@ -1,15 +1,13 @@
 n_cell_blocks: 1
 cell_block_dim: 8
 
-border_type: TORUS
+border_type: INFINITE
 
 border_min_block: -2, -2
 border_min_cell: 0, 0
 
 border_max_block: 2, 2
 border_max_cell: 5, 5
-
-null_states: 0
 
 initial_states: 0
 initialisation_type: RANDOM

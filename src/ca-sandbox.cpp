@@ -188,6 +188,7 @@ main(int argc, const char *argv[])
           running &= load_rule_file(rule_filename, &loaded_rule.config);
 
           build_rule_tree(&loaded_rule);
+          // print_rule_tree(&loaded_rule);
 
           print("\n");
         }
@@ -208,8 +209,6 @@ main(int argc, const char *argv[])
         {
           break;
         }
-
-        get_or_create_cell_block(&universe, &cell_initialisation_options, (s32vec2){0, 0});
 
         opengl_print_errors();
       }

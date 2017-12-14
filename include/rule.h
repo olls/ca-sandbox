@@ -15,11 +15,28 @@ enum struct NeighbourhoodRegionShape
 };
 
 
+/// Holds the configuration of a rule, i.e: the parsed data from the rule file.
+///
+/// - NULL states indicate states which do not need simulating, these are used so an INFINITE border
+///     simulation can still run in finite time.
+///   - CellBlocks must be initialised with NULL states.
+///   - NULL state rules must be stable (i.e. No change in state) when inputs in neighbourhood
+///       region are also NULL states.
+///   - This allows the simulator to avoid simulating/creating a CellBlock if:
+///     - Its initial state is all NULL states
+///     - It is still in its initial state
+///     - There are no non-NULL state Cells within the rule neighbourhood of the CellBlock's border.
+///
 struct RuleConfiguration
 {
   NeighbourhoodRegionShape neighbourhood_region_shape;
   u32 neighbourhood_region_size;
   u32 n_states;
+
+  /// Array of state values which are NULL states
+  u32 *null_states;
+  /// Length of null_states
+  u32 n_null_states;
 
   ExtendableArray rule_patterns;
 };
@@ -42,18 +59,19 @@ struct RuleNode
 };
 
 
-/// A Rule is represented by a tree data structure, where each node represents the state of a
-///   neighbour, and the child to look at for the next neighbour.  The tree has a (max) depth of the
-///   number of inputs to the transition function, i.e: the number of neighbour nodes +1 for the
-///   central node.  (Some branches of the tree may stop at a lower depth, as the rest of the
-///   neighbours may not needed)
+/// - A Rule is represented by a tree data structure, where each node represents the state of a
+///     neighbour, and the child to look at for the next neighbour.  The tree has a (max) depth of
+///     the number of inputs to the transition function, i.e: the number of neighbour nodes +1 for
+///     the central node.  (Some branches of the tree may stop at a lower depth, as the rest of the
+///     neighbours may not needed)
 ///
-/// To use the rule you traverse down the tree.  At each node, you select the next child node based
-///   on the current neighbour's state, then advance to the next neighbour as you traverse to the
-///   next tree node.  To start the traversal you start at the root node, and the central cell.
+/// - To use the rule you traverse down the tree.  At each node, you select the next child node
+///     based on the current neighbour's state, then advance to the next neighbour as you traverse
+///     to the next tree node.  To start the traversal you start at the root node, and the central
+///     cell.
 ///
-/// The use of a tree allows the direct representation of all the nodes, whilst keeping the memory
-///   usage viable as identical sub-trees are represented by the same memory.
+/// - The use of a tree allows the direct representation of all the nodes, whilst keeping the memory
+///     usage viable as identical sub-trees are represented by the same memory.
 ///
 struct Rule
 {
@@ -77,6 +95,10 @@ u32
 get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size);
 
 
+b32
+is_null_state(RuleConfiguration *rule_configuration, CellState state);
+
+
 void
 build_rule_tree(Rule *result);
 
@@ -86,7 +108,7 @@ print_rule_tree(Rule *rule_tree);
 
 
 CellState
-execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position, CellState null_state_0);
+execute_transition_function(Border *border, Universe *universe, Rule *rule, s32vec2 cell_block_position, s32vec2 cell_position);
 
 
 #endif

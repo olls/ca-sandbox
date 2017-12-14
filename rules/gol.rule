@@ -1,4 +1,5 @@
 n_states: 2
+null_states: 0
 neighbourhood_region_shape: MOORE
 neighbourhood_region_size: 1
 

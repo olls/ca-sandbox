@@ -283,6 +283,21 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     rule_config->neighbourhood_region_size = 0;
     find_label_value_u32(file_string, "neighbourhood_region_size", &rule_config->neighbourhood_region_size);
 
+    String null_states_string = {};
+    b32 null_states_found = find_label_value(file_string, "null_states", &null_states_string);
+    if (null_states_found)
+    {
+      rule_config->n_null_states = read_u32_list(null_states_string, &rule_config->null_states);
+      if (rule_config->n_null_states == 0)
+      {
+        success &= false;
+      }
+    }
+    else
+    {
+      rule_config->n_null_states = 0;
+    }
+
     success &= rule_config->neighbourhood_region_size > 0;
     success &= rule_config->n_states > 0;
 
@@ -295,6 +310,15 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       print("n_states: %d\n", rule_config->n_states);
       print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
       print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
+      print("n_null_states: %d\n", rule_config->n_null_states);
+      print("null_states: ", rule_config->n_null_states);
+      for (u32 i = 0;
+           i < rule_config->n_null_states;
+           ++i)
+      {
+        print(" %d", rule_config->null_states[i]);
+      }
+      print("\n");
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size) + 1;  // Plus one for centre cell
 
