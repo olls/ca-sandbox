@@ -21,44 +21,44 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
   {
     case (NeighbourhoodRegionShape::VON_NEUMANN):
     {
-      // 1 -> 4
+      // 1 -> 5
       //   #
-      // #   #
+      // # # #
       //   #
       //
-      // 2 -> 8
+      // 2 -> 9
       //     #
       //     #
-      // # #   # #
+      // # # # # #
       //     #
       //     #
-      result = size * 4;
+      result = (size * 4) + 1;
     } break;
 
     case (NeighbourhoodRegionShape::MOORE):
     {
-      // 1 -> 8
+      // 1 -> 9
       // # # #
-      // #   #
+      // # # #
       // # # #
       //
-      // 2 -> 24
+      // 2 -> 25
       // # # # # #
       // # # # # #
-      // # #   # #
       // # # # # #
       // # # # # #
-      result = pow(((size*2) + 1), 2) - 1;
+      // # # # # #
+      result = pow(((size*2) + 1), 2);
     } break;
 
     case (NeighbourhoodRegionShape::ONE_DIM):
     {
-      // 1 -> 2
-      // #   #
+      // 1 -> 3
+      // # # #
       //
-      // 2 -> 4
-      // # #   # #
-      result = size * 2;
+      // 2 -> 5
+      // # # # # #
+      result = (size * 2) + 1;
     } break;
   }
 
@@ -66,58 +66,80 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
 }
 
 
-/// Fills in coords_results with delta coordinates for the given neighbourhood region, including the
-///   centre cell.
+
+/// Convert neighbour index into direction, from left-to-right, top-to-bottom.  Used to loop over
+///   all neighbours in execute_transision_function().
 ///
-/// @param[in] shape  Shape of neighbourhood region
-/// @param[in] size  Size of neighbourhood region
-/// @param[out] coords_results  Size of array defined by get_neighbourhood_region_n_cells + 1 for
-///                               central cell
-///
-void
-get_neighbourhood_region_cells(NeighbourhoodRegionShape shape, u32 size, s32vec2 *coords_results)
+s32vec2
+get_neighbourhood_region_cell_delta(NeighbourhoodRegionShape shape, u32 size, u32 index)
 {
-  // TODO: Generalise to deal with size
+  assert(index < get_neighbourhood_region_n_cells(shape, size));
 
-  s32vec2 cell_centre_coord     = { 0,  0};
-  s32vec2 cell_north_coord      = { 0, -1};
-  s32vec2 cell_east_coord       = { 1,  0};
-  s32vec2 cell_south_coord      = { 0,  1};
-  s32vec2 cell_west_coord       = {-1,  0};
-  s32vec2 cell_north_east_coord = { 1, -1};
-  s32vec2 cell_south_east_coord = { 1,  1};
-  s32vec2 cell_south_west_coord = {-1,  1};
-  s32vec2 cell_north_west_coord = {-1, -1};
-
+  s32vec2 result;
   switch (shape)
   {
     case (NeighbourhoodRegionShape::MOORE):
     {
-      coords_results[0] = cell_north_west_coord;
-      coords_results[1] = cell_north_coord;
-      coords_results[2] = cell_north_east_coord;
-      coords_results[3] = cell_west_coord;
-      coords_results[4] = cell_centre_coord;
-      coords_results[5] = cell_east_coord;
-      coords_results[6] = cell_south_west_coord;
-      coords_results[7] = cell_south_coord;
-      coords_results[8] = cell_south_east_coord;
+      u32 neighbourhood_region_side_length = ((size * 2) + 1);
+
+      result = (s32vec2){(s32)(index % neighbourhood_region_side_length),
+                         (s32)(index / neighbourhood_region_side_length)};
+
+      result = vec2_subtract(result, size);
+
     } break;
     case (NeighbourhoodRegionShape::VON_NEUMANN):
     {
-      coords_results[0] = cell_north_coord;
-      coords_results[1] = cell_west_coord;
-      coords_results[2] = cell_centre_coord;
-      coords_results[3] = cell_east_coord;
-      coords_results[4] = cell_south_coord;
+      u32 distance_from_centre;
+
+      if (index < size)
+      {
+        // Up spoke
+        result = (s32vec2){ 0, -1};
+        distance_from_centre = size - index;
+      }
+      else if (index < 2 * size)
+      {
+        // Left spoke
+        result = (s32vec2){-1,  0};
+        distance_from_centre = 2 * size - index;
+      }
+      else if (index == size * 2)
+      {
+        // Centre
+        result = (s32vec2){0, 0};
+        distance_from_centre = 0;
+      }
+      else if (index < (size * 3) + 1)
+      {
+        // Right spoke
+        result = (s32vec2){ 1,  0};
+        distance_from_centre = index - (size * 2);
+      }
+      else if (index < (size * 4) + 1)
+      {
+        // Bottom spoke
+        result = (s32vec2){ 0,  1};
+        distance_from_centre = index - (size * 3);
+      }
+      else
+      {
+        print("Error: index passed into get_von_neumann_neighbour_delta is too large for size.\n");
+        assert(0);
+      }
+
+      result = vec2_multiply(result, distance_from_centre);
+
     } break;
+
     case (NeighbourhoodRegionShape::ONE_DIM):
     {
-      coords_results[0] = cell_west_coord;
-      coords_results[1] = cell_centre_coord;
-      coords_results[2] = cell_east_coord;
+      result = (s32vec2){(s32)(index - size), 0};
+
     } break;
   }
+
+  return result;
 }
 
 
@@ -350,7 +372,7 @@ build_rule_tree(Rule *result)
   result->rule_nodes_table = (RuleNode *)allocate_size(result->rule_node_size, result->rule_nodes_table_size);
   result->next_free_rule_node_position = 0;
 
-  result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size) + 1;
+  result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size);
 
   CellState *tree_path = allocate(CellState, result->n_inputs);
   result->root_node = add_node_to_rule_tree(result, 0, tree_path);
@@ -419,12 +441,6 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   CellState result;
 
-  // TODO: rule->n_inputs is a bit dodgy...
-  assert(rule->n_inputs == get_neighbourhood_region_n_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size) + 1);
-
-  s32vec2 *neighbour_positions = allocate(s32vec2, rule->n_inputs);
-  get_neighbourhood_region_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size, neighbour_positions);
-
   RuleNode *node = get_rule_node(rule, rule->root_node);
 
   u32 input_n = 0;
@@ -437,7 +453,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
     }
     else
     {
-      s32vec2 current_input_position = neighbour_positions[input_n];
+      s32vec2 current_input_delta = get_neighbourhood_region_cell_delta(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size, input_n);
 
       CellState current_state;
 
@@ -450,7 +466,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
         current_state = rule->config.null_states[0];
       }
 
-      b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_position, cell_block_position, cell_position, &current_state);
+      b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_delta, cell_block_position, cell_position, &current_state);
 
       if (!simulate_cell)
       {

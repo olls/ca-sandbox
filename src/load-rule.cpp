@@ -320,7 +320,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       }
       print("\n");
 
-      u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size) + 1;  // Plus one for centre cell
+      u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
       new_extendable_array(sizeof(RulePattern) + (sizeof(CellStateWildcard) * n_inputs), &rule_config->rule_patterns);
 

@@ -14,7 +14,7 @@
 //       Result: s
 //     Where s is the resulting state, if this pattern matches.
 // - Following this is the pattern, written out as each cell-state in the neighbourhood region
-//     (including the center), left-to-right, top-to-bottom, separated by whitespace.  Cells can be
+//     (including the centre), left-to-right, top-to-bottom, separated by whitespace.  Cells can be
 //     represented by a wildcard: '*' if the state value does not need to be matched for this
 //     pattern.
 // - Optional conditions can be added after the pattern:
@@ -48,6 +48,7 @@ struct RulePattern
   ComparisonOp count_matching_comparison;
   u32 count_matching_n;
 
+  /// Left-to-right, top-to-bottom list of cell states in pattern
   CellStateWildcard cell_states[];
 };
 
