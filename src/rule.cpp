@@ -66,6 +66,61 @@ get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size)
 }
 
 
+/// Fills in coords_results with delta coordinates for the given neighbourhood region, including the
+///   centre cell.
+///
+/// @param[in] shape  Shape of neighbourhood region
+/// @param[in] size  Size of neighbourhood region
+/// @param[out] coords_results  Size of array defined by get_neighbourhood_region_n_cells + 1 for
+///                               central cell
+///
+void
+get_neighbourhood_region_cells(NeighbourhoodRegionShape shape, u32 size, s32vec2 *coords_results)
+{
+  // TODO: Generalise to deal with size
+
+  s32vec2 cell_centre_coord     = { 0,  0};
+  s32vec2 cell_north_coord      = { 0, -1};
+  s32vec2 cell_east_coord       = { 1,  0};
+  s32vec2 cell_south_coord      = { 0,  1};
+  s32vec2 cell_west_coord       = {-1,  0};
+  s32vec2 cell_north_east_coord = { 1, -1};
+  s32vec2 cell_south_east_coord = { 1,  1};
+  s32vec2 cell_south_west_coord = {-1,  1};
+  s32vec2 cell_north_west_coord = {-1, -1};
+
+  switch (shape)
+  {
+    case (NeighbourhoodRegionShape::MOORE):
+    {
+      coords_results[0] = cell_north_west_coord;
+      coords_results[1] = cell_north_coord;
+      coords_results[2] = cell_north_east_coord;
+      coords_results[3] = cell_west_coord;
+      coords_results[4] = cell_centre_coord;
+      coords_results[5] = cell_east_coord;
+      coords_results[6] = cell_south_west_coord;
+      coords_results[7] = cell_south_coord;
+      coords_results[8] = cell_south_east_coord;
+    } break;
+    case (NeighbourhoodRegionShape::VON_NEUMANN):
+    {
+      coords_results[0] = cell_north_coord;
+      coords_results[1] = cell_west_coord;
+      coords_results[2] = cell_centre_coord;
+      coords_results[3] = cell_east_coord;
+      coords_results[4] = cell_south_coord;
+    } break;
+    case (NeighbourhoodRegionShape::ONE_DIM):
+    {
+      coords_results[0] = cell_west_coord;
+      coords_results[1] = cell_centre_coord;
+      coords_results[2] = cell_east_coord;
+    } break;
+  }
+}
+
+
 b32
 is_null_state(RuleConfiguration *rule_configuration, CellState state)
 {
@@ -364,47 +419,11 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   CellState result;
 
+  // TODO: rule->n_inputs is a bit dodgy...
+  assert(rule->n_inputs == get_neighbourhood_region_n_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size) + 1);
+
   s32vec2 *neighbour_positions = allocate(s32vec2, rule->n_inputs);
-
-  s32vec2 cell_centre_coord     = { 0,  0};
-  s32vec2 cell_north_coord      = { 0, -1};
-  s32vec2 cell_east_coord       = { 1,  0};
-  s32vec2 cell_south_coord      = { 0,  1};
-  s32vec2 cell_west_coord       = {-1,  0};
-  s32vec2 cell_north_east_coord = { 1, -1};
-  s32vec2 cell_south_east_coord = { 1,  1};
-  s32vec2 cell_south_west_coord = {-1,  1};
-  s32vec2 cell_north_west_coord = {-1, -1};
-
-  switch (rule->config.neighbourhood_region_shape)
-  {
-    case (NeighbourhoodRegionShape::MOORE):
-    {
-      neighbour_positions[0] = cell_north_west_coord;
-      neighbour_positions[1] = cell_north_coord;
-      neighbour_positions[2] = cell_north_east_coord;
-      neighbour_positions[3] = cell_west_coord;
-      neighbour_positions[4] = cell_centre_coord;
-      neighbour_positions[5] = cell_east_coord;
-      neighbour_positions[6] = cell_south_west_coord;
-      neighbour_positions[7] = cell_south_coord;
-      neighbour_positions[8] = cell_south_east_coord;
-    } break;
-    case (NeighbourhoodRegionShape::VON_NEUMANN):
-    {
-      neighbour_positions[0] = cell_north_coord;
-      neighbour_positions[1] = cell_west_coord;
-      neighbour_positions[2] = cell_centre_coord;
-      neighbour_positions[3] = cell_east_coord;
-      neighbour_positions[4] = cell_south_coord;
-    } break;
-    case (NeighbourhoodRegionShape::ONE_DIM):
-    {
-      neighbour_positions[0] = cell_west_coord;
-      neighbour_positions[1] = cell_centre_coord;
-      neighbour_positions[2] = cell_east_coord;
-    } break;
-  }
+  get_neighbourhood_region_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size, neighbour_positions);
 
   RuleNode *node = get_rule_node(rule, rule->root_node);
 

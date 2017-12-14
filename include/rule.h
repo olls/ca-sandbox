@@ -30,7 +30,12 @@ enum struct NeighbourhoodRegionShape
 struct RuleConfiguration
 {
   NeighbourhoodRegionShape neighbourhood_region_shape;
+
+  /// The distance the neighbourhood region extends from the centre cell, see
+  ///   get_neighbourhood_region_n_cells() for definitions
   u32 neighbourhood_region_size;
+
+  /// Number of cell states the rule uses
   u32 n_states;
 
   /// Array of state values which are NULL states
