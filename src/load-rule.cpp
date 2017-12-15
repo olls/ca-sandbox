@@ -71,7 +71,7 @@ read_count_matching_value(RuleConfiguration *rule_config, String *count_matching
 b32
 is_cell_state_or_wildcard(char character)
 {
-  b32 result = character == '*' || is_letter(character);
+  b32 result = character == '*' || is_state_character(character);
   return result;
 }
 
@@ -334,10 +334,19 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     else
     {
       print("n_states: %d\n", rule_config->n_states);
+      print("states:");
+      for (u32 i = 0;
+           i < rule_config->n_states;
+           ++i)
+      {
+        String state_name = rule_config->state_names[i];
+        print(" %.*s", string_length(state_name), state_name.start);
+      }
+      print("\n");
       print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
       print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
       print("n_null_states: %d\n", rule_config->n_null_states);
-      print("null_states: ", rule_config->n_null_states);
+      print("null_states:", rule_config->n_null_states);
       for (u32 i = 0;
            i < rule_config->n_null_states;
            ++i)

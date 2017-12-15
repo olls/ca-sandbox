@@ -84,8 +84,6 @@ read_cell_block(String *file_string, Universe *universe, RuleConfiguration *rule
     {
       Cell *cell = cell_block->cells + cell_index;
 
-      consume_until(file_string, is_letter);
-
       b32 state_read = read_state_name(rule_config, file_string, &cell->state);
       if (!state_read)
       {

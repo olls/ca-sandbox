@@ -8,6 +8,10 @@
 
 
 b32
+is_state_character(char character);
+
+
+b32
 read_state_name(RuleConfiguration *rule_config, String *string, CellState *resulting_state_value);
 
 

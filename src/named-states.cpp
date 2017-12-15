@@ -37,14 +37,22 @@ state_value_from_name(RuleConfiguration *rule_config, String state_name, CellSta
 
 
 b32
+is_state_character(char character)
+{
+  b32 result = is_letter(character) || is_num(character);
+  return result;
+}
+
+
+b32
 read_state_name(RuleConfiguration *rule_config, String *string, CellState *resulting_state_value)
 {
   String state_name = {};
 
-  consume_until(string, is_letter);
+  consume_until(string, is_state_character);
   state_name.start = string->current_position;
 
-  consume_while(string, is_letter);
+  consume_while(string, is_state_character);
   state_name.end = string->current_position;
 
   b32 result = state_value_from_name(rule_config, state_name, resulting_state_value);
@@ -130,16 +138,8 @@ read_named_states_list(RuleConfiguration *rule_config, String states_list_string
 
   while (states_list_string.current_position < states_list_string.end)
   {
-    String current_state_string = {};
-
-    consume_until(&states_list_string, is_letter);
-    current_state_string.start = states_list_string.current_position;
-
-    consume_while(&states_list_string, is_letter);
-    current_state_string.end = states_list_string.current_position;
-
     CellState named_state_value;
-    b32 valid_state = state_value_from_name(rule_config, current_state_string, &named_state_value);
+    b32 valid_state = read_state_name(rule_config, &states_list_string, &named_state_value);
 
     if (valid_state)
     {
