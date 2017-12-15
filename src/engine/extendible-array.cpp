@@ -1,16 +1,16 @@
 #include <string.h>
 
-#include "extendable-array.h"
+#include "extendible-array.h"
 
 #include "allocate.h"
 #include "assert.h"
 
 
 void
-new_extendable_array(u32 element_size, ExtendableArray *result)
+new_extendible_array(u32 element_size, ExtendibleArray *result)
 {
   result->element_size = element_size,
-  result->array_size = EXTENDABLE_ARRAY_INITIAL_SIZE,
+  result->array_size = EXTENDIBLE_ARRAY_INITIAL_SIZE,
   result->next_free_element_position = 0,
 
   result->elements = allocate_size(result->element_size, result->array_size);
@@ -18,7 +18,7 @@ new_extendable_array(u32 element_size, ExtendableArray *result)
 
 
 void *
-get_from_extendable_array(ExtendableArray *array, u32 position)
+get_from_extendible_array(ExtendibleArray *array, u32 position)
 {
   void *result;
 
@@ -29,7 +29,7 @@ get_from_extendable_array(ExtendableArray *array, u32 position)
 
 
 u32
-add_to_extendable_array(ExtendableArray *array, void *new_element)
+add_to_extendible_array(ExtendibleArray *array, void *new_element)
 {
   if (array->next_free_element_position == array->array_size)
   {
@@ -42,7 +42,7 @@ add_to_extendable_array(ExtendableArray *array, void *new_element)
   u32 position = array->next_free_element_position;
   ++array->next_free_element_position;
 
-  void *slot = get_from_extendable_array(array, position);
+  void *slot = get_from_extendible_array(array, position);
   memcpy(slot, new_element, array->element_size);
 
   return position;

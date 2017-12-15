@@ -3,8 +3,10 @@
 
 #include "types.h"
 #include "text.h"
+
 #include "cell-storage.h"
 #include "simulate.h"
+#include "rule.h"
 
 
 /// Universe files are text files, containing a directory of CellBlock.
@@ -20,7 +22,7 @@
 
 
 b32
-load_universe_from_file(String file_string, Universe *universe);
+load_universe_from_file(String file_string, Universe *universe, RuleConfiguration *rule_config);
 
 
 b32
@@ -28,7 +30,7 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options);
 
 
 b32
-load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options);
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options, RuleConfiguration *rule_config);
 
 
 #endif

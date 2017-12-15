@@ -6,19 +6,19 @@
 #include "files.h"
 #include "parsing.h"
 #include "allocate.h"
-#include "extendable-array.h"
+#include "extendible-array.h"
 
 #include "rule.h"
+#include "named-states.h"
 
 
 b32
-read_count_matching_value(String *count_matching_string, RulePattern *result)
+read_count_matching_value(RuleConfiguration *rule_config, String *count_matching_string, RulePattern *rule_pattern_result)
 {
   b32 success = true;
-  result->count_matching_enabled = false;
+  rule_pattern_result->count_matching_enabled = false;
 
-  consume_until(count_matching_string, is_num);
-  result->count_matching_state = get_u32(count_matching_string);
+  read_state_name(rule_config, count_matching_string, &rule_pattern_result->count_matching_state);
 
   consume_until_char(count_matching_string, ',');
 
@@ -32,15 +32,15 @@ read_count_matching_value(String *count_matching_string, RulePattern *result)
     consume_until(count_matching_string, is_comparison_op);
     if (count_matching_string->current_position[0] == '>')
     {
-      result->count_matching_comparison = ComparisonOp::GREATER_THAN;
+      rule_pattern_result->count_matching_comparison = ComparisonOp::GREATER_THAN;
     }
     else if (count_matching_string->current_position[0] == '<')
     {
-      result->count_matching_comparison = ComparisonOp::LESS_THAN;
+      rule_pattern_result->count_matching_comparison = ComparisonOp::LESS_THAN;
     }
     else if (count_matching_string->current_position[0] == '=')
     {
-      result->count_matching_comparison = ComparisonOp::EQUALS;
+      rule_pattern_result->count_matching_comparison = ComparisonOp::EQUALS;
     }
     else
     {
@@ -58,8 +58,8 @@ read_count_matching_value(String *count_matching_string, RulePattern *result)
       }
       else
       {
-        result->count_matching_n = get_u32(count_matching_string);
-        result->count_matching_enabled = true;
+        rule_pattern_result->count_matching_n = get_u32(count_matching_string);
+        rule_pattern_result->count_matching_enabled = true;
       }
     }
   }
@@ -71,13 +71,13 @@ read_count_matching_value(String *count_matching_string, RulePattern *result)
 b32
 is_cell_state_or_wildcard(char character)
 {
-  b32 result = character == '*' || is_num(character);
+  b32 result = character == '*' || is_letter(character);
   return result;
 }
 
 
 b32
-read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *result)
+read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inputs, RulePattern *rule_pattern_result)
 {
   b32 success = true;
 
@@ -128,29 +128,30 @@ read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *
     }
     ++line.current_position;
 
-    consume_until(&line, is_num);
-    if (line.current_position == line.end)
+    String state_name_string = {.start = line.current_position,
+                                .current_position = line.current_position,
+                                .end = line.end};
+    success &= read_state_name(rule_config, &state_name_string, &rule_pattern_result->result);
+    if (!success)
     {
-      success &= false;
+      print("Error in rule pattern's result value.\n");
       return success;
     }
 
-    result->result = get_u32(&line);
-
     // Bounds for the whole of this pattern rule
     String pattern_block = {
-      .start = line.start,
+      .start = line.end,
       .current_position = line.end,
       .end = file_string->end
     };
 
-    // Find next blank line, i.e: '\n\n'
+    // Find next blank line, i.e: '\n\n', to set the end of the pattern_block to.
     b32 found_block_end = false;
     while (!found_block_end)
     {
       consume_until(&pattern_block, is_newline);
 
-      if (pattern_block.current_position[1] == '\n')
+      if (pattern_block.current_position[1] == '\n' || pattern_block.current_position == pattern_block.end)
       {
         pattern_block.end = pattern_block.current_position;
         found_block_end = true;
@@ -162,6 +163,7 @@ read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *
     }
 
     pattern_block.current_position = pattern_block.start;
+    file_string->current_position = pattern_block.end;
 
     // Get pattern of cells
 
@@ -169,24 +171,32 @@ read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *
          cell_n < n_inputs;
          ++cell_n)
     {
-      consume_until(file_string, is_cell_state_or_wildcard);
+      consume_until(&pattern_block, is_cell_state_or_wildcard);
 
-      if (file_string->current_position == file_string->end)
+      if (pattern_block.current_position == pattern_block.end)
       {
         success &= false;
         break;
       }
       else
       {
-        if (file_string->current_position[0] == '*')
+        CellStateWildcard *this_cell_state_wildcard = rule_pattern_result->cell_states + cell_n;
+
+        if (pattern_block.current_position[0] == '*')
         {
-          result->cell_states[cell_n].wildcard = true;
-          ++file_string->current_position;
+          this_cell_state_wildcard->wildcard = true;
+          ++pattern_block.current_position;
         }
         else
         {
-          result->cell_states[cell_n].wildcard = false;
-          result->cell_states[cell_n].state = get_u32(file_string);
+          this_cell_state_wildcard->wildcard = false;
+          success &= read_state_name(rule_config, &pattern_block, &this_cell_state_wildcard->state);
+
+          if (!success)
+          {
+            print("Error in rule pattern's pattern.\n");
+            break;
+          }
         }
       }
     }
@@ -197,7 +207,7 @@ read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *
     b32 count_matching_exists = find_label_value(pattern_block, "count_matching", &count_matching_string);
     if (count_matching_exists)
     {
-      success &= read_count_matching_value(&count_matching_string, result);
+      success &= read_count_matching_value(rule_config, &count_matching_string, rule_pattern_result);
     }
   }
 
@@ -206,19 +216,23 @@ read_rule_pattern(String *file_string, u32 n_states, u32 n_inputs, RulePattern *
 
 
 b32
-read_rule_patterns(String *file_string, u32 n_states, u32 n_inputs, ExtendableArray *rule_patterns)
+read_rule_patterns(RuleConfiguration *rule_config, String file_string, u32 n_inputs, ExtendibleArray *rule_patterns)
 {
   b32 success = true;
 
   RulePattern *rule_pattern = (RulePattern *)allocate_size(rule_patterns->element_size, 1);
 
-  while (file_string->current_position != file_string->end)
+  while (file_string.current_position != file_string.end)
   {
 
-    b32 found_pattern = read_rule_pattern(file_string, n_states, n_inputs, rule_pattern);
+    b32 found_pattern = read_rule_pattern(rule_config, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
     {
-      add_to_extendable_array(rule_patterns, rule_pattern);
+      add_to_extendible_array(rule_patterns, rule_pattern);
+    }
+    else
+    {
+      print("Error in rule pattern.\n");
     }
   }
 
@@ -241,6 +255,10 @@ read_rule_neighbourhood_region_shape_value(String neighbourhood_region_shape_str
   {
     *result = NeighbourhoodRegionShape::VON_NEUMANN;
   }
+  else if (string_equals(neighbourhood_region_shape_string, "ONE_DIM"))
+  {
+    *result = NeighbourhoodRegionShape::ONE_DIM;
+  }
   else
   {
     success = false;
@@ -248,7 +266,6 @@ read_rule_neighbourhood_region_shape_value(String neighbourhood_region_shape_str
 
   return success;
 }
-
 
 
 b32
@@ -268,6 +285,14 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
     rule_config->n_states = 0;
     find_label_value_u32(file_string, "n_states", &rule_config->n_states);
+    b32 states_success = rule_config->n_states > 0;
+
+    if (states_success)
+    {
+      states_success &= find_state_names(file_string, rule_config);
+    }
+
+    success &= states_success;
 
     String neighbourhood_region_shape_string = {};
     b32 neighbourhood_region_shape_found = find_label_value(file_string, "neighbourhood_region_shape", &neighbourhood_region_shape_string);
@@ -277,6 +302,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     }
     else
     {
+      print("No neighbourhood_region_shape supplied.\n");
       success &= false;
     }
 
@@ -285,11 +311,12 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
     String null_states_string = {};
     b32 null_states_found = find_label_value(file_string, "null_states", &null_states_string);
-    if (null_states_found)
+    if (null_states_found && states_success)
     {
-      rule_config->n_null_states = read_u32_list(null_states_string, &rule_config->null_states);
+      rule_config->n_null_states = read_named_states_list(rule_config, null_states_string, &rule_config->null_states);
       if (rule_config->n_null_states == 0)
       {
+        print("Error in null_states.\n");
         success &= false;
       }
     }
@@ -299,7 +326,6 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     }
 
     success &= rule_config->neighbourhood_region_size > 0;
-    success &= rule_config->n_states > 0;
 
     if (!success)
     {
@@ -322,20 +348,21 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
-      new_extendable_array(sizeof(RulePattern) + (sizeof(CellStateWildcard) * n_inputs), &rule_config->rule_patterns);
+      new_extendible_array(sizeof(RulePattern) + (sizeof(CellStateWildcard) * n_inputs), &rule_config->rule_patterns);
 
-      success &= read_rule_patterns(&file_string, rule_config->n_states, n_inputs, &rule_config->rule_patterns);
+      success &= read_rule_patterns(rule_config, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)
       {
         print("Error whilst reading rule patterns.\n");
       }
       else
       {
+        print("n_rule_patterns: %d\n", rule_config->rule_patterns.next_free_element_position);
         for (u32 rule_pattern_n = 0;
              rule_pattern_n < rule_config->rule_patterns.next_free_element_position;
              ++rule_pattern_n)
         {
-          RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&rule_config->rule_patterns, rule_pattern_n);
+          RulePattern *rule_pattern = (RulePattern *)get_from_extendible_array(&rule_config->rule_patterns, rule_pattern_n);
           print("Rule Pattern:\n");
           print("  result: %d\n", rule_pattern->result);
           print("  cells: ");

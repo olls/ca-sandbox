@@ -83,6 +83,14 @@ b32
 string_equals(String string, const char *search);
 
 
+b32
+strings_equal(String *string, String *search);
+
+
+u32
+string_length(String string);
+
+
 u32
 get_u32(String *string);
 

@@ -171,6 +171,42 @@ string_equals(String string, const char *search)
 }
 
 
+b32
+strings_equal(String *a, String *b)
+{
+  b32 success = false;
+
+  u32 a_length = a->end - a->start;
+  u32 b_length = b->end - b->start;
+
+  if (a_length == b_length)
+  {
+    success = true;
+
+    for (u32 char_index = 0;
+         char_index < a_length;
+         ++char_index)
+    {
+      if (a->start[char_index] != b->start[char_index])
+      {
+        success = false;
+        break;
+      }
+    }
+  }
+
+  return success;
+}
+
+
+u32
+string_length(String string)
+{
+  u32 result = string.end - string.start;
+  return result;
+}
+
+
 u32
 get_u32(String *string)
 {

@@ -6,7 +6,7 @@
 #include "assert.h"
 #include "print.h"
 #include "maths.h"
-#include "extendable-array.h"
+#include "extendible-array.h"
 
 #include "load-rule.h"
 #include "simulate.h"
@@ -172,7 +172,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
        pattern_n < config->rule_patterns.next_free_element_position;
        ++pattern_n)
   {
-    RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&config->rule_patterns, pattern_n);
+    RulePattern *rule_pattern = (RulePattern *)get_from_extendible_array(&config->rule_patterns, pattern_n);
 
     b32 matches = true;
     u32 count_matching_state_n = 0;

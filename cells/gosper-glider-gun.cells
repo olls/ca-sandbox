@@ -1,5 +1,5 @@
 cell_block_dim: 9
-n_cell_blocks: 5
+n_cell_blocks: 4
 
 border_type: INFINITE
 border_min_block: -2, -2
@@ -7,57 +7,49 @@ border_min_cell: 0, 0
 border_max_block: 5, 5
 border_max_cell: 0, 0
 
+initial_states: O
+initialisation_type: RANDOM
+
 CellBlock: 0, 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 1 1 0 0 0 0 0
-0 0 1 1 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O X X O O O O O
+O O X X O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
 
 CellBlock: 1, 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 1 1 0 0
-0 0 0 0 1 0 0 0 1
-0 0 0 1 0 0 0 0 0
-0 0 0 1 0 0 0 1 0
-0 0 0 1 0 0 0 0 0
-0 0 0 0 1 0 0 0 1
-0 0 0 0 0 1 1 0 0
+O O O O O O O O O
+O O O O O O O O O
+O O O O O X X O O
+O O O O X O O O X
+O O O X O O O O O
+O O O X O O O X O
+O O O X O O O O O
+O O O O X O O O X
+O O O O O X X O O
 
 CellBlock: 2, 0
-0 0 0 0 0 0 0 0 1
-0 0 0 0 0 0 1 0 1
-0 0 0 0 1 1 0 0 0
-0 0 0 0 1 1 0 0 0
-1 0 0 0 1 1 0 0 0
-1 1 0 0 0 0 1 0 1
-1 0 0 0 0 0 0 0 1
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-
-CellBlock: 3, 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
+O O O O O O O O X
+O O O O O O X O X
+O O O O X X O O O
+O O O O X X O O O
+X O O O X X O O O
+X X O O O O X O X
+X O O O O O O O X
+O O O O O O O O O
+O O O O O O O O O
 
 CellBlock: 4, 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-1 1 0 0 0 0 0 0 0
-1 1 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
+O O O O O O O O O
+O O O O O O O O O
+X X O O O O O O O
+X X O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O
+O O O O O O O O O

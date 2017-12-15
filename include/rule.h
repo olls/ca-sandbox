@@ -1,7 +1,8 @@
 #ifndef RULE_H_DEF
 #define RULE_H_DEF
 
-#include "extendable-array.h"
+#include "extendible-array.h"
+#include "text.h"
 
 #include "cell.h"
 #include "border.h"
@@ -38,12 +39,15 @@ struct RuleConfiguration
   /// Number of cell states the rule uses
   u32 n_states;
 
+  /// Array of state names, indexed by state value
+  String *state_names;
+
   /// Array of state values which are NULL states
-  u32 *null_states;
+  CellState *null_states;
   /// Length of null_states
   u32 n_null_states;
 
-  ExtendableArray rule_patterns;
+  ExtendibleArray rule_patterns;
 };
 
 

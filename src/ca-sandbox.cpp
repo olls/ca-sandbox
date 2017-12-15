@@ -6,7 +6,7 @@
 #include "allocate.h"
 #include "files.h"
 #include "text.h"
-#include "extendable-array.h"
+#include "extendible-array.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"
@@ -169,18 +169,6 @@ main(int argc, const char *argv[])
 
         if (argc >= 3)
         {
-          const char *universe_filename = argv[1];
-          print("\nLoading universe file: %s\n", universe_filename);
-
-          File universe_file;
-          String universe_file_string = get_file_string(universe_filename, &universe_file);
-
-          running &= load_universe_from_file(universe_file_string, &universe);
-          running &= load_simulate_options(universe_file_string, &simulate_options);
-          running &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options);
-
-          close_file(&universe_file);
-
           const char *rule_filename = argv[2];
 
           print("\nLoading rule file: %s\n", rule_filename);
@@ -190,6 +178,19 @@ main(int argc, const char *argv[])
           build_rule_tree(&loaded_rule);
           // print_rule_tree(&loaded_rule);
 
+          print("\n");
+
+          const char *universe_filename = argv[1];
+          print("\nLoading universe file: %s\n", universe_filename);
+
+          File universe_file;
+          String universe_file_string = get_file_string(universe_filename, &universe_file);
+
+          running &= load_universe_from_file(universe_file_string, &universe, &loaded_rule.config);
+          running &= load_simulate_options(universe_file_string, &simulate_options);
+          running &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options, &loaded_rule.config);
+
+          close_file(&universe_file);
           print("\n");
         }
         else
@@ -207,6 +208,7 @@ main(int argc, const char *argv[])
 
         if (!running)
         {
+          print("Quitting\n");
           break;
         }
 

@@ -6,12 +6,14 @@
 #include "parsing.h"
 #include "files.h"
 #include "allocate.h"
+
 #include "cell-storage.h"
 #include "simulate.h"
+#include "named-states.h"
 
 
 void
-read_cell_block(String *file_string, Universe *universe)
+read_cell_block(String *file_string, Universe *universe, RuleConfiguration *rule_config)
 {
   String line;
   String label;
@@ -72,6 +74,8 @@ read_cell_block(String *file_string, Universe *universe)
 
     print("CellBlock: %d, %d\n", x, y);
 
+    // TODO: Use a block string to contain separate cell blocks, as is done for the patterns.
+
     CellBlock *cell_block = create_uninitialised_cell_block(universe, (s32vec2){x, y});
 
     for (u32 cell_index = 0;
@@ -80,9 +84,13 @@ read_cell_block(String *file_string, Universe *universe)
     {
       Cell *cell = cell_block->cells + cell_index;
 
-      consume_until(file_string, is_num);
+      consume_until(file_string, is_letter);
 
-      cell->state = get_u32(file_string);
+      b32 state_read = read_state_name(rule_config, file_string, &cell->state);
+      if (!state_read)
+      {
+        print("Invalid state name in cell block.\n");
+      }
     }
   }
 }
@@ -93,7 +101,7 @@ read_cell_block(String *file_string, Universe *universe)
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] universe  Universe to fill in
 b32
-load_universe_from_file(String file_string, Universe *universe)
+load_universe_from_file(String file_string, Universe *universe, RuleConfiguration *rule_config)
 {
   b32 success = true;
 
@@ -121,7 +129,7 @@ load_universe_from_file(String file_string, Universe *universe)
          cell_block_index < n_cell_blocks;
          ++cell_block_index)
     {
-      read_cell_block(&file_string, universe);
+      read_cell_block(&file_string, universe, rule_config);
     }
   }
 
@@ -259,7 +267,7 @@ debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initiali
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] cell_intialisation_options  CellInitialisationOptions object to fill in
 b32
-load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options)
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_config)
 {
   b32 success = true;
 
@@ -275,9 +283,11 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
     if (success)
     {
-      cell_initialisation_options->set_of_initial_states_size = read_u32_list(initial_states_string, (u32 **)&cell_initialisation_options->set_of_initial_states);
+      cell_initialisation_options->set_of_initial_states_size = read_named_states_list(rule_config, initial_states_string, &cell_initialisation_options->set_of_initial_states);
+
       if (cell_initialisation_options->set_of_initial_states_size == 0)
       {
+        print("No initial states found\n");
         success &= false;
       }
     }
@@ -286,6 +296,10 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
   if (success)
   {
     debug_print_cell_initialisation_options(cell_initialisation_options);
+  }
+  else
+  {
+    print("Error whilst loading cell initialisation options.\n");
   }
 
   return success;
