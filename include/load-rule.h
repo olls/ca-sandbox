@@ -24,9 +24,16 @@
 //     The condition is represented by one of >, <, =, followed by the number to compare against.
 
 
-struct CellStateWildcard
+enum struct PatternCellStateType
 {
-  b32 wildcard;
+  WILDCARD,
+  STATE
+};
+
+
+struct PatternCellState
+{
+  PatternCellStateType type;
   CellState state;
 };
 
@@ -49,7 +56,7 @@ struct RulePattern
   u32 count_matching_n;
 
   /// Left-to-right, top-to-bottom list of cell states in pattern
-  CellStateWildcard cell_states[];
+  PatternCellState cell_states[];
 };
 
 

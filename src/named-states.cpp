@@ -39,7 +39,7 @@ state_value_from_name(RuleConfiguration *rule_config, String state_name, CellSta
 b32
 is_state_character(char character)
 {
-  b32 result = is_letter(character) || is_num(character);
+  b32 result = is_letter(character) || is_num(character) || character == '_';
   return result;
 }
 

@@ -143,6 +143,14 @@ get_neighbourhood_region_cell_delta(NeighbourhoodRegionShape shape, u32 size, u3
 }
 
 
+u32
+get_neighbourhood_region_centre_index(NeighbourhoodRegionShape shape, u32 size)
+{
+  u32 result = get_neighbourhood_region_n_cells(shape, size) / 2;
+  return result;
+}
+
+
 b32
 is_null_state(RuleConfiguration *rule_configuration, CellState state)
 {
@@ -182,22 +190,27 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
          ++input_n)
     {
       CellState in = inputs[input_n];
-      CellStateWildcard pattern_input = rule_pattern->cell_states[input_n];
+      PatternCellState pattern_input = rule_pattern->cell_states[input_n];
 
-      if (!pattern_input.wildcard)
+      switch (pattern_input.type)
       {
-        if (pattern_input.state != in)
+        case (PatternCellStateType::STATE):
         {
-          matches = false;
-          break;
-        }
-      }
-      else if (rule_pattern->count_matching_enabled)
-      {
-        if (in == rule_pattern->count_matching_state)
+          if (pattern_input.state != in)
+          {
+            matches = false;
+            break;
+          }
+        } break;
+
+        case (PatternCellStateType::WILDCARD):
         {
-          ++count_matching_state_n;
-        }
+          if (rule_pattern->count_matching_enabled &&
+              in == rule_pattern->count_matching_state)
+          {
+            ++count_matching_state_n;
+          }
+        } break;
       }
     }
 
@@ -230,8 +243,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
   {
     // Default rule, keep previous state
 
-    // TODO: Is this always correct?
-    u32 center_position = n_inputs / 2;
+    u32 center_position = get_neighbourhood_region_centre_index(config->neighbourhood_region_shape, config->neighbourhood_region_size);
 
     result = inputs[center_position];
   }
@@ -332,6 +344,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
          child_n < rule->config.n_states;
          ++child_n)
     {
+      // This is the list of inputs for the current child
       tree_path[depth] = child_n;
 
       u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path);
@@ -339,8 +352,9 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
     }
   }
 
-  // Optimise node
+  // Optimise finished node
 
+  // If it matches any existing nodes, use their index instead of creating a new node.
   s32 existing_node_position = find_node(rule, node);
   if (existing_node_position >= 0)
   {
@@ -392,7 +406,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, u32 n_inputs, CellState inp
 
     // Print inputs (path to node)
     for (u32 input_n = 0;
-         input_n < n_inputs;
+         input_n < depth;
          ++input_n)
     {
       print("%d ", inputs[input_n]);
@@ -484,8 +498,6 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   if (reached_result)
   {
-    assert(input_n == rule->n_inputs);
-
     result = node->leaf_value;
   }
   else

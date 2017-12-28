@@ -42,4 +42,21 @@ min(T a, T b)
 }
 
 
+inline u64
+ipow(u64 base, u64 exp)
+{
+    u64 result = 1;
+    while (exp)
+    {
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        base *= base;
+    }
+
+    return result;
+}
+
+
+
 #endif

@@ -69,7 +69,7 @@ read_count_matching_value(RuleConfiguration *rule_config, String *count_matching
 
 
 b32
-is_cell_state_or_wildcard(char character)
+is_pattern_cell_state_character(char character)
 {
   b32 result = character == '*' || is_state_character(character);
   return result;
@@ -171,7 +171,7 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
          cell_n < n_inputs;
          ++cell_n)
     {
-      consume_until(&pattern_block, is_cell_state_or_wildcard);
+      consume_until(&pattern_block, is_pattern_cell_state_character);
 
       if (pattern_block.current_position == pattern_block.end)
       {
@@ -180,17 +180,17 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
       }
       else
       {
-        CellStateWildcard *this_cell_state_wildcard = rule_pattern_result->cell_states + cell_n;
+        PatternCellState *this_cell_state_pattern = rule_pattern_result->cell_states + cell_n;
 
         if (pattern_block.current_position[0] == '*')
         {
-          this_cell_state_wildcard->wildcard = true;
+          this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
           ++pattern_block.current_position;
         }
         else
         {
-          this_cell_state_wildcard->wildcard = false;
-          success &= read_state_name(rule_config, &pattern_block, &this_cell_state_wildcard->state);
+          this_cell_state_pattern->type = PatternCellStateType::STATE;
+          success &= read_state_name(rule_config, &pattern_block, &this_cell_state_pattern->state);
 
           if (!success)
           {
@@ -357,7 +357,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
-      new_extendible_array(sizeof(RulePattern) + (sizeof(CellStateWildcard) * n_inputs), &rule_config->rule_patterns);
+      new_extendible_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs), &rule_config->rule_patterns);
 
       success &= read_rule_patterns(rule_config, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)
@@ -379,12 +379,12 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
                cell_n < n_inputs;
                ++cell_n)
           {
-            CellStateWildcard cell = rule_pattern->cell_states[cell_n];
-            if (cell.wildcard)
+            PatternCellState cell = rule_pattern->cell_states[cell_n];
+            if (cell.type == PatternCellStateType::WILDCARD)
             {
               print("* ");
             }
-            else
+            else if (cell.type == PatternCellStateType::STATE)
             {
               print("%d ", cell.state);
             }
