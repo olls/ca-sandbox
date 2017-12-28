@@ -288,26 +288,6 @@ main(int argc, const char *argv[])
         0,                    0,               0,  1
       };
 
-#if 0
-      //
-      // Test cell blocks drawing
-      //
-
-      debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
-
-      glBindVertexArray(debug_cell_block_outline_drawing_vao);
-      glUseProgram(debug_cell_block_outline_drawing_shader_program);
-      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
-
-      // Get attribute locations
-      init_debug_cell_block_outline_drawing_attributes(&debug_cell_block_outline_drawing_vbo, debug_cell_block_outline_drawing_shader_program);
-
-      debug_cell_block_outline_draw(&debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
-
-      opengl_print_errors();
-      glBindVertexArray(0);
-#endif
-
       //
       // Cell instance drawing
       //
@@ -328,6 +308,26 @@ main(int argc, const char *argv[])
 
       opengl_print_errors();
       glBindVertexArray(0);
+
+#if 0
+      //
+      // Test cell blocks drawing
+      //
+
+      debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+
+      glBindVertexArray(debug_cell_block_outline_drawing_vao);
+      glUseProgram(debug_cell_block_outline_drawing_shader_program);
+      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+
+      // Get attribute locations
+      init_debug_cell_block_outline_drawing_attributes(&debug_cell_block_outline_drawing_vbo, debug_cell_block_outline_drawing_shader_program);
+
+      debug_cell_block_outline_draw(&debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+
+      opengl_print_errors();
+      glBindVertexArray(0);
+#endif
 
       //
       // imGUI Rendering

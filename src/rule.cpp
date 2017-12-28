@@ -394,7 +394,7 @@ build_rule_tree(Rule *result)
 
 
 void
-print_node(Rule *rule, u32 node_position, u32 depth, u32 n_inputs, CellState inputs[])
+print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
@@ -420,7 +420,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, u32 n_inputs, CellState inp
          ++child_n)
     {
       inputs[depth] = child_n;
-      print_node(rule, rule_node->children[child_n], depth+1, n_inputs, inputs);
+      print_node(rule, rule_node->children[child_n], depth+1, inputs);
     }
   }
 }
@@ -432,7 +432,7 @@ print_rule_tree(Rule *rule_tree)
   print("\nPrinting Rule Tree\n");
 
   CellState inputs[rule_tree->n_inputs];
-  print_node(rule_tree, rule_tree->root_node, 0, rule_tree->n_inputs, inputs);
+  print_node(rule_tree, rule_tree->root_node, 0, inputs);
 
   print("\n");
 }
