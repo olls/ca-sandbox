@@ -8,7 +8,7 @@
 #include "text.h"
 #include "assert.h"
 #include "files.h"
-#include "cell-storage.h"
+#include "universe.h"
 
 
 void

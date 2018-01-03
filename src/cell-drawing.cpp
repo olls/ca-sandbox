@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include "cell-drawing.h"
 
 #include "util.h"
 #include "print.h"
@@ -6,7 +7,7 @@
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
 #include "cell-drawing.h"
-#include "cell-storage.h"
+#include "universe.h"
 
 
 /// @file

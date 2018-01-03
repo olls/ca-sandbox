@@ -1,7 +1,7 @@
 #ifndef SIMULATE_H_DEF
 #define SIMULATE_H_DEF
 
-#include "cell-storage.h"
+#include "universe.h"
 #include "cell-block-coordinate-system.h"
 #include "rule.h"
 #include "border.h"

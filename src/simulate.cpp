@@ -4,7 +4,7 @@
 #include "types.h"
 #include "assert.h"
 #include "allocate.h"
-#include "cell-storage.h"
+#include "universe.h"
 #include "cell-block-coordinate-system.h"
 #include "rule.h"
 #include "border.h"

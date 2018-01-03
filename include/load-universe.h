@@ -4,12 +4,12 @@
 #include "types.h"
 #include "text.h"
 
-#include "cell-storage.h"
+#include "universe.h"
 #include "simulate.h"
 #include "rule.h"
 
 
-/// Universe files are text files, containing a directory of CellBlock.
+/// Universe files are text files, containing a directory of CellBlock%s.
 ///
 ///   cell_block_dim: %d
 ///   n_cell_blocks: %d

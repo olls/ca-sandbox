@@ -13,7 +13,7 @@
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
 
-#include "cell-storage.h"
+#include "universe.h"
 #include "load-universe.h"
 #include "cell-drawing.h"
 #include "rule.h"

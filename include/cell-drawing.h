@@ -2,7 +2,7 @@
 #define CELL_DRAWING_H_DEF
 
 #include "opengl-buffer.h"
-#include "cell-storage.h"
+#include "universe.h"
 
 
 /// @file

@@ -3,7 +3,7 @@
 
 #include "types.h"
 #include "vectors.h"
-#include "cell-storage.h"
+#include "universe.h"
 
 
 enum struct BorderType

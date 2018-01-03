@@ -1,5 +1,5 @@
-#ifndef CELL_STORAGE_H_DEF
-#define CELL_STORAGE_H_DEF
+#ifndef UNIVERSE_H_DEF
+#define UNIVERSE_H_DEF
 
 
 #include "cell.h"
@@ -19,6 +19,12 @@
 /// - To iterate over all CellBlock%s / Cell%s just loop through the hashmap.
 /// - Possible optimisation: CellBlocks store pointers to neighbours for quick access to border cell
 ///     states.
+///
+/// Resetting Universes:
+/// - The currently simulated state of the universe is stored in one main Universe hash map
+/// - The canonical initial state of the universe is stored in the .cells file.
+/// - Modifications to the universe can be saved to a .cells file, and then loaded as an initial
+///     state.
 
 
 const u32 DEFAULT_CELL_BLOCK_DIM = 16;

@@ -1,7 +1,7 @@
 #ifndef SAVE_UNIVERSE_H_DEF
 #define SAVE_UNIVERSE_H_DEF
 
-#include "cell-storage.h"
+#include "universe.h"
 
 
 b32

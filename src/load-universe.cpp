@@ -7,7 +7,7 @@
 #include "files.h"
 #include "allocate.h"
 
-#include "cell-storage.h"
+#include "universe.h"
 #include "simulate.h"
 #include "named-states.h"
 
