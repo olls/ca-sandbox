@@ -10,29 +10,69 @@
 
 struct vec2
 {
-  r32 x;
-  r32 y;
+  union
+  {
+    struct
+    {
+      r32 x;
+      r32 y;
+    };
+    struct
+    {
+      r32 es[2];
+    };
+  };
 };
 
 
 struct uvec2
 {
-  u32 x;
-  u32 y;
+  union
+  {
+    struct
+    {
+      u32 x;
+      u32 y;
+    };
+    struct
+    {
+      u32 es[2];
+    };
+  };
 };
 
 
 struct s32vec2
 {
-  s32 x;
-  s32 y;
+  union
+  {
+    struct
+    {
+      s32 x;
+      s32 y;
+    };
+    struct
+    {
+      s32 es[2];
+    };
+  };
 };
 
 
 struct s64vec2
 {
-  s64 x;
-  s64 y;
+  union
+  {
+    struct
+    {
+      s64 x;
+      s64 y;
+    };
+    struct
+    {
+      s64 es[2];
+    };
+  };
 };
 
 
@@ -136,33 +176,73 @@ vec2_eq(vec a, vec b)
 
 struct vec3
 {
-  r32 x;
-  r32 y;
-  r32 z;
+  union
+  {
+    struct
+    {
+      r32 x;
+      r32 y;
+      r32 z;
+    };
+    struct
+    {
+      r32 es[3];
+    };
+  };
 };
 
 
 struct uvec3
 {
-  u32 x;
-  u32 y;
-  u32 z;
+  union
+  {
+    struct
+    {
+      u32 x;
+      u32 y;
+      u32 z;
+    };
+    struct
+    {
+      u32 es[3];
+    };
+  };
 };
 
 
 struct s32vec3
 {
-  s32 x;
-  s32 y;
-  s32 z;
+  union
+  {
+    struct
+    {
+      s32 x;
+      s32 y;
+      s32 z;
+    };
+    struct
+    {
+      s32 es[3];
+    };
+  };
 };
 
 
 struct s64vec3
 {
-  s64 x;
-  s64 y;
-  s64 z;
+  union
+  {
+    struct
+    {
+      s64 x;
+      s64 y;
+      s64 z;
+    };
+    struct
+    {
+      s64 es[3];
+    };
+  };
 };
 
 
@@ -275,37 +355,77 @@ vec3_eq(vec a, vec b)
 
 struct vec4
 {
-  r32 w;
-  r32 x;
-  r32 y;
-  r32 z;
+  union
+  {
+    struct
+    {
+      r32 w;
+      r32 x;
+      r32 y;
+      r32 z;
+    };
+    struct
+    {
+      r32 es[4];
+    };
+  };
 };
 
 
 struct uvec4
 {
-  u32 w;
-  u32 x;
-  u32 y;
-  u32 z;
+  union
+  {
+    struct
+    {
+      u32 w;
+      u32 x;
+      u32 y;
+      u32 z;
+    };
+    struct
+    {
+      u32 es[4];
+    };
+  };
 };
 
 
 struct s32vec4
 {
-  s32 w;
-  s32 x;
-  s32 y;
-  s32 z;
+  union
+  {
+    struct
+    {
+      s32 w;
+      s32 x;
+      s32 y;
+      s32 z;
+    };
+    struct
+    {
+      s32 es[4];
+    };
+  };
 };
 
 
 struct s64vec4
 {
-  s64 w;
-  s64 x;
-  s64 y;
-  s64 z;
+  union
+  {
+    struct
+    {
+      s64 w;
+      s64 x;
+      s64 y;
+      s64 z;
+    };
+    struct
+    {
+      s64 es[4];
+    };
+  };
 };
 
 
