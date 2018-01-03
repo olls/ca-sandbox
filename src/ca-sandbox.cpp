@@ -17,6 +17,7 @@
 #include "rule.h"
 #include "load-rule.h"
 #include "simulate.h"
+#include "rule-ui.h"
 #include "misc-ui.h"
 #include "simulation-ui.h"
 
@@ -261,6 +262,7 @@ main(int argc, const char *argv[])
 
       miscellaneous_ui(&misc_ui);
 
+      rule_ui(&loaded_rule);
       simulate_ui(&simulate_options, &universe);
 
       //

@@ -190,8 +190,10 @@ find_node(Rule *rule, RuleNode *node)
 
 
 u32
-add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
+add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_estimate)
 {
+  static u64 n_nodes_traced = 0;
+
   u32 node_position;
 
   // Temporary storage for the node
@@ -201,12 +203,23 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
   {
     node->is_leaf = true;
     node->leaf_value = use_rule_patterns_to_get_result(&rule->config, rule->n_inputs, tree_path);
+
+    u64 intervals = 20;
+    if (n_nodes_traced % (n_nodes_estimate / intervals) == 0)
+    {
+      r64 percent_done = 100 * (r64)n_nodes_traced / (r64)n_nodes_estimate;
+      print("Generating rule tree: %.1lf\%, %lu/%lu\n", percent_done, n_nodes_traced, n_nodes_estimate);
+    }
+    ++n_nodes_traced;
   }
   else
   {
     node->is_leaf = false;
 
     // Generate all children by iterating over all states for this level/neighbour
+    // If the rule pattern is NOT_USED for this input, only run the branch once and set the result
+    //   of all children to the same resulting node.
+
     for (CellState child_n = 0;
          child_n < rule->config.named_states.n_states;
          ++child_n)
@@ -214,7 +227,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
       // This is the list of inputs for the current child
       tree_path[depth] = child_n;
 
-      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path);
+      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path, n_nodes_estimate);
       node->children[child_n] = child_position;
     }
   }
@@ -229,12 +242,12 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
   }
   else
   {
+    // Create new node
+
     node_position = new_node(rule);
     RuleNode *new_node = get_rule_node(rule, node_position);
 
     memcpy(new_node, node, rule->rule_node_size);
-
-    u32 a = 0;
   }
 
   un_allocate(node);
@@ -255,8 +268,12 @@ build_rule_tree(Rule *result)
 
   result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size);
 
+  u64 n_nodes_estimate = ipow((u64)result->config.named_states.n_states, (u64)result->n_inputs);
+  print("Building rule tree: %lu\n", n_nodes_estimate);
+
+  // The tree_path is used to store the route taken through the tree to reach a leaf node.
   CellState *tree_path = allocate(CellState, result->n_inputs);
-  result->root_node = add_node_to_rule_tree(result, 0, tree_path);
+  result->root_node = add_node_to_rule_tree(result, 0, tree_path, n_nodes_estimate);
 }
 
 
