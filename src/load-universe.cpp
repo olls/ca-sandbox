@@ -302,3 +302,41 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
   return success;
 }
+
+
+/// Loads the .cells file into the various structs.
+///
+/// Fills: Universe, CellInitialisationOptions, and SimulateOptions
+/// UniverseUI holds the .cell file state
+/// NamedStates is needed to read the states in the .cells file
+///
+/// TODO: Why is this in here?
+b32
+load_universe(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+{
+  b32 success = true;
+
+  print("\nLoading universe file: %s\n", filename);
+
+  destroy_cell_hashmap(universe);
+  init_cell_hashmap(universe);
+
+  File universe_file;
+  String universe_file_string = get_file_string(filename, &universe_file);
+  if (universe_file_string.start == 0)
+  {
+    success &= false;
+  }
+  else
+  {
+    success &= load_universe_from_file(universe_file_string, universe, named_states);
+    success &= load_simulate_options(universe_file_string, simulate_options);
+    success &= load_cell_initialisation_options(universe_file_string, cell_initialisation_options, named_states);
+
+    close_file(&universe_file);
+  }
+
+  print("\n");
+
+  return success;
+}

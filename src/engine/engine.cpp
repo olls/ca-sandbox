@@ -21,7 +21,7 @@ const b32 FULLSCREEN = false;
 const u32 WINDOW_WIDTH = 1920;
 const u32 WINDOW_HEIGHT = 1080;
 #else
-const b32 FULLSCREEN = true;
+const b32 FULLSCREEN = false;
 const u32 WINDOW_WIDTH = 1280;
 const u32 WINDOW_HEIGHT = 720;
 #endif
@@ -159,7 +159,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   glViewport(0, 0, engine->window.width, engine->window.height);
 
-#define OPEN_GL_DEBUG
+// #define OPEN_GL_DEBUG
 #ifdef OPEN_GL_DEBUG
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

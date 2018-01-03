@@ -27,6 +27,34 @@ init_cell_hashmap(Universe *universe)
 }
 
 
+void
+destroy_cell_hashmap(Universe *universe)
+{
+  if (universe->hashmap != 0)
+  {
+    // Un-allocate all CellBlocks in the hashmap
+    for (u32 slot_n = 0;
+         slot_n < universe->hashmap_size;
+         ++slot_n)
+    {
+      CellBlock *cell_block = universe->hashmap[slot_n];
+
+      while (cell_block != 0)
+      {
+        CellBlock *next = cell_block->next_block;
+        un_allocate(cell_block);
+        cell_block = next;
+      }
+    }
+  }
+
+  if (universe->hashmap != 0)
+  {
+    un_allocate(universe->hashmap);
+  }
+}
+
+
 CellBlock *
 allocate_cell_block(Universe *universe, s32vec2 position)
 {

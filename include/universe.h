@@ -77,6 +77,10 @@ void
 init_cell_hashmap(Universe *universe);
 
 
+void
+destroy_cell_hashmap(Universe *universe);
+
+
 CellBlock *
 create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
 

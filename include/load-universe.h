@@ -32,4 +32,8 @@ b32
 load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options, NamedStates *named_states);
 
 
+b32
+load_universe(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
+
+
 #endif

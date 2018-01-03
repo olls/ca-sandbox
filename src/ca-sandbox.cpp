@@ -20,6 +20,7 @@
 #include "rule-ui.h"
 #include "misc-ui.h"
 #include "simulation-ui.h"
+#include "universe-ui.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -87,7 +88,7 @@ main(int argc, const char *argv[])
 
   if (success)
   {
-    Universe universe;
+    Universe universe = {};
 
     GLuint debug_cell_block_outline_drawing_shader_program = 0;
     OpenGL_Buffer debug_cell_block_outline_drawing_vbo = {};
@@ -115,6 +116,8 @@ main(int argc, const char *argv[])
       .step_simulation = false
     };
 
+    UniverseUI universe_ui = {};
+
     u64 last_sim_time = get_us();
 
     b32 init = true;
@@ -139,7 +142,6 @@ main(int argc, const char *argv[])
         cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
         cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
         cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
-
 
         // Debug cell block drawing
         {
@@ -170,8 +172,6 @@ main(int argc, const char *argv[])
           glBindVertexArray(0);
         }
 
-        init_cell_hashmap(&universe);
-
         simulate_options = default_simulation_options();
         cell_initialisation_options = default_cell_initialisation_options();
 
@@ -188,18 +188,8 @@ main(int argc, const char *argv[])
 
           print("\n");
 
-          const char *universe_filename = argv[1];
-          print("\nLoading universe file: %s\n", universe_filename);
-
-          File universe_file;
-          String universe_file_string = get_file_string(universe_filename, &universe_file);
-
-          running &= load_universe_from_file(universe_file_string, &universe, &loaded_rule.config);
-          running &= load_simulate_options(universe_file_string, &simulate_options);
-          running &= load_cell_initialisation_options(universe_file_string, &cell_initialisation_options, &loaded_rule.config);
-
-          close_file(&universe_file);
-          print("\n");
+          copy_string(universe_ui.cells_file_picker.selected_file, argv[1], strlen(argv[1])+1);
+          running &= load_universe(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
         }
         else
         {
@@ -241,7 +231,7 @@ main(int argc, const char *argv[])
       // Start frame
       //
 
-      print("Frame Start\n");
+      // print("Frame Start\n");
 
       engine_frame_start(&engine);
       ImGui_ImplSdlGL3_NewFrame(engine.window.sdl_window);
@@ -264,6 +254,7 @@ main(int argc, const char *argv[])
 
       rule_ui(&loaded_rule);
       simulate_ui(&simulate_options, &universe);
+      do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
 
       //
       // Simulate
@@ -282,7 +273,7 @@ main(int argc, const char *argv[])
         simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
         u64 end_sim_time = get_us();
 
-        print("Simulation took %ldus\n", end_sim_time - start_sim_time);
+        // print("Simulation took %ldus\n", end_sim_time - start_sim_time);
 
         last_sim_time = end_sim_time;
       }
