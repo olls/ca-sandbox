@@ -7,6 +7,26 @@
 #include "vectors.h"
 #include "files.h"
 
+#include <string.h>
+
+
+/// Creates a String struct pointing at the c-string passed in.
+///
+/// NOTE: The c-string is not copied, so be careful with scope!
+String
+new_string(const char *c_string)
+{
+  String result;
+
+  u32 length = strlen(c_string);
+
+  result.start = c_string;
+  result.current_position = result.start;
+  result.end = result.start + length;
+
+  return result;
+}
+
 
 String
 get_file_string(const char *filename, File *file)
@@ -201,6 +221,14 @@ strings_equal(String *a, String *b)
 
 u32
 string_length(String string)
+{
+  u32 result = string.end - string.start;
+  return result;
+}
+
+
+u32
+string_length(WriteString string)
 {
   u32 result = string.end - string.start;
   return result;

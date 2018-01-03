@@ -28,6 +28,10 @@ struct WriteString
 
 
 String
+new_string(const char *c_string);
+
+
+String
 get_file_string(const char *filename, File *file);
 
 
@@ -89,6 +93,10 @@ strings_equal(String *string, String *search);
 
 u32
 string_length(String string);
+
+
+u32
+string_length(WriteString string);
 
 
 u32
