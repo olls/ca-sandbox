@@ -19,6 +19,7 @@
 #include "rule.h"
 #include "load-rule.h"
 #include "simulate.h"
+#include "misc-ui.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -31,9 +32,9 @@
 
 /// The number of simulation frames per second.
 #ifdef GDB_DEBUG
-const u32 SIM_FREQUENCY = 1;
+const r32 INITIAL_SIM_FREQUENCY = 1;
 #else
-const u32 SIM_FREQUENCY = 20;
+const r32 INITIAL_SIM_FREQUENCY = 30;
 #endif
 
 
@@ -106,6 +107,11 @@ main(int argc, const char *argv[])
     CellInitialisationOptions cell_initialisation_options;
 
     Rule loaded_rule = {};
+
+    MiscUI misc_ui = {
+      .sim_frequency = INITIAL_SIM_FREQUENCY,
+      .step_simulation = false
+    };
 
     u64 last_sim_time = get_us();
 
@@ -246,7 +252,13 @@ main(int argc, const char *argv[])
         running = false;
       }
 
+      //
+      // Draw imGui elements
+      //
+
       ImGui::ShowTestWindow();
+
+      miscellaneous_ui(&misc_ui);
 
       //
       // Simulate
@@ -254,11 +266,13 @@ main(int argc, const char *argv[])
 
 // When we are stepping through the code, we only want a maximum of one sim-frame per loop.
 #ifdef GDB_DEBUG
-      if (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
+      if (engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency) || misc_ui.step_simulation)
 #else
-      while (engine.frame_start >= last_sim_time + (1000000.0 / SIM_FREQUENCY))
+      while (engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency) || misc_ui.step_simulation)
 #endif
       {
+        misc_ui.step_simulation = false;
+
         u64 start_sim_time = get_us();
         simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
         u64 end_sim_time = get_us();
