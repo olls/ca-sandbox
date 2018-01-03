@@ -13,12 +13,12 @@
 
 
 b32
-read_count_matching_value(RuleConfiguration *rule_config, String *count_matching_string, RulePattern *rule_pattern_result)
+read_count_matching_value(NamedStates *named_states, String *count_matching_string, RulePattern *rule_pattern_result)
 {
   b32 success = true;
   rule_pattern_result->count_matching_enabled = false;
 
-  read_state_name(rule_config, count_matching_string, &rule_pattern_result->count_matching_state);
+  read_state_name(named_states, count_matching_string, &rule_pattern_result->count_matching_state);
 
   consume_until_char(count_matching_string, ',');
 
@@ -77,7 +77,7 @@ is_pattern_cell_state_character(char character)
 
 
 b32
-read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inputs, RulePattern *rule_pattern_result)
+read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, RulePattern *rule_pattern_result)
 {
   b32 success = true;
 
@@ -131,7 +131,7 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
     String state_name_string = {.start = line.current_position,
                                 .current_position = line.current_position,
                                 .end = line.end};
-    success &= read_state_name(rule_config, &state_name_string, &rule_pattern_result->result);
+    success &= read_state_name(named_states, &state_name_string, &rule_pattern_result->result);
     if (!success)
     {
       print("Error in rule pattern's result value.\n");
@@ -190,7 +190,7 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
         else
         {
           this_cell_state_pattern->type = PatternCellStateType::STATE;
-          success &= read_state_name(rule_config, &pattern_block, &this_cell_state_pattern->state);
+          success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->state);
 
           if (!success)
           {
@@ -207,7 +207,7 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
     b32 count_matching_exists = find_label_value(pattern_block, "count_matching", &count_matching_string);
     if (count_matching_exists)
     {
-      success &= read_count_matching_value(rule_config, &count_matching_string, rule_pattern_result);
+      success &= read_count_matching_value(named_states, &count_matching_string, rule_pattern_result);
     }
   }
 
@@ -216,7 +216,7 @@ read_rule_pattern(RuleConfiguration *rule_config, String *file_string, u32 n_inp
 
 
 b32
-read_rule_patterns(RuleConfiguration *rule_config, String file_string, u32 n_inputs, ExtendibleArray *rule_patterns)
+read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, ExtendibleArray *rule_patterns)
 {
   b32 success = true;
 
@@ -225,7 +225,7 @@ read_rule_patterns(RuleConfiguration *rule_config, String file_string, u32 n_inp
   while (file_string.current_position != file_string.end)
   {
 
-    b32 found_pattern = read_rule_pattern(rule_config, &file_string, n_inputs, rule_pattern);
+    b32 found_pattern = read_rule_pattern(named_states, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
     {
       add_to_extendible_array(rule_patterns, rule_pattern);
@@ -283,13 +283,13 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       .end = file.read_ptr + file.size
     };
 
-    rule_config->n_states = 0;
-    find_label_value_u32(file_string, "n_states", &rule_config->n_states);
-    b32 states_success = rule_config->n_states > 0;
+    rule_config->named_states.n_states = 0;
+    find_label_value_u32(file_string, "n_states", &rule_config->named_states.n_states);
+    b32 states_success = rule_config->named_states.n_states > 0;
 
     if (states_success)
     {
-      states_success &= find_state_names(file_string, rule_config);
+      states_success &= find_state_names(file_string, &rule_config->named_states);
     }
 
     success &= states_success;
@@ -313,7 +313,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     b32 null_states_found = find_label_value(file_string, "null_states", &null_states_string);
     if (null_states_found && states_success)
     {
-      rule_config->n_null_states = read_named_states_list(rule_config, null_states_string, &rule_config->null_states);
+      rule_config->n_null_states = read_named_states_list(&rule_config->named_states, null_states_string, &rule_config->null_states);
       if (rule_config->n_null_states == 0)
       {
         print("Error in null_states.\n");
@@ -333,16 +333,8 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     }
     else
     {
-      print("n_states: %d\n", rule_config->n_states);
-      print("states:");
-      for (u32 i = 0;
-           i < rule_config->n_states;
-           ++i)
-      {
-        String state_name = rule_config->state_names[i];
-        print(" %.*s", string_length(state_name), state_name.start);
-      }
-      print("\n");
+      debug_print_named_states(&rule_config->named_states);
+
       print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
       print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
       print("n_null_states: %d\n", rule_config->n_null_states);
@@ -359,7 +351,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       new_extendible_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs), &rule_config->rule_patterns);
 
-      success &= read_rule_patterns(rule_config, file_string, n_inputs, &rule_config->rule_patterns);
+      success &= read_rule_patterns(&rule_config->named_states, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)
       {
         print("Error whilst reading rule patterns.\n");

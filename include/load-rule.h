@@ -61,7 +61,7 @@ struct RulePattern
 
 
 b32
-load_rule_file(const char *filename, RuleConfiguration *rule_configuration);
+load_rule_file(const char *filename, RuleConfiguration *rule_config);
 
 
 #endif

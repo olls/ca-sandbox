@@ -5,8 +5,8 @@
 #include "print.h"
 #include "allocate.h"
 #include "parsing.h"
+#include "extendible-array.h"
 
-#include "rule.h"
 #include "cell.h"
 
 
@@ -15,15 +15,15 @@
 ///   defined state name.
 ///
 b32
-state_value_from_name(RuleConfiguration *rule_config, String state_name, CellState *resulting_state)
+state_value_from_name(NamedStates *named_states, String state_name, CellState *resulting_state)
 {
   b32 result = false;
 
   for (u32 test_state_index = 0;
-       test_state_index < rule_config->n_states;
+       test_state_index < named_states->n_states;
        ++test_state_index)
   {
-    String *test_state_name = rule_config->state_names + test_state_index;
+    String *test_state_name = named_states->state_names + test_state_index;
     if (strings_equal(&state_name, test_state_name))
     {
       *resulting_state = (CellState)test_state_index;
@@ -45,7 +45,7 @@ is_state_character(char character)
 
 
 b32
-read_state_name(RuleConfiguration *rule_config, String *string, CellState *resulting_state_value)
+read_state_name(NamedStates *named_states, String *string, CellState *resulting_state_value)
 {
   String state_name = {};
 
@@ -55,20 +55,20 @@ read_state_name(RuleConfiguration *rule_config, String *string, CellState *resul
   consume_while(string, is_state_character);
   state_name.end = string->current_position;
 
-  b32 result = state_value_from_name(rule_config, state_name, resulting_state_value);
+  b32 result = state_value_from_name(named_states, state_name, resulting_state_value);
   return result;
 }
 
 
 b32
-find_state_names(String file_string, RuleConfiguration *rule_config)
+find_state_names(String file_string, NamedStates *named_states)
 {
   b32 success = true;
 
-  rule_config->state_names = allocate(String, rule_config->n_states);
+  named_states->state_names = allocate(String, named_states->n_states);
 
   u32 n_states_found = 0;
-  while (n_states_found < rule_config->n_states)
+  while (n_states_found < named_states->n_states)
   {
     String state_name = {};
     b32 found_state_name = find_label_value(file_string, "State", &state_name);
@@ -84,7 +84,7 @@ find_state_names(String file_string, RuleConfiguration *rule_config)
            test_state_index < n_states_found;
            ++test_state_index)
       {
-        String *test_state_name = rule_config->state_names + test_state_index;
+        String *test_state_name = named_states->state_names + test_state_index;
         if (strings_equal(test_state_name, &state_name))
         {
           name_unique = false;
@@ -104,8 +104,8 @@ find_state_names(String file_string, RuleConfiguration *rule_config)
         char *state_name_text = allocate(char, string_length(state_name));
         copy_string(state_name_text, state_name.start, string_length(state_name));
 
-        rule_config->state_names[n_states_found].start = state_name_text;
-        rule_config->state_names[n_states_found].end = state_name_text + string_length(state_name);
+        named_states->state_names[n_states_found].start = state_name_text;
+        named_states->state_names[n_states_found].end = state_name_text + string_length(state_name);
 
         ++n_states_found;
       }
@@ -116,7 +116,7 @@ find_state_names(String file_string, RuleConfiguration *rule_config)
     }
   }
 
-  if (n_states_found != rule_config->n_states)
+  if (n_states_found != named_states->n_states)
   {
     print("Error whilst parsing rule, incorrect number of named rules.\n");
     success &= false;
@@ -127,7 +127,7 @@ find_state_names(String file_string, RuleConfiguration *rule_config)
 
 
 u32
-read_named_states_list(RuleConfiguration *rule_config, String states_list_string, CellState **resulting_states)
+read_named_states_list(NamedStates *named_states, String states_list_string, CellState **resulting_states)
 {
   u32 result = 0;
 
@@ -139,7 +139,7 @@ read_named_states_list(RuleConfiguration *rule_config, String states_list_string
   while (states_list_string.current_position < states_list_string.end)
   {
     CellState named_state_value;
-    b32 valid_state = read_state_name(rule_config, &states_list_string, &named_state_value);
+    b32 valid_state = read_state_name(named_states, &states_list_string, &named_state_value);
 
     if (valid_state)
     {
@@ -155,4 +155,20 @@ read_named_states_list(RuleConfiguration *rule_config, String states_list_string
 
   *resulting_states = (CellState *)states_array.elements;
   return result;
+}
+
+
+void
+debug_print_named_states(NamedStates *named_states)
+{
+  print("n_states: %d\n", named_states->n_states);
+  print("states:");
+  for (u32 i = 0;
+       i < named_states->n_states;
+       ++i)
+  {
+    String state_name = named_states->state_names[i];
+    print(" %.*s", string_length(state_name), state_name.start);
+  }
+  print("\n");
 }

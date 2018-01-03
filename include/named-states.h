@@ -4,7 +4,17 @@
 #include "types.h"
 #include "text.h"
 
-#include "rule.h"
+#include "cell.h"
+
+
+struct NamedStates
+{
+  /// Number of cell states the rule uses
+  u32 n_states;
+
+  /// Array of state names, indexed by state value
+  String *state_names;
+};
 
 
 b32
@@ -12,15 +22,19 @@ is_state_character(char character);
 
 
 b32
-read_state_name(RuleConfiguration *rule_config, String *string, CellState *resulting_state_value);
+read_state_name(NamedStates *named_states, String *string, CellState *resulting_state_value);
 
 
 b32
-find_state_names(String file_string, RuleConfiguration *rule_config);
+find_state_names(String file_string, NamedStates *named_states);
 
 
 u32
-read_named_states_list(RuleConfiguration *rule_config, String null_states_string, CellState **resulting_states);
+read_named_states_list(NamedStates *named_states, String null_states_string, CellState **resulting_states);
+
+
+void
+debug_print_named_states(NamedStates *named_states);
 
 
 #endif

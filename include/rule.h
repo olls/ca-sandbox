@@ -6,14 +6,8 @@
 
 #include "cell.h"
 #include "border.h"
-
-
-enum struct NeighbourhoodRegionShape
-{
-  VON_NEUMANN,
-  MOORE,
-  ONE_DIM
-};
+#include "neighbourhood-region.h"
+#include "named-states.h"
 
 
 /// Holds the configuration of a rule, i.e: the parsed data from the rule file.
@@ -36,11 +30,7 @@ struct RuleConfiguration
   ///   get_neighbourhood_region_n_cells() for definitions
   u32 neighbourhood_region_size;
 
-  /// Number of cell states the rule uses
-  u32 n_states;
-
-  /// Array of state names, indexed by state value
-  String *state_names;
+  NamedStates named_states;
 
   /// Array of state values which are NULL states
   CellState *null_states;
@@ -98,10 +88,6 @@ struct Rule
 
   u32 root_node;
 };
-
-
-u32
-get_neighbourhood_region_n_cells(NeighbourhoodRegionShape shape, u32 size);
 
 
 b32

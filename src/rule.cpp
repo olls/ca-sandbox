@@ -300,7 +300,7 @@ find_node(Rule *rule, RuleNode *node)
     {
       b32 all_children_match = true;
       for (u32 child_n = 0;
-           child_n < rule->config.n_states;
+           child_n < rule->config.named_states.n_states;
            ++child_n)
       {
         if (node->children[child_n] != test_node->children[child_n])
@@ -341,7 +341,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
 
     // Generate all children by iterating over all states for this level/neighbour
     for (CellState child_n = 0;
-         child_n < rule->config.n_states;
+         child_n < rule->config.named_states.n_states;
          ++child_n)
     {
       // This is the list of inputs for the current child
@@ -380,7 +380,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[])
 void
 build_rule_tree(Rule *result)
 {
-  result->rule_node_size = sizeof(RuleNode) + (result->config.n_states * sizeof(u32));
+  result->rule_node_size = sizeof(RuleNode) + (result->config.named_states.n_states * sizeof(u32));
 
   result->rule_nodes_table_size = 16;
   result->rule_nodes_table = (RuleNode *)allocate_size(result->rule_node_size, result->rule_nodes_table_size);
@@ -416,7 +416,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
   {
     print("Node");
     for (CellState child_n = 0;
-         child_n < rule->config.n_states;
+         child_n < rule->config.named_states.n_states;
          ++child_n)
     {
       inputs[depth] = child_n;

@@ -13,7 +13,7 @@
 
 
 void
-read_cell_block(String *file_string, Universe *universe, RuleConfiguration *rule_config)
+read_cell_block(String *file_string, Universe *universe, NamedStates *named_states)
 {
   String line;
   String label;
@@ -84,7 +84,7 @@ read_cell_block(String *file_string, Universe *universe, RuleConfiguration *rule
     {
       Cell *cell = cell_block->cells + cell_index;
 
-      b32 state_read = read_state_name(rule_config, file_string, &cell->state);
+      b32 state_read = read_state_name(named_states, file_string, &cell->state);
       if (!state_read)
       {
         print("Invalid state name in cell block.\n");
@@ -99,7 +99,7 @@ read_cell_block(String *file_string, Universe *universe, RuleConfiguration *rule
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] universe  Universe to fill in
 b32
-load_universe_from_file(String file_string, Universe *universe, RuleConfiguration *rule_config)
+load_universe_from_file(String file_string, Universe *universe, NamedStates *named_states)
 {
   b32 success = true;
 
@@ -127,7 +127,7 @@ load_universe_from_file(String file_string, Universe *universe, RuleConfiguratio
          cell_block_index < n_cell_blocks;
          ++cell_block_index)
     {
-      read_cell_block(&file_string, universe, rule_config);
+      read_cell_block(&file_string, universe, named_states);
     }
   }
 
@@ -265,7 +265,7 @@ debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initiali
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] cell_intialisation_options  CellInitialisationOptions object to fill in
 b32
-load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_config)
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
 {
   b32 success = true;
 
@@ -281,7 +281,7 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
     if (success)
     {
-      cell_initialisation_options->set_of_initial_states_size = read_named_states_list(rule_config, initial_states_string, &cell_initialisation_options->set_of_initial_states);
+      cell_initialisation_options->set_of_initial_states_size = read_named_states_list(named_states, initial_states_string, &cell_initialisation_options->set_of_initial_states);
 
       if (cell_initialisation_options->set_of_initial_states_size == 0)
       {
