@@ -1,9 +1,9 @@
-#include <stdlib.h>
-#include <string.h>
-
 #include "allocate.h"
 
 #include "types.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 
 void *

@@ -1,9 +1,9 @@
-#include <stdlib.h>
-
 #include "random.h"
 
 #include "types.h"
 #include "assert.h"
+
+#include <stdlib.h>
 
 
 /// Returns a random unsigned 32 bit integer in min >= result > max.

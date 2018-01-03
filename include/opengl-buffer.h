@@ -1,10 +1,9 @@
 #ifndef OPENGL_BUFFER_H_DEF
 #define OPENGL_BUFFER_H_DEF
 
+#include "types.h"
 
 #include <GL/glew.h>
-
-#include "types.h"
 
 
 ///@file

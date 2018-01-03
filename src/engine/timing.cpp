@@ -1,8 +1,8 @@
-#include <sys/time.h>
-#include <unistd.h>
-
 #include "types.h"
 #include "timing.h"
+
+#include <sys/time.h>
+#include <unistd.h>
 
 
 /// @file

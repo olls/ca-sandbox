@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "rule.h"
 
 #include "allocate.h"
@@ -170,6 +168,7 @@ is_null_state(RuleConfiguration *rule_configuration, CellState state)
 
 /// Matches the input against the RulePatterns, finds the first matching rule pattern and uses that
 ///   output.
+///
 CellState
 use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellState inputs[])
 {
@@ -252,6 +251,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 }
 
 
+// TODO: Replace RuleNode storage with an ExpandableArray
 u32
 new_node(Rule *rule)
 {
@@ -279,6 +279,9 @@ get_rule_node(Rule *rule, u32 index)
 }
 
 
+/// Finds and returns the position of an existing RuleNode within the rule storage which matches the
+///   RuleNode passed in.
+///
 s32
 find_node(Rule *rule, RuleNode *node)
 {

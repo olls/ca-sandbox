@@ -1,9 +1,9 @@
-#include <string.h>
-
 #include "extendible-array.h"
 
 #include "allocate.h"
 #include "assert.h"
+
+#include <string.h>
 
 
 void

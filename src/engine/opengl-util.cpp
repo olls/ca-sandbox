@@ -1,8 +1,8 @@
-#include <GL/glew.h>
-
 #include "types.h"
 #include "print.h"
 #include "opengl-util.h"
+
+#include <GL/glew.h>
 
 
 /// @file

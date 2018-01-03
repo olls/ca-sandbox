@@ -2,7 +2,6 @@
 #define FILES_H_DEF
 
 #include "types.h"
-#include "files.h"
 
 
 /// @file

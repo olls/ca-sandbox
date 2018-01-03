@@ -1,10 +1,10 @@
-#include <GL/glew.h>
-#include <stdlib.h>
-
 #include "types.h"
 #include "print.h"
 #include "files.h"
 #include "allocate.h"
+
+#include <GL/glew.h>
+#include <stdlib.h>
 
 
 b32

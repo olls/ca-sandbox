@@ -1,11 +1,11 @@
-#include <string.h>
-#include <stdlib.h>
-
 #include "parsing.h"
 
 #include "types.h"
 #include "allocate.h"
 #include "text.h"
+
+#include <string.h>
+#include <stdlib.h>
 
 
 u32

@@ -1,14 +1,15 @@
-#include  <string.h>
-#include <stdarg.h>
-#include <stdio.h>
-
 #include "save-universe.h"
 
 #include "print.h"
 #include "text.h"
 #include "assert.h"
 #include "files.h"
+
 #include "universe.h"
+
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 
 void

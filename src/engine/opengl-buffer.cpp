@@ -1,11 +1,11 @@
-#include <GL/glew.h>
-
 #include "types.h"
 #include "print.h"
 #include "maths.h"
 #include "assert.h"
 #include "opengl-util.h"
 #include "opengl-buffer.h"
+
+#include <GL/glew.h>
 
 
 /// @file

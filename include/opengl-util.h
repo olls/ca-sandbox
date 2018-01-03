@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+#include <GL/glew.h>
+
 
 #define opengl_print_errors() _opengl_print_errors(__FILE__, __LINE__)
 

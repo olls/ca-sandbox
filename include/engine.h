@@ -1,10 +1,10 @@
 #ifndef ENGINE_H_DEF
 #define ENGINE_H_DEF
 
-#include <SDL2/SDL.h>
-
 #include "types.h"
 #include "timing.h"
+
+#include <SDL2/SDL.h>
 
 
 /// @file

@@ -1,7 +1,7 @@
+#include "print.h"
+
 #include <stdio.h>
 #include <cstdarg>
-
-#include "print.h"
 
 
 /// @file
