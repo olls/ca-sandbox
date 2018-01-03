@@ -11,7 +11,12 @@ struct ExtendibleArray
 {
   u32 element_size;
   u32 array_size;
-  u32 next_free_element_position;
+  union
+  {
+    u32 n_elements;
+    u32 next_free_element_position;
+  };
+
   void *elements;
 };
 
@@ -26,6 +31,13 @@ get_from_extendible_array(ExtendibleArray *array, u32 position);
 
 u32
 add_to_extendible_array(ExtendibleArray *array, void *new_element);
+
+
+u32
+add_to_extendible_array(ExtendibleArray *array, u32 n_new_elements, void *new_elements);
+
+void
+delete_extendible_array(ExtendibleArray *array);
 
 
 #endif

@@ -47,3 +47,35 @@ add_to_extendible_array(ExtendibleArray *array, void *new_element)
 
   return position;
 }
+
+
+u32
+add_to_extendible_array(ExtendibleArray *array, u32 n_new_elements, void *new_elements)
+{
+  if (array->array_size < array->next_free_element_position + n_new_elements)
+  {
+    while (array->array_size < array->next_free_element_position + n_new_elements)
+    {
+      array->array_size *= 2;
+    }
+
+    array->elements = re_allocate(array->elements, array->element_size * array->array_size);
+  }
+
+  assert(array->elements != 0);
+
+  u32 position = array->next_free_element_position;
+  array->next_free_element_position += n_new_elements;
+
+  void *start_position = get_from_extendible_array(array, position);
+  memcpy(start_position, new_elements, array->element_size * n_new_elements);
+
+  return position;
+}
+
+
+void
+delete_extendible_array(ExtendibleArray *array)
+{
+  un_allocate(array->elements);
+}
