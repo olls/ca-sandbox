@@ -18,6 +18,7 @@
 #include "load-rule.h"
 #include "simulate.h"
 #include "misc-ui.h"
+#include "simulation-ui.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -259,6 +260,8 @@ main(int argc, const char *argv[])
       ImGui::ShowTestWindow();
 
       miscellaneous_ui(&misc_ui);
+
+      simulate_ui(&simulate_options, &universe);
 
       //
       // Simulate
