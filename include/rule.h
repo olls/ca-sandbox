@@ -79,15 +79,10 @@ struct Rule
   /// Number of inputs to the transition function, i.e: number of neighbours + centre cell
   u32 n_inputs;
 
-  /// Size in bytes of one RuleNode for this n_states value
-  u32 rule_node_size;
+  /// Array of all RuleNodes making up this rule.
+  ExtendableArray rule_nodes_table;
 
-  u32 rule_nodes_table_size;
-  u32 next_free_rule_node_position;
-  RuleNode *rule_nodes_table;
-
-  ExtendableArray rule_nodes_table_e;
-
+  /// Position of the rule tree's root node within the rule_nodes_table.
   u32 root_node;
 };
 
@@ -98,6 +93,10 @@ is_null_state(RuleConfiguration *rule_configuration, CellState state);
 
 void
 build_rule_tree(Rule *result);
+
+
+void
+destroy_rule_tree(Rule *rule);
 
 
 void

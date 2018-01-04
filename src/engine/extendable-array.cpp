@@ -77,5 +77,10 @@ add_to_extendable_array(ExtendableArray *array, u32 n_new_elements, void *new_el
 void
 delete_extendable_array(ExtendableArray *array)
 {
-  un_allocate(array->elements);
+  if (array->elements != 0)
+  {
+    un_allocate(array->elements);
+  }
+
+  *array = {};
 }

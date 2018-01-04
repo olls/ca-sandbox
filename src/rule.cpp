@@ -115,34 +115,6 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 }
 
 
-// TODO: Replace RuleNode storage with an ExpandableArray
-u32
-new_node(Rule *rule)
-{
-  if (rule->next_free_rule_node_position == rule->rule_nodes_table_size)
-  {
-    rule->rule_nodes_table_size *= 2;
-    rule->rule_nodes_table = (RuleNode *)re_allocate(rule->rule_nodes_table, rule->rule_node_size * rule->rule_nodes_table_size);
-  }
-
-  assert(rule->rule_nodes_table != 0);
-
-  u32 position = rule->next_free_rule_node_position;
-
-  ++rule->next_free_rule_node_position;
-
-  return position;
-}
-
-
-RuleNode *
-get_rule_node(Rule *rule, u32 index)
-{
-  // Have to do this indexing in bytes, because the RuleNodes are a variable sized struct.
-  return (RuleNode *)((char *)(rule->rule_nodes_table) + (index * rule->rule_node_size));
-}
-
-
 /// Finds and returns the position of an existing RuleNode within the rule storage which matches the
 ///   RuleNode passed in.
 ///
@@ -152,10 +124,10 @@ find_node(Rule *rule, RuleNode *node)
   s32 result = -1;
 
   for (u32 node_n = 0;
-       node_n < rule->next_free_rule_node_position;
+       node_n < rule->rule_nodes_table.n_elements;
        ++node_n)
   {
-    RuleNode *test_node = get_rule_node(rule, node_n);
+    RuleNode *test_node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, node_n);
 
     if (node->is_leaf && test_node->is_leaf &&
         node->leaf_value == test_node->leaf_value)
@@ -197,7 +169,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
   u32 node_position;
 
   // Temporary storage for the node
-  RuleNode *node = (RuleNode *)allocate_size(rule->rule_node_size, 1);
+  RuleNode *node = (RuleNode *)allocate_size(rule->rule_nodes_table.element_size, 1);
 
   if (depth == rule->n_inputs)
   {
@@ -244,10 +216,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
   {
     // Create new node
 
-    node_position = new_node(rule);
-    RuleNode *new_node = get_rule_node(rule, node_position);
-
-    memcpy(new_node, node, rule->rule_node_size);
+    node_position = add_to_extendable_array(&rule->rule_nodes_table, node);
   }
 
   un_allocate(node);
@@ -260,11 +229,17 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
 void
 build_rule_tree(Rule *result)
 {
-  result->rule_node_size = sizeof(RuleNode) + (result->config.named_states.n_states * sizeof(u32));
+  // We can continue to use the existing table if the element_size (i.e: the n_states) has not
+  //   changed, as the tree will be rebuilt out of the existing nodes.  We currently destroy the
+  //   rule table before calling build_rule_tree if the file is reloaded to create a new table.
+  //   If the tree is altered via the GUI there is no way to change the n_states (currently), so we
+  //   don't need a new table.
 
-  result->rule_nodes_table_size = 16;
-  result->rule_nodes_table = (RuleNode *)allocate_size(result->rule_node_size, result->rule_nodes_table_size);
-  result->next_free_rule_node_position = 0;
+  if (result->rule_nodes_table.elements == 0)
+  {
+    u32 rule_node_size = sizeof(RuleNode) + (result->config.named_states.n_states * sizeof(u32));
+    new_extendable_array(rule_node_size, &result->rule_nodes_table);
+  }
 
   result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size);
 
@@ -274,6 +249,15 @@ build_rule_tree(Rule *result)
   // The tree_path is used to store the route taken through the tree to reach a leaf node.
   CellState *tree_path = allocate(CellState, result->n_inputs);
   result->root_node = add_node_to_rule_tree(result, 0, tree_path, n_nodes_estimate);
+
+  un_allocate(tree_path);
+}
+
+
+void
+destroy_rule_tree(Rule *rule)
+{
+  delete_extendable_array(&rule->rule_nodes_table);
 }
 
 
@@ -282,7 +266,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
-  RuleNode *rule_node = get_rule_node(rule, node_position);
+  RuleNode *rule_node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, node_position);
 
   if (rule_node->is_leaf)
   {
@@ -339,7 +323,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   CellState result;
 
-  RuleNode *node = get_rule_node(rule, rule->root_node);
+  RuleNode *node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, rule->root_node);
 
   u32 input_n = 0;
   b32 reached_result = false;
@@ -375,7 +359,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
       // Select the next node based on this input's state
       u32 next_node_position = node->children[current_state];
-      node = get_rule_node(rule, next_node_position);
+      node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, next_node_position);
       ++input_n;
     }
   }

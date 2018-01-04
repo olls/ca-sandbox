@@ -260,6 +260,7 @@ main(int argc, const char *argv[])
         print("\nLoading rule file: %s\n", rule_ui.file_picker.selected_file);
         running &= load_rule_file(rule_ui.file_picker.selected_file, &loaded_rule.config);
 
+        destroy_rule_tree(&loaded_rule);
         build_rule_tree(&loaded_rule);
         // print_rule_tree(&loaded_rule);
 
