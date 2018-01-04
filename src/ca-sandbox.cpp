@@ -276,24 +276,19 @@ main(int argc, const char *argv[])
         cell_initialisation_options = default_cell_initialisation_options();
 
         running &= load_universe(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
-      }
 
-      if (loaded_rule.config.neighbourhood_region_size >= universe.cell_block_dim)
-      {
-        print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
-        running &= false;
+        if (loaded_rule.config.neighbourhood_region_size >= universe.cell_block_dim)
+        {
+          print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
+          running &= false;
+        }
       }
 
       //
       // Simulate
       //
 
-// When we are stepping through the code, we only want a maximum of one sim-frame per loop.
-#ifdef GDB_DEBUG
       if (engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency) || misc_ui.step_simulation)
-#else
-      while (engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency) || misc_ui.step_simulation)
-#endif
       {
         misc_ui.step_simulation = false;
 
