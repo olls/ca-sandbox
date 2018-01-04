@@ -88,8 +88,6 @@ main(int argc, const char *argv[])
 
   if (success)
   {
-    Universe universe = {};
-
     GLuint debug_cell_block_outline_drawing_shader_program = 0;
     OpenGL_Buffer debug_cell_block_outline_drawing_vbo = {};
     OpenGL_Buffer debug_cell_block_outline_drawing_ibo = {};
@@ -106,10 +104,13 @@ main(int argc, const char *argv[])
     GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
     GLuint cell_instance_drawing_cell_width_uniform = 0;
 
+    Universe universe = {};
     SimulateOptions simulate_options;
     CellInitialisationOptions cell_initialisation_options;
+    b32 cells_file_loaded = false;
 
     Rule loaded_rule = {};
+    b32 rule_file_loaded = false;
 
     MiscUI misc_ui = {
       .sim_frequency = INITIAL_SIM_FREQUENCY,
@@ -117,6 +118,7 @@ main(int argc, const char *argv[])
     };
 
     UniverseUI universe_ui = {};
+    RuleUI rule_ui = {};
 
     u64 last_sim_time = get_us();
 
@@ -172,35 +174,21 @@ main(int argc, const char *argv[])
           glBindVertexArray(0);
         }
 
-        simulate_options = default_simulation_options();
-        cell_initialisation_options = default_cell_initialisation_options();
-
+        // Load initial filename arguments
         if (argc >= 3)
         {
           const char *rule_filename = argv[2];
+          copy_string(rule_ui.file_picker.selected_file, rule_filename, strlen(rule_filename)+1); // Plus one for \0
+          rule_ui.reload_rule_file = true;
 
-          print("\nLoading rule file: %s\n", rule_filename);
-
-          running &= load_rule_file(rule_filename, &loaded_rule.config);
-
-          build_rule_tree(&loaded_rule);
-          // print_rule_tree(&loaded_rule);
-
-          print("\n");
-
-          copy_string(universe_ui.cells_file_picker.selected_file, argv[1], strlen(argv[1])+1);
-          running &= load_universe(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+          const char *cells_filename = argv[1];
+          copy_string(universe_ui.cells_file_picker.selected_file, cells_filename, strlen(cells_filename)+1);
+          universe_ui.reload_cells_file = true;
         }
         else
         {
           print("Not enough command line arguments supplied.\n");
           print("Usage: ./ca-sandbox [universe-file-path] [rule-file-path]\n\n");
-          running &= false;
-        }
-
-        if (loaded_rule.config.neighbourhood_region_size >= universe.cell_block_dim)
-        {
-          print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
           running &= false;
         }
 
@@ -248,13 +236,51 @@ main(int argc, const char *argv[])
       // Draw imGui elements
       //
 
-      ImGui::ShowTestWindow();
+      // ImGui::ShowTestWindow();
+      // ImGui::ShowUserGuide();
+      // ImGui::ShowMetricsWindow();
+      // ImGui::ShowStyleEditor();
 
-      miscellaneous_ui(&misc_ui);
+      miscellaneous_ui(&misc_ui, last_simulation_delta);
 
-      rule_ui(&loaded_rule);
+      do_rule_ui(&rule_ui, &loaded_rule);
       simulate_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+
+      //
+      // Load input files
+      //
+
+      if (rule_ui.reload_rule_file)
+      {
+        rule_ui.reload_rule_file = false;
+        rule_file_loaded = true;
+
+        print("\nLoading rule file: %s\n", rule_ui.file_picker.selected_file);
+        running &= load_rule_file(rule_ui.file_picker.selected_file, &loaded_rule.config);
+
+        build_rule_tree(&loaded_rule);
+        // print_rule_tree(&loaded_rule);
+
+        print("\n");
+      }
+
+      if (universe_ui.reload_cells_file && rule_file_loaded)
+      {
+        universe_ui.reload_cells_file = false;
+        cells_file_loaded = true;
+
+        simulate_options = default_simulation_options();
+        cell_initialisation_options = default_cell_initialisation_options();
+
+        running &= load_universe(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+      }
+
+      if (loaded_rule.config.neighbourhood_region_size >= universe.cell_block_dim)
+      {
+        print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
+        running &= false;
+      }
 
       //
       // Simulate

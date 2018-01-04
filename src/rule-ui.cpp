@@ -5,6 +5,7 @@
 #include "allocate.h"
 #include "imgui.h"
 #include "print.h"
+#include "file-picker.h"
 
 #include "neighbourhood-region.h"
 #include "named-states.h"
@@ -138,12 +139,34 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 
 
 void
-rule_ui(Rule *rule)
+do_rule_ui(RuleUI *rule_ui, Rule *rule)
 {
   ImGuiWindowFlags window_flags = 0;
 
   if (ImGui::Begin("Rule Editor", NULL, window_flags))
   {
+    u32 string_length = strlen(rule_ui->file_picker.selected_file);
+    ImGui::Text("Rule file: %.*s", string_length, rule_ui->file_picker.selected_file);
+
+    if (ImGui::Button("Change rule file"))
+    {
+      rule_ui->file_picker.active = true;
+      rule_ui->file_picker.current_item = 0;
+      rule_ui->file_picker.root_directory = ".";
+      rule_ui->file_picker.current_path[0] = '\0';
+    }
+
+    if (rule_ui->file_picker.active)
+    {
+      file_picker("Rule file picker", &rule_ui->file_picker);
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Reload rule file"))
+    {
+      rule_ui->reload_rule_file = true;
+    }
+
     // Display all rule patterns
 
     for (u32 rule_n = 0;

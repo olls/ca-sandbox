@@ -21,7 +21,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *sim
   if (ImGui::Begin("Universe"))
   {
     u32 string_length = strlen(universe_ui->cells_file_picker.selected_file);
-    ImGui::InputText("cells file name", universe_ui->cells_file_picker.selected_file, string_length);
+    ImGui::Text("Cells file: %.*s", string_length, universe_ui->cells_file_picker.selected_file);
 
     if (ImGui::Button("Change cells file"))
     {
@@ -36,15 +36,11 @@ do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *sim
     {
       file_picker("Cells file picker", &universe_ui->cells_file_picker);
     }
-    else
-    {
-      // universe_ui->cells_file_picker.selected_file;
-    }
 
-    if (ImGui::Button("Load cells file"))
+    ImGui::SameLine();
+    if (ImGui::Button("Reload cells file"))
     {
-      // Reload the cells file.
-      b32 success = load_universe(universe_ui->cells_file_picker.selected_file, universe, simulate_options, cell_initialisation_options, named_states);
+      universe_ui->reload_cells_file = true;
     }
   }
 
