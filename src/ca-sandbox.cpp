@@ -4,7 +4,7 @@
 #include "allocate.h"
 #include "files.h"
 #include "text.h"
-#include "extendible-array.h"
+#include "extendable-array.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"

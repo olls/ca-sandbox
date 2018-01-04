@@ -173,7 +173,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
          rule_n < rule->config.rule_patterns.n_elements;
          ++rule_n)
     {
-      RulePattern *rule_pattern = (RulePattern *)get_from_extendible_array(&rule->config.rule_patterns, rule_n);
+      RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&rule->config.rule_patterns, rule_n);
       display_rule_pattern(&rule->config, rule_pattern);
     }
   }

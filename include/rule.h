@@ -1,7 +1,7 @@
 #ifndef RULE_H_DEF
 #define RULE_H_DEF
 
-#include "extendible-array.h"
+#include "extendable-array.h"
 #include "text.h"
 
 #include "cell.h"
@@ -37,7 +37,7 @@ struct RuleConfiguration
   /// Length of null_states
   u32 n_null_states;
 
-  ExtendibleArray rule_patterns;
+  ExtendableArray rule_patterns;
 };
 
 
@@ -85,6 +85,8 @@ struct Rule
   u32 rule_nodes_table_size;
   u32 next_free_rule_node_position;
   RuleNode *rule_nodes_table;
+
+  ExtendableArray rule_nodes_table_e;
 
   u32 root_node;
 };

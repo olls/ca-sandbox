@@ -5,7 +5,7 @@
 #include "print.h"
 #include "allocate.h"
 #include "parsing.h"
-#include "extendible-array.h"
+#include "extendable-array.h"
 
 #include "cell.h"
 
@@ -131,10 +131,10 @@ read_named_states_list(NamedStates *named_states, String states_list_string, Cel
 {
   u32 result = 0;
 
-  // Use ExtendibleArray while we build the states list, as we don't know it's length until it is
+  // Use ExtendableArray while we build the states list, as we don't know it's length until it is
   //   finished.
-  ExtendibleArray states_array = {};
-  new_extendible_array(sizeof(CellState), &states_array);
+  ExtendableArray states_array = {};
+  new_extendable_array(sizeof(CellState), &states_array);
 
   while (states_list_string.current_position < states_list_string.end)
   {
@@ -143,14 +143,14 @@ read_named_states_list(NamedStates *named_states, String states_list_string, Cel
 
     if (valid_state)
     {
-      add_to_extendible_array(&states_array, &named_state_value);
+      add_to_extendable_array(&states_array, &named_state_value);
       ++result;
     }
   }
 
-  // Because we are using a CellState as the size of the extendible array elements, the
-  //   implementation allows us to cast extendible_array.elements to a CellState[] and use it as a
-  //   normal array.  This allows us to use the dynamic allocation of the ExtendibleArray whilst
+  // Because we are using a CellState as the size of the extendable array elements, the
+  //   implementation allows us to cast extendable_array.elements to a CellState[] and use it as a
+  //   normal array.  This allows us to use the dynamic allocation of the ExtendableArray whilst
   //   building it, but we can use it as a normal array afterwards.
 
   *resulting_states = (CellState *)states_array.elements;

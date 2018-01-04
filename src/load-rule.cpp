@@ -6,7 +6,7 @@
 #include "files.h"
 #include "parsing.h"
 #include "allocate.h"
-#include "extendible-array.h"
+#include "extendable-array.h"
 
 #include "rule.h"
 #include "named-states.h"
@@ -216,7 +216,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
 
 
 b32
-read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, ExtendibleArray *rule_patterns)
+read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, ExtendableArray *rule_patterns)
 {
   b32 success = true;
 
@@ -228,7 +228,7 @@ read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, 
     b32 found_pattern = read_rule_pattern(named_states, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
     {
-      add_to_extendible_array(rule_patterns, rule_pattern);
+      add_to_extendable_array(rule_patterns, rule_pattern);
     }
     else
     {
@@ -349,7 +349,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
-      new_extendible_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs), &rule_config->rule_patterns);
+      new_extendable_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs), &rule_config->rule_patterns);
 
       success &= read_rule_patterns(&rule_config->named_states, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)
@@ -363,7 +363,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
              rule_pattern_n < rule_config->rule_patterns.next_free_element_position;
              ++rule_pattern_n)
         {
-          RulePattern *rule_pattern = (RulePattern *)get_from_extendible_array(&rule_config->rule_patterns, rule_pattern_n);
+          RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&rule_config->rule_patterns, rule_pattern_n);
           print("Rule Pattern:\n");
           print("  result: %d\n", rule_pattern->result);
           print("  cells: ");
