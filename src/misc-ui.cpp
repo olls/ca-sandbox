@@ -6,7 +6,7 @@
 
 
 void
-miscellaneous_ui(MiscUI *misc_ui)
+miscellaneous_ui(MiscUI *misc_ui, u32 last_simulation_delta)
 {
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoCollapse;
@@ -23,6 +23,8 @@ miscellaneous_ui(MiscUI *misc_ui)
     ImGui::SameLine();
 
     misc_ui->step_simulation = ImGui::Button("Step Simulation");
+
+    ImGui::Text("Simulation Time: %.3fms", last_simulation_delta * 0.001);
   }
 
   ImGui::End();

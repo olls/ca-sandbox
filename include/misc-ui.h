@@ -14,7 +14,7 @@ struct MiscUI
 
 
 void
-miscellaneous_ui(MiscUI *misc_ui);
+miscellaneous_ui(MiscUI *misc_ui, u32 last_simulation_delta);
 
 
 #endif

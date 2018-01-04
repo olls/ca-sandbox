@@ -121,6 +121,7 @@ main(int argc, const char *argv[])
     RuleUI rule_ui = {};
 
     u64 last_sim_time = get_us();
+    u32 last_simulation_delta = 0;
 
     b32 init = true;
     b32 running = true;
@@ -299,7 +300,7 @@ main(int argc, const char *argv[])
         simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
         u64 end_sim_time = get_us();
 
-        // print("Simulation took %ldus\n", end_sim_time - start_sim_time);
+        last_simulation_delta = end_sim_time - start_sim_time;
 
         last_sim_time = end_sim_time;
       }
