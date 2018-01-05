@@ -25,21 +25,32 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
 {
   ImGuiIO& io = ImGui::GetIO();
 
-  view_panning->scale += io.MouseWheel * 0.01;
-  view_panning->scale = max(view_panning->scale, 0.003f); // TODO: Calculate pixel == cell scale for min?
+  // TODO: Scaling acceleration could be more scientific
+  const r32 scale_acceleration = 0.01;
+  const r32 scale_deacceleration = 0.8;
+  const r32 max_scale = 2.0;
+  const r32 min_scale = 0.003;
 
-  vec2 d_mouse = vec2_subtract(screen_mouse_pos, view_panning->last_mouse_pos);
-  view_panning->last_mouse_pos = screen_mouse_pos;
+  view_panning->scale_speed += io.MouseWheel * scale_acceleration;
+  view_panning->scale *= 1 + view_panning->scale_speed;
 
-  if (!io.WantCaptureMouse)
+  // TODO: Calculate pixel == cell scale for min?
+  view_panning->scale = max(min_scale, min(max_scale, view_panning->scale));
+  view_panning->scale_speed *= scale_deacceleration;
+
+  // Check mouse is in the window
+  if (!(io.MousePos.x == -1 &&
+        io.MousePos.y == -1))
   {
-    if (io.MouseDown[0])
+    vec2 d_mouse = vec2_subtract(screen_mouse_pos, view_panning->last_mouse_pos);
+    view_panning->last_mouse_pos = screen_mouse_pos;
+
+    // ImGui isn't using the mouse
+    if (!io.WantCaptureMouse)
     {
-      if (!(io.MousePos.x == -1 &&
-            io.MousePos.y == -1))
+      if (io.MouseDown[0])
       {
         vec2 scaled_mouse_pos = vec2_divide(d_mouse, view_panning->scale);
-        ImGui::Text("scaled_mouse_pos: %f %f", scaled_mouse_pos.x, scaled_mouse_pos.y);
         view_panning->offset = vec2_add(view_panning->offset, scaled_mouse_pos);
       }
     }

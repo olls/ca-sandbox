@@ -9,6 +9,7 @@
 
 struct ViewPanning
 {
+  r32 scale_speed;
   r32 scale;
 
   vec2 last_mouse_pos;
