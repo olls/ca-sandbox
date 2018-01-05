@@ -9,6 +9,7 @@
 struct MiscUI
 {
   r32 sim_frequency;
+  b32 simulating;
   b32 step_simulation;
 };
 

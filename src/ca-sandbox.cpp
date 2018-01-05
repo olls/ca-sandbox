@@ -118,6 +118,7 @@ main(int argc, const char *argv[])
 
     MiscUI misc_ui = {
       .sim_frequency = INITIAL_SIM_FREQUENCY,
+      .simulating = false,
       .step_simulation = false
     };
 
@@ -283,6 +284,8 @@ main(int argc, const char *argv[])
 
       if (universe_ui.reload_cells_file && rule_file_loaded)
       {
+        misc_ui.simulating = false;
+
         universe_ui.reload_cells_file = false;
         cells_file_loaded = true;
 
@@ -302,7 +305,8 @@ main(int argc, const char *argv[])
       // Simulate
       //
 
-      if (engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency) || misc_ui.step_simulation)
+      if ((misc_ui.simulating && engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency)) ||
+          misc_ui.step_simulation)
       {
         misc_ui.step_simulation = false;
 
