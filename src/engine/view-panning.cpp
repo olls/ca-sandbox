@@ -31,12 +31,15 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
   const r32 max_scale = 2.0;
   const r32 min_scale = 0.003;
 
-  view_panning->scale_speed += io.MouseWheel * scale_acceleration;
-  view_panning->scale *= 1 + view_panning->scale_speed;
+  if (!io.WantCaptureMouse)
+  {
+    view_panning->scale_speed += io.MouseWheel * scale_acceleration;
+    view_panning->scale *= 1 + view_panning->scale_speed;
 
-  // TODO: Calculate pixel == cell scale for min?
-  view_panning->scale = max(min_scale, min(max_scale, view_panning->scale));
-  view_panning->scale_speed *= scale_deacceleration;
+    // TODO: Calculate pixel == cell scale for min?
+    view_panning->scale = max(min_scale, min(max_scale, view_panning->scale));
+    view_panning->scale_speed *= scale_deacceleration;
+  }
 
   // Check mouse is in the window
   if (!(io.MousePos.x == -1 &&
