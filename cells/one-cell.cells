@@ -12,52 +12,52 @@ border_max_cell: 5, 5
 initial_states: O
 initialisation_type: RANDOM
 
+CellBlock: -2, 0
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+X X X X X X X X
+Y Y Y Y Y Y Y Y
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+
+CellBlock: -1, 0
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+X X X X X X X X
+Y Y Y Y Y Y Y Y
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+
 CellBlock: 0, 0
 O O O O O O O O
 O O O O O O O O
-O O O X X O O O
-O O X X X X O O
-O O X X X X O O
-O O O X X O O O
 O O O O O O O O
+X X X X X X X X
+Y Y Y Y Y Y Y Y
 O O O O O O O O
-
-CellBlock: 1, 1
-O O O O O O O O
-O O O O O O O O
-O O O O X X O O
-O O O O X O O O
-O O X X X O O O
-O O X X X O O O
 O O O O O O O O
 O O O O O O O O
 
-CellBlock: 1, -1
+CellBlock: 1, 0
 O O O O O O O O
 O O O O O O O O
-O O X X X O O O
-O O X X X O O O
-O O O O X O O O
-O O O O X X O O
 O O O O O O O O
+X X X X X X X X
+Y Y Y Y Y Y Y Y
 O O O O O O O O
-
-CellBlock: -1, 1
-O O O O O O O O
-O O O O O O O O
-O O X X O O O O
-O O O X O O O O
-O O O X X X O O
-O O O X X X O O
 O O O O O O O O
 O O O O O O O O
 
-CellBlock: -1, -1
+CellBlock: 2, 0
 O O O O O O O O
 O O O O O O O O
-O O O X X X O O
-O O O X X X O O
-O O O X O O O O
-O O X X O O O O
+O O O O O O O O
+X X X X X X X X
+2 2 2 2 2 2 2 2
+O O O O O O O O
 O O O O O O O O
 O O O O O O O O

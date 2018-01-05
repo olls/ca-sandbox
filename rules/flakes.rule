@@ -1,0 +1,18 @@
+neighbourhood_region_shape: MOORE
+neighbourhood_region_size: 1
+n_states: 2
+State: O
+State: X
+null_states: O
+
+// Survives
+Result: X
+* * *
+* X *
+* * *
+
+Result: X
+* * *
+* O *
+* * *
+count_matching: X, = 3

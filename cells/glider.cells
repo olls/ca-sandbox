@@ -1,12 +1,14 @@
 cell_block_dim: 8
 n_cell_blocks: 1
 
+border_type: TORUS
+
 CellBlock: 0, 0
-0 0 0 0 0 0 0 0
-0 0 0 1 0 0 0 0
-0 0 0 0 1 0 0 0
-0 0 1 1 1 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
+O O O O O O O O
+O O O X O O O O
+O O O O X O O O
+O O X X X O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O

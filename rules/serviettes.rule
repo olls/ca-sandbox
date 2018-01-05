@@ -1,0 +1,29 @@
+neighbourhood_region_shape: MOORE
+neighbourhood_region_size: 1
+n_states: 2
+State: O
+State: X
+null_states: O
+
+Result: 1
+* * *
+* O *
+* * *
+count_matching: X, = 2
+
+Result: X
+* * *
+* O *
+* * *
+count_matching: X, = 3
+
+Result: X
+* * *
+* O *
+* * *
+count_matching: X, = 4
+
+Result: O
+* * *
+* X *
+* * *

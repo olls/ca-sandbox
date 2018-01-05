@@ -1,7 +1,7 @@
 n_cell_blocks: 9
 cell_block_dim: 8
 
-border_type: FIXED
+border_type: INFINITE
 
 border_min_block: -5, -5
 border_min_cell: 0, 0
@@ -9,96 +9,96 @@ border_min_cell: 0, 0
 border_max_block: 5, 5
 border_max_cell: 1, 1
 
-initial_states: 0
+initial_states: O
 initialisation_type: RANDOM
 
 
 CellBlock: 0, 0
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
 
 CellBlock: 1, 0
-1 1 1 0 0 0 0 0
-1 1 1 0 0 0 0 0
-1 1 1 1 0 0 0 0
-1 1 1 1 0 0 0 0
-1 1 1 1 0 0 0 0
-1 1 1 1 0 0 0 0
-1 1 1 0 0 0 0 0
-1 1 1 0 0 0 0 0
+X X X O O O O O
+X X X O O O O O
+X X X X O O O O
+X X X X O O O O
+X X X X O O O O
+X X X X O O O O
+X X X O O O O O
+X X X O O O O O
 
 CellBlock: -1, 0
-0 0 0 0 0 1 1 1
-0 0 0 0 0 1 1 1
-0 0 0 0 1 1 1 1
-0 0 0 0 1 1 1 1
-0 0 0 0 1 1 1 1
-0 0 0 0 1 1 1 1
-0 0 0 0 0 1 1 1
-0 0 0 0 0 1 1 1
+O O O O O X X X
+O O O O O X X X
+O O O O X X X X
+O O O O X X X X
+O O O O X X X X
+O O O O X X X X
+O O O O O X X X
+O O O O O X X X
 
 CellBlock: 0, 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-0 0 1 1 1 1 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
+O O X X X X O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
 
 CellBlock: 0, -1
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 1 1 1 1 0 0
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O X X X X O O
+X X X X X X X X
+X X X X X X X X
+X X X X X X X X
 
 CellBlock: -1, -1
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 1
-0 0 0 0 0 0 1 1
-0 0 0 0 0 1 1 1
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O X
+O O O O O O X X
+O O O O O X X X
 
 CellBlock: 1, -1
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-1 0 0 0 0 0 0 0
-1 1 0 0 0 0 0 0
-1 1 1 0 0 0 0 0
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+X O O O O O O O
+X X O O O O O O
+X X X O O O O O
 
 CellBlock: -1, 1
-0 0 0 0 0 1 1 1
-0 0 0 0 0 0 1 1
-0 0 0 0 0 0 0 1
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
+O O O O O X X X
+O O O O O O X X
+O O O O O O O X
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
 
 CellBlock: 1, 1
-1 1 1 0 0 0 0 0
-1 1 0 0 0 0 0 0
-1 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
+X X X O O O O O
+X X O O O O O O
+X O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O
+O O O O O O O O

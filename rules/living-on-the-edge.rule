@@ -1,0 +1,75 @@
+n_states: 6
+State: O
+State: X
+State: Y
+State: Z
+State: A
+State: B
+
+null_states: O
+
+neighbourhood_region_shape: MOORE
+neighbourhood_region_size: 1
+
+// Dies under-population
+Result: Y
+* * *
+* X *
+* * *
+count_matching: X, < 3
+
+
+// Survives
+Result: X
+* * *
+* X *
+* * *
+count_matching: X, = 3
+
+// Decays
+Result: Z
+* * *
+* Y *
+* * *
+
+Result: A
+* * *
+* Z *
+* * *
+
+Result: B
+* * *
+* A *
+* * *
+
+Result: O
+* * *
+* B *
+* * *
+
+Result: X
+* * *
+* X *
+* * *
+count_matching: X, = 4
+
+Result: X
+* * *
+* X *
+* * *
+count_matching: X, = 5
+
+
+// Dies overpopulation
+Result: Y
+* * *
+* X *
+* * *
+count_matching: X, > 5
+
+// Born
+Result: X
+* * *
+* O *
+* * *
+count_matching: X, = 3
