@@ -3,26 +3,14 @@
 
 #include "types.h"
 
+#include "ccVector.h"
+
 
 /// @file
 /// @brief Vector structs and templates for operating on them
-
-
-struct vec2
-{
-  union
-  {
-    struct
-    {
-      r32 x;
-      r32 y;
-    };
-    struct
-    {
-      r32 es[2];
-    };
-  };
-};
+///
+/// ccVector provides vec2, vec3, vec4.  This file adds integer vector types, and provides templated
+///   vector functions
 
 
 struct uvec2
@@ -172,24 +160,6 @@ vec2_eq(vec a, vec b)
                a.y == b.y;
   return result;
 }
-
-
-struct vec3
-{
-  union
-  {
-    struct
-    {
-      r32 x;
-      r32 y;
-      r32 z;
-    };
-    struct
-    {
-      r32 es[3];
-    };
-  };
-};
 
 
 struct uvec3
@@ -351,25 +321,6 @@ vec3_eq(vec a, vec b)
                a.z == b.z;
   return result;
 }
-
-
-struct vec4
-{
-  union
-  {
-    struct
-    {
-      r32 w;
-      r32 x;
-      r32 y;
-      r32 z;
-    };
-    struct
-    {
-      r32 es[4];
-    };
-  };
-};
 
 
 struct uvec4
