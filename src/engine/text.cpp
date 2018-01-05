@@ -7,6 +7,10 @@
 
 #include <string.h>
 
+/// @file
+/// @brief  Text utility functions and structs
+///
+
 
 /// Creates a String struct pointing at the c-string passed in.
 ///

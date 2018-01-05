@@ -7,6 +7,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+/// @file
+/// @brief  Generic functions for parsing `name: value` style text.
+///
+
 
 u32
 read_u32_list(String string, u32 **list_result)

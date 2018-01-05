@@ -10,6 +10,10 @@
 
 #include "tinydir.h"
 
+/// @file
+/// @brief  Provides a very simple file browser/picker using ImGui
+///
+
 
 /// This is used to pass the tinydir_dir reference through the ImGui::ListBox callback, and to keep
 ///   the tinydir_file object in the scope of the LIstBox caller __not inside the callback__

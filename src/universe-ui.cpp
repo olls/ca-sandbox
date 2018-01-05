@@ -12,6 +12,10 @@
 
 #include "imgui.h"
 
+/// @file
+/// @brief  GUI for managing the Universe object
+///
+
 
 /// The GUI elements for managing the .cells file, and the objects which its data fills.
 ///

@@ -2,8 +2,8 @@
 
 #include "universe.h"
 
-
 /// @file
+/// @brief  Functions for managing CellBlock and Cell coordinates
 ///
 
 

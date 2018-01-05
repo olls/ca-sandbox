@@ -4,9 +4,9 @@
 
 #include <GL/glew.h>
 
-
 /// @file
-/// @brief Utility functions for debugging OpenGL
+/// @brief  Utility functions for debugging OpenGL
+///
 
 
 /// Convert an OpenGL error code into a string, and print it.

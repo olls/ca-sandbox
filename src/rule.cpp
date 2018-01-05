@@ -12,6 +12,10 @@
 
 #include <string.h>
 
+/// @file
+/// @brief  Functions for building a rule tree, and accessing it.
+///
+
 
 b32
 is_null_state(RuleConfiguration *rule_configuration, CellState state)

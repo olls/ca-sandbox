@@ -4,7 +4,6 @@
 #include "opengl-buffer.h"
 #include "universe.h"
 
-
 /// @file
 /// @brief Data structures for drawing the Cell%s with OpenGL
 ///

@@ -1,10 +1,8 @@
 #ifndef UNIVERSE_H_DEF
 #define UNIVERSE_H_DEF
 
-
 #include "cell.h"
 #include "vectors.h"
-
 
 /// @file
 /// @brief Defines the storage data structure for the Cell%s.

@@ -5,7 +5,11 @@
 
 #include "rule.h"
 
+/// @file
+///
 
+
+/// Holds the state for the rule GUI
 struct RuleUI
 {
   FilePicker file_picker;

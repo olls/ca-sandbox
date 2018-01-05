@@ -11,6 +11,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+/// @file
+/// @brief  Functions for saving a Universe object and all of its CellBlock%s to a .cells file
+///
+
+// TODO: Update the file format
 
 void
 write_text(WriteString *writer, const char *text, ...)

@@ -6,9 +6,7 @@
 #include "rule.h"
 #include "border.h"
 
-
 #define DEBUG_STATE 9999
-
 
 /// @file
 ///

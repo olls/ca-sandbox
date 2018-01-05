@@ -3,6 +3,8 @@
 
 #include "opengl-buffer.h"
 
+/// @file
+///
 
 void
 opengl_create_general_buffers(OpenGL_Buffer *general_vertex_buffer,

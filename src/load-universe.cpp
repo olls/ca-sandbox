@@ -11,6 +11,10 @@
 #include "simulate.h"
 #include "named-states.h"
 
+/// @file
+/// @brief  Functions for parsing and loading the .cells files
+///
+
 
 void
 read_cell_block(String *file_string, Universe *universe, NamedStates *named_states)

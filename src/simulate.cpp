@@ -9,7 +9,6 @@
 #include "rule.h"
 #include "border.h"
 
-
 /// @file
 /// @brief Contains functions for running the CA simulation on the CellBlock%s.
 

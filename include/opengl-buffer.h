@@ -5,8 +5,8 @@
 
 #include <GL/glew.h>
 
-
-///@file
+/// @file
+/// @brief  OpenGL buffer management
 ///
 /// Implements a continuous array in an OpenGL buffer object:
 /// - Allocates a block of memory in OpenGL

@@ -10,7 +10,6 @@
 
 #include <GL/glew.h>
 
-
 /// @file
 /// @brief Functions for drawing the Universe to the screen using OpenGL instancing.
 

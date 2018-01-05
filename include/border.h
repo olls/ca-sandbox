@@ -5,6 +5,10 @@
 #include "vectors.h"
 #include "universe.h"
 
+/// @file
+/// @brief  structs for storing the border configuration
+///
+
 
 enum struct BorderType
 {

@@ -6,6 +6,11 @@
 #include "maths.h"
 #include "vectors.h"
 
+/// @file
+/// @brief  Utility functions for indexing the neighbours of cell according to different
+///           neighbourhood region types and sizes.
+///
+
 
 /// Returns the total number of cells within the neighbourhood region, including the centre cell
 ///

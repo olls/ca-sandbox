@@ -5,7 +5,6 @@
 
 #include "ccVector.h"
 
-
 /// @file
 /// @brief Vector structs and templates for operating on them
 ///

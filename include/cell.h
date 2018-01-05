@@ -3,9 +3,9 @@
 
 #include "vectors.h"
 
-
 /// @file
-/// @brief Definition of Cell
+/// @brief structs for cell storage, and configuration
+///
 
 
 typedef u32 CellState;

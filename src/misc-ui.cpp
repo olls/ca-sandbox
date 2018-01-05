@@ -4,6 +4,10 @@
 #include "print.h"
 #include "imgui.h"
 
+/// @file
+/// @brief  Provides GUI for misc items which don't fall into the other windows
+///
+
 
 void
 miscellaneous_ui(MiscUI *misc_ui, u32 last_simulation_delta)

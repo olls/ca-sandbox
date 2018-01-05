@@ -1,6 +1,7 @@
+#include "engine.h"
+
 #include "types.h"
 #include "print.h"
-#include "engine.h"
 #include "timing.h"
 #include "opengl-util.h"
 
@@ -9,9 +10,9 @@
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
 
-
 /// @file
-/// @brief Contains functions for initialising SDL and OpenGL, as well as managing frame timings.
+/// @brief  Contains functions for initialising SDL and OpenGL, as well as managing frame timings.
+///
 
 
 const u32 FPS = 60;

@@ -6,8 +6,8 @@
 
 #include <SDL2/SDL.h>
 
-
 /// @file
+/// @brief  structs for managing the state of the engine (SDL window, frame timing, ...)
 ///
 
 

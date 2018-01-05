@@ -9,6 +9,10 @@
 #include "neighbourhood-region.h"
 #include "named-states.h"
 
+/// @file
+/// @brief  structs for storing a rule
+///
+
 
 /// Holds the configuration of a rule, i.e: the parsed data from the rule file.
 ///

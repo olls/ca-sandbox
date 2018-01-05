@@ -12,6 +12,10 @@
 #include "rule.h"
 #include "load-rule.h"
 
+/// @file
+/// @brief  Provides GUI elements to modify the currently loaded Rule
+///
+
 
 CellState
 advance_state(NamedStates *named_states, CellState previous)

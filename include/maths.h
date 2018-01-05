@@ -3,6 +3,10 @@
 
 #include <math.h>
 
+/// @file
+/// @brief  Templates for basic maths functions
+///
+
 
 template <typename T>
 T

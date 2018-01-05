@@ -6,6 +6,9 @@
 
 #include "ccVector.h"
 
+/// @file
+///
+
 
 struct ViewPanning
 {

@@ -26,10 +26,9 @@
 
 #include <GL/glew.h>
 
-
 /// @file
-///
 /// @brief Program root file.
+///
 
 
 /// The number of simulation frames per second.

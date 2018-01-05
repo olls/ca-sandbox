@@ -4,9 +4,12 @@
 
 #include "simulate.h"
 
+/// @file
+/// @brief  GUI elements for managing the SimulationOptions struct
+///
+
 
 /// Provides GUI elements for modifying the SimulateOptions object
-///
 void
 simulate_ui(SimulateOptions *simulate_options, Universe *universe)
 {

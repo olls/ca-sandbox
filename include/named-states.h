@@ -6,6 +6,10 @@
 
 #include "cell.h"
 
+/// @file
+/// @brief  Managing named states
+///
+
 
 struct NamedStates
 {

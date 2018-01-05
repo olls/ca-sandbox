@@ -1,11 +1,12 @@
-#include "types.h"
 #include "timing.h"
+
+#include "types.h"
 
 #include <sys/time.h>
 #include <unistd.h>
 
-
 /// @file
+///
 
 
 /// Returns the current time in micro-seconds

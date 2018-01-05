@@ -8,6 +8,10 @@
 #include "simulate.h"
 #include "rule.h"
 
+/// @file
+/// @brief  Functions for parsing and loading `.cells` files
+///
+
 
 /// Universe files are text files, containing a directory of CellBlock%s.
 ///

@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/// @file
+/// @brief  Simple `malloc` wrapper
+///
+
 
 void *
 allocate_size(u32 size, u32 n)

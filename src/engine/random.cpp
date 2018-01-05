@@ -5,6 +5,10 @@
 
 #include <stdlib.h>
 
+/// @file
+/// @brief  Simple random wrapper
+///
+
 
 /// Returns a random unsigned 32 bit integer in min >= result > max.
 u32

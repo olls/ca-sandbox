@@ -9,6 +9,10 @@
 
 #include "cell.h"
 
+/// @file
+/// @brief  Functions for parsing and identifying state names
+///
+
 
 /// Searches the array of state names in the rule configuration for state_name, retuning the
 ///   corresponding CellState via *resulting_state.  Function returns false, if the name is a

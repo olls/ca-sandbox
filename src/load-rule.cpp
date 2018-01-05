@@ -11,6 +11,10 @@
 #include "rule.h"
 #include "named-states.h"
 
+/// @file
+/// @brief  Loading and reading a .rule file into a Rule struct
+///
+
 
 b32
 read_count_matching_value(NamedStates *named_states, String *count_matching_string, RulePattern *rule_pattern_result)

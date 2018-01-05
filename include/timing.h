@@ -1,8 +1,11 @@
 #ifndef TIMING_H_DEF
 #define TIMING_H_DEF
 
+#include "types.h"
 
 /// @file
+/// @brief  Utilities for getting the current time, and recording FPS averages
+///
 
 
 #define seconds_in_ms(n) (1000 * (n))

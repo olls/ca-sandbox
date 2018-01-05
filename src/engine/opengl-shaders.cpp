@@ -1,3 +1,5 @@
+#include "opengl-shaders.h"
+
 #include "types.h"
 #include "print.h"
 #include "files.h"
@@ -5,6 +7,10 @@
 
 #include <GL/glew.h>
 #include <stdlib.h>
+
+/// @file
+/// @brief  Functions for compiling an GLSL shader and creating a shader program
+///
 
 
 b32

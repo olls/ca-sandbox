@@ -1,9 +1,9 @@
-#include "types.h"
-#include "print.h"
 #include "assert.h"
 
-#include <stdlib.h>
+#include "types.h"
+#include "print.h"
 
+#include <stdlib.h>
 
 /// @file
 ///

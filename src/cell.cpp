@@ -4,6 +4,10 @@
 #include "vectors.h"
 #include "allocate.h"
 
+/// @file
+/// @brief  Functions for initialising a Cell struct
+///
+
 
 CellState
 initialise_cell_state(CellInitialisationOptions *cell_initialisation_options, s32vec2 position)

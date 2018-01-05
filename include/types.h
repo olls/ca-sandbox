@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-
 /// @file
-/// @brief Custom typedefs and type bounds.
+/// @brief  Custom typedefs and type bounds.
+///
 
 
 typedef uint64_t u64;

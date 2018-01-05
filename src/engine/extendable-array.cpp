@@ -5,6 +5,10 @@
 
 #include <string.h>
 
+/// @file
+/// @brief  Simple array implementation, reallocates with 2x size when it fills up.
+///
+
 
 void
 new_extendable_array(u32 element_size, ExtendableArray *result)

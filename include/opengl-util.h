@@ -5,8 +5,12 @@
 
 #include <GL/glew.h>
 
-
 #define opengl_print_errors() _opengl_print_errors(__FILE__, __LINE__)
+
+/// @file
+/// @brief  OpenGL utilities
+///
+
 
 b32
 _opengl_print_errors(const char *file, u32 line);

@@ -5,7 +5,13 @@
 #include "vectors.h"
 #include "files.h"
 
+/// @file
+/// @brief  Text utilities
+///
 
+
+/// A simple struct for keeping track of the end point of a string, and your current position within
+///   the string.
 struct String
 {
   const char *start;
@@ -14,6 +20,7 @@ struct String
 };
 
 
+/// Same as String, but without const
 struct WriteString
 {
   char *start;

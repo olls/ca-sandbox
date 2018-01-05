@@ -8,9 +8,9 @@
 
 #include <string.h>
 
-
 /// @file
-/// @brief Implements functions for accessing the Universe.
+/// @brief Implements functions for accessing the Cells stored in the Universe.
+///
 
 
 /// Initialise the universe
