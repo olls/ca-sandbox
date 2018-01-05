@@ -1,15 +1,14 @@
 #include "types.h"
 #include "vectors.h"
 #include "print.h"
-#include "allocate.h"
-#include "files.h"
 #include "text.h"
-#include "extendable-array.h"
+#include "util.h"
 #include "engine.h"
 #include "opengl-util.h"
 #include "opengl-shaders.h"
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
+#include "view-panning.h"
 
 #include "universe.h"
 #include "load-universe.h"
@@ -119,6 +118,11 @@ main(int argc, const char *argv[])
 
     UniverseUI universe_ui = {};
     RuleUI rule_ui = {};
+
+    ViewPanning view_panning = {
+      .scale = 0.3,
+      .offset = {0,0}
+    };
 
     u64 last_sim_time = get_us();
     u32 last_simulation_delta = 0;
@@ -310,16 +314,19 @@ main(int argc, const char *argv[])
       glClear(GL_COLOR_BUFFER_BIT);
 
       r32 cell_width = 1;
-      vec2 offset = {0, 0};
 
-      r32 view_scale = 0.15;
-      r32 aspect = (r32)engine.window.height / engine.window.width;
-      r32 projection_matrix[] = {
-        aspect * view_scale,  0,               0,  offset.x,
-        0,                   -1 * view_scale,  0,  offset.y,
-        0,                    0,               1,  0,
-        0,                    0,               0,  1
-      };
+      s32vec2 window_size = s32vec2{(s32)engine.window.width, (s32)engine.window.height};
+
+      vec2 screen_mouse_pos = io.MousePos;
+      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2{(r32)engine.window.width, (r32)engine.window.height});
+      screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
+      screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
+      screen_mouse_pos.y *= -1;
+
+      update_view_panning(&view_panning, screen_mouse_pos);
+      update_view_projection_matrix(&view_panning, window_size);
+
+      ImGui::Text("View offset: [%f %f]", view_panning.offset.x, view_panning.offset.y);
 
       //
       // Cell instance drawing
@@ -329,7 +336,7 @@ main(int argc, const char *argv[])
 
       glBindVertexArray(cell_instance_drawing_vao);
       glUseProgram(cell_instance_drawing_shader_program);
-      glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+      glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning.projection_matrix[0][0]);
 
       glUniform1i(cell_instance_drawing_cell_block_dim_uniform, universe.cell_block_dim);
       glUniform1f(cell_instance_drawing_cell_width_uniform, cell_width);

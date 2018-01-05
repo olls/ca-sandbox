@@ -4,6 +4,7 @@
 #include "print.h"
 #include "text.h"
 #include "util.h"
+#include "assert.h"
 
 #include "imgui.h"
 
