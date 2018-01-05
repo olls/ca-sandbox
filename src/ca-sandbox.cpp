@@ -44,33 +44,35 @@ const r32 INITIAL_SIM_FREQUENCY = 30;
 ///
 /// TODO: Shader compilation should probably be moved to the locations where the shaders are used.
 b32
-init_shaders(GLuint *debug_cell_block_outline_drawing_shader_program, GLuint *cell_instance_drawing_shader_program)
+init_shaders(GLuint *debug_cell_block_outline_drawing_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *screen_shader_program)
 {
   b32 success = true;
+
+  GLenum shader_types[] = {
+    GL_VERTEX_SHADER,
+    GL_FRAGMENT_SHADER
+  };
 
   const char *debug_cell_block_outline_drawing_filenames[] = {
     "src/shaders/debug-cell-block-outlines.glvs",
     "src/shaders/screen.glfs"
   };
 
-  GLenum debug_cell_block_outline_drawing_types[] = {
-    GL_VERTEX_SHADER,
-    GL_FRAGMENT_SHADER
-  };
-
-  success &= create_shader_program(debug_cell_block_outline_drawing_filenames, debug_cell_block_outline_drawing_types, 2, debug_cell_block_outline_drawing_shader_program);
+  success &= create_shader_program(debug_cell_block_outline_drawing_filenames, shader_types, 2, debug_cell_block_outline_drawing_shader_program);
 
   const char *cells_filenames[] = {
     "src/shaders/cell-instancing.glvs",
     "src/shaders/screen.glfs"
   };
 
-  GLenum cell_types[] = {
-    GL_VERTEX_SHADER,
-    GL_FRAGMENT_SHADER
+  success &= create_shader_program(cells_filenames, shader_types, 2, cell_instance_drawing_shader_program);
+
+  const char *screen_filenames[] = {
+    "src/shaders/screen.glvs",
+    "src/shaders/screen.glfs"
   };
 
-  success &= create_shader_program(cells_filenames, cell_types, 2, cell_instance_drawing_shader_program);
+  success &= create_shader_program(screen_filenames, shader_types, 2, screen_shader_program);
 
   return success;
 }
@@ -102,6 +104,9 @@ main(int argc, const char *argv[])
     GLuint cell_instance_drawing_mat4_projection_matrix_uniform = 0;
     GLuint cell_instance_drawing_cell_block_dim_uniform = 0;
     GLuint cell_instance_drawing_cell_width_uniform = 0;
+
+    GLuint screen_shader_program = 0;
+    GLuint screen_vao = 0;
 
     Universe universe = {};
     SimulateOptions simulate_options;
@@ -141,7 +146,7 @@ main(int argc, const char *argv[])
 
         opengl_create_general_buffers(&general_vertex_buffer, &general_index_buffer);
 
-        b32 shader_success = init_shaders(&debug_cell_block_outline_drawing_shader_program, &cell_instance_drawing_shader_program);
+        b32 shader_success = init_shaders(&debug_cell_block_outline_drawing_shader_program, &cell_instance_drawing_shader_program, &screen_shader_program);
         running &= shader_success;
 
         // Uniforms
@@ -177,6 +182,11 @@ main(int argc, const char *argv[])
           init_cell_drawing(&cell_instancing, &general_vertex_buffer, &general_index_buffer);
 
           glBindVertexArray(0);
+        }
+
+        // Screen debug drawing
+        {
+          glGenVertexArrays(1, &screen_vao);
         }
 
         // Load initial filename arguments
@@ -367,6 +377,34 @@ main(int argc, const char *argv[])
 
       opengl_print_errors();
       glBindVertexArray(0);
+#endif
+
+#if 0
+      //
+      // Debug screen rendering
+      //
+
+      glBindVertexArray(screen_vao);
+      glUseProgram(screen_shader_program);
+      glBindBuffer(general_vertex_buffer.binding_target, general_vertex_buffer.id);
+
+      vec2 vertices[] = {{0,  0}, screen_mouse_pos};
+      u32 vertices_pos = opengl_buffer_add_elements(&general_vertex_buffer, array_count(vertices), vertices);
+
+      GLuint attribute_pos = glGetAttribLocation(screen_shader_program, "pos");
+      if (attribute_pos == -1)
+      {
+        print("Failed to get attribute_pos\n");
+      }
+      glEnableVertexAttribArray(attribute_pos);
+      glVertexAttribPointer(attribute_pos, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+
+      glDrawArrays(GL_LINES, vertices_pos, array_count(vertices));
+
+      general_vertex_buffer.elements_used -= array_count(vertices);
+
+      opengl_print_errors();
+      glUseProgram(0);
 #endif
 
       //
