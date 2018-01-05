@@ -204,10 +204,17 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
 
   if (border_limits_defined)
   {
-    success &= get_vector(border_min_block_string, &simulate_options->border.min_corner_block);
-    success &= get_vector(border_min_cell_string, &simulate_options->border.min_corner_cell);
-    success &= get_vector(border_max_block_string, &simulate_options->border.max_corner_block);
-    success &= get_vector(border_max_cell_string, &simulate_options->border.max_corner_cell);
+    b32 error_in_border_limits = false;
+    error_in_border_limits &= get_vector(border_min_block_string, &simulate_options->border.min_corner_block);
+    error_in_border_limits &= get_vector(border_min_cell_string, &simulate_options->border.min_corner_cell);
+    error_in_border_limits &= get_vector(border_max_block_string, &simulate_options->border.max_corner_block);
+    error_in_border_limits &= get_vector(border_max_cell_string, &simulate_options->border.max_corner_cell);
+
+    if (error_in_border_limits)
+    {
+      success &= false;
+      print("Error in border definitions\n");
+    }
   }
 
   if (success)

@@ -209,6 +209,10 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
     {
       success &= read_count_matching_value(named_states, &count_matching_string, rule_pattern_result);
     }
+    else
+    {
+      rule_pattern_result->count_matching_enabled = false;
+    }
   }
 
   return success;
@@ -224,6 +228,7 @@ read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, 
 
   while (file_string.current_position != file_string.end)
   {
+    *rule_pattern = {};
 
     b32 found_pattern = read_rule_pattern(named_states, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
