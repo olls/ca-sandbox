@@ -34,15 +34,27 @@ init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex
     {1, 0}
   };
 
+  cell_instancing->cell_n_vertices = array_count(vertices);
+  cell_instancing->cell_general_vertices_position = opengl_buffer_add_elements(general_vertex_buffer, cell_instancing->cell_n_vertices, vertices);
+
+  GLushort vertices_pos = cell_instancing->cell_general_vertices_position;
+
   GLushort indices[] = {
     0, 1, 2,
     0, 2, 3
   };
 
-  cell_instancing->cell_n_vertices = array_count(vertices);
   cell_instancing->cell_n_indices = array_count(indices);
 
-  cell_instancing->cell_general_vertices_position = opengl_buffer_add_elements(general_vertex_buffer, cell_instancing->cell_n_vertices, vertices);
+  // These are indices into the general vertex buffer, so they need to be offset to the position of
+  //   the vertices in the buffer
+  for (u32 i = 0;
+       i < cell_instancing->cell_n_indices;
+       ++i)
+  {
+    indices[i] += vertices_pos;
+  }
+
   cell_instancing->cell_general_indices_position = opengl_buffer_add_elements(general_index_buffer, cell_instancing->cell_n_indices, indices);
 
   create_opengl_buffer(&cell_instancing->buffer, sizeof(CellInstance), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
@@ -202,7 +214,9 @@ void
 draw_cell_instances(CellInstancing *cell_instancing)
 {
   glBindBuffer(cell_instancing->buffer.binding_target, cell_instancing->buffer.id);
-  glDrawElementsInstanced(GL_TRIANGLES, cell_instancing->cell_n_indices, GL_UNSIGNED_SHORT, 0, cell_instancing->buffer.elements_used);
+
+  void *indices_buffer_offset = (void *)(intptr_t)(cell_instancing->cell_general_indices_position * sizeof(GLushort));
+  glDrawElementsInstanced(GL_TRIANGLES, cell_instancing->cell_n_indices, GL_UNSIGNED_SHORT, indices_buffer_offset, cell_instancing->buffer.elements_used);
 
   opengl_print_errors();
 }
