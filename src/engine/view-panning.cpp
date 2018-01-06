@@ -29,7 +29,7 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
   ImGuiIO& io = ImGui::GetIO();
 
   // TODO: Scaling acceleration could be more scientific
-  const r32 scale_acceleration = 0.01;
+  const r32 scale_acceleration = 0.02;
   const r32 scale_deacceleration = 0.8;
   const r32 max_scale = 2.0;
   const r32 min_scale = 0.003;
