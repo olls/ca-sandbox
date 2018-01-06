@@ -95,45 +95,28 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-  SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS);
+  SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
+                                            SDL_WINDOW_SHOWN |
+                                            SDL_WINDOW_INPUT_FOCUS |
+                                            SDL_WINDOW_RESIZABLE);
+  u32 width = 0;
+  u32 height = 0;
   if (FULLSCREEN)
   {
     flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN_DESKTOP);
-    engine->window.width = 0;
-    engine->window.height = 0;
   }
   else
   {
-    engine->window.width = WINDOW_WIDTH;
-    engine->window.height = WINDOW_HEIGHT;
+    width = WINDOW_WIDTH;
+    height = WINDOW_HEIGHT;
   }
 
-  engine->window.sdl_window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, engine->window.width, engine->window.height, flags);
+  engine->window.sdl_window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
   if (!engine->window.sdl_window)
   {
     print("Failed to initialise SDL window: %s\n", SDL_GetError());
     success = false;
     return success;
-  }
-
-  if (FULLSCREEN)
-  {
-    s32 display_index = SDL_GetWindowDisplayIndex(engine->window.sdl_window);
-    if (display_index < 0)
-    {
-      print("Failed to get display index.\n");
-      success = false;
-      return success;
-    }
-    SDL_Rect window_rect;
-    if (SDL_GetDisplayBounds(display_index, &window_rect))
-    {
-      print("Failed to get display bounds.\n");
-      success = false;
-      return success;
-    }
-    engine->window.width = window_rect.w;
-    engine->window.height = window_rect.h;
   }
 
   engine->window.gl_context = SDL_GL_CreateContext(engine->window.sdl_window);
@@ -157,8 +140,6 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   glDisable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
-
-  glViewport(0, 0, engine->window.width, engine->window.height);
 
 // #define OPEN_GL_DEBUG
 #ifdef OPEN_GL_DEBUG

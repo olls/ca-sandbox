@@ -322,16 +322,16 @@ main(int argc, const char *argv[])
       // Render
       //
 
-      glViewport(0, 0, engine.window.width, engine.window.height);
+      s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
+
+      glViewport(0, 0, window_size.x, window_size.y);
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
       r32 cell_width = 1;
 
-      s32vec2 window_size = s32vec2{(s32)engine.window.width, (s32)engine.window.height};
-
       vec2 screen_mouse_pos = io.MousePos;
-      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2{(r32)engine.window.width, (r32)engine.window.height});
+      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
       screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
       screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
       screen_mouse_pos.y *= -1;

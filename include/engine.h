@@ -11,12 +11,9 @@
 ///
 
 
-/// Stores width and height of the window, as well as records of the SDL_window and OpenGL context.
+/// Stores the SDL_window and OpenGL context.
 struct Window
 {
-  u32 width;
-  u32 height;
-
   SDL_Window *sdl_window;
   SDL_GLContext gl_context;
 };
