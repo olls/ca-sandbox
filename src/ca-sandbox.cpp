@@ -200,12 +200,6 @@ main(int argc, const char *argv[])
           copy_string(universe_ui.cells_file_picker.selected_file, cells_filename, strlen(cells_filename)+1);
           universe_ui.reload_cells_file = true;
         }
-        else
-        {
-          print("Not enough command line arguments supplied.\n");
-          print("Usage: ./ca-sandbox [universe-file-path] [rule-file-path]\n\n");
-          running &= false;
-        }
 
         if (!running)
         {
