@@ -71,6 +71,14 @@ uvec2_to_vec2(uvec2 a)
   return result;
 }
 
+/// Truncate r32 vector values to s32 vector.
+inline s32vec2
+vec2_to_s32vec2(vec2 a)
+{
+  s32vec2 result = {(s32)a.x, (s32)a.y};
+  return result;
+}
+
 template <typename vec>
 inline vec
 vec2_add(vec a, vec b)
@@ -223,6 +231,14 @@ uvec3_to_vec3(uvec3 a)
   return result;
 }
 
+/// Truncate r32 vector values to s32 vector.
+inline s32vec3
+vec3_to_s32vec3(vec3 a)
+{
+  s32vec3 result = {(s32)a.x, (s32)a.y, (s32)a.z};
+  return result;
+}
+
 template <typename vec>
 inline vec
 vec3_add(vec a, vec b)
@@ -328,10 +344,10 @@ struct uvec4
   {
     struct
     {
-      u32 w;
       u32 x;
       u32 y;
       u32 z;
+      u32 w;
     };
     struct
     {
@@ -347,10 +363,10 @@ struct s32vec4
   {
     struct
     {
-      s32 w;
       s32 x;
       s32 y;
       s32 z;
+      s32 w;
     };
     struct
     {
@@ -366,10 +382,10 @@ struct s64vec4
   {
     struct
     {
-      s64 w;
       s64 x;
       s64 y;
       s64 z;
+      s64 w;
     };
     struct
     {
@@ -383,7 +399,15 @@ struct s64vec4
 inline vec4
 uvec4_to_vec4(uvec4 a)
 {
-  vec4 result = {(r32)a.w, (r32)a.x, (r32)a.y, (r32)a.z};
+  vec4 result = {(r32)a.x, (r32)a.y, (r32)a.z, (r32)a.w};
+  return result;
+}
+
+/// Truncate r32 vector values to s32 vector.
+inline s32vec4
+vec4_to_s32vec4(vec4 a)
+{
+  s32vec4 result = {(s32)a.x, (s32)a.y, (s32)a.z, (s32)a.w};
   return result;
 }
 
@@ -395,6 +419,7 @@ vec4_add(vec a, vec b)
   result.x = a.x + b.x;
   result.y = a.y + b.y;
   result.z = a.z + b.z;
+  result.w = a.w + b.w;
   return result;
 }
 
@@ -406,6 +431,7 @@ vec4_subtract(vec a, vec b)
   result.x = a.x - b.x;
   result.y = a.y - b.y;
   result.z = a.z - b.z;
+  result.w = a.w - b.w;
   return result;
 }
 
@@ -417,6 +443,7 @@ vec4_multiply(vec a, vec b)
   result.x = a.x * b.x;
   result.y = a.y * b.y;
   result.z = a.z * b.z;
+  result.w = a.w * b.w;
   return result;
 }
 
@@ -428,6 +455,7 @@ vec4_divide(vec a, vec b)
   result.x = a.x / b.x;
   result.y = a.y / b.y;
   result.z = a.z / b.z;
+  result.w = a.w / b.w;
   return result;
 }
 
@@ -439,6 +467,7 @@ vec4_add(vec a, Scalar b)
   result.x = a.x + b;
   result.y = a.y + b;
   result.z = a.z + b;
+  result.w = a.w + b;
   return result;
 }
 
@@ -450,6 +479,7 @@ vec4_subtract(vec a, Scalar b)
   result.x = a.x - b;
   result.y = a.y - b;
   result.z = a.z - b;
+  result.w = a.w - b;
   return result;
 }
 
@@ -461,6 +491,7 @@ vec4_multiply(vec a, Scalar b)
   result.x = a.x * b;
   result.y = a.y * b;
   result.z = a.z * b;
+  result.w = a.w * b;
   return result;
 }
 
@@ -472,6 +503,7 @@ vec4_divide(vec a, Scalar b)
   result.x = a.x / b;
   result.y = a.y / b;
   result.z = a.z / b;
+  result.w = a.w / b;
   return result;
 }
 
@@ -481,7 +513,8 @@ vec4_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&
                a.y == b.y &&
-               a.z == b.z;
+               a.z == b.z &&
+               a.w == b.w;
   return result;
 }
 
