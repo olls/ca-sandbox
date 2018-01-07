@@ -40,4 +40,8 @@ b32
 load_universe(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
 
 
+void
+debug_blank_universe(Universe *universe, CellInitialisationOptions *cell_initialisation_options);
+
+
 #endif

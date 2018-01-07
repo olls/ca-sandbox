@@ -351,3 +351,27 @@ load_universe(const char *filename, Universe *universe, SimulateOptions *simulat
 
   return success;
 }
+
+
+void
+debug_blank_universe(Universe *universe, CellInitialisationOptions *cell_initialisation_options)
+{
+  destroy_cell_hashmap(universe);
+  init_cell_hashmap(universe);
+  universe->cell_block_dim = 32;
+
+  u32 width = 10;
+  u32 height = 10;
+
+  for (s32 y = 0;
+       y < height;
+       ++y)
+  {
+    for (s32 x = 0;
+         x < width;
+         ++x)
+    {
+      create_cell_block(universe, cell_initialisation_options, (s32vec2){x, y});
+    }
+  }
+}
