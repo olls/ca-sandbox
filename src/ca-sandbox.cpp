@@ -17,8 +17,8 @@
 #include "load-rule.h"
 #include "simulate.h"
 #include "rule-ui.h"
-#include "misc-ui.h"
 #include "simulation-ui.h"
+#include "simulate-options-ui.h"
 #include "universe-ui.h"
 
 #include "imgui.h"
@@ -115,7 +115,7 @@ main(int argc, const char *argv[])
     Rule loaded_rule = {};
     b32 rule_file_loaded = false;
 
-    MiscUI misc_ui = {
+    SimulationUI simulation_ui = {
       .sim_frequency = INITIAL_SIM_FREQUENCY,
       .simulating = false,
       .step_simulation = false
@@ -250,10 +250,9 @@ main(int argc, const char *argv[])
       // ImGui::ShowMetricsWindow();
       // ImGui::ShowStyleEditor();
 
-      miscellaneous_ui(&misc_ui, last_simulation_delta);
-
+      do_simulation_ui(&simulation_ui, last_simulation_delta, &universe_ui.reload_cells_file);
       do_rule_ui(&rule_ui, &loaded_rule);
-      simulate_ui(&simulate_options, &universe);
+      do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
 
       //
@@ -277,7 +276,7 @@ main(int argc, const char *argv[])
 
       if (universe_ui.reload_cells_file && rule_file_loaded)
       {
-        misc_ui.simulating = false;
+        simulation_ui.simulating = false;
 
         universe_ui.reload_cells_file = false;
         cells_file_loaded = true;
@@ -298,18 +297,42 @@ main(int argc, const char *argv[])
       // Simulate
       //
 
-      if ((misc_ui.simulating && engine.frame_start >= last_sim_time + (1000000.0 / misc_ui.sim_frequency)) ||
-          misc_ui.step_simulation)
+      if (simulation_ui.mode == Mode::SIMULATOR)
       {
-        misc_ui.step_simulation = false;
+        u32 n_simulation_steps = 0;
 
-        u64 start_sim_time = get_us();
-        simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
-        u64 end_sim_time = get_us();
+        if (simulation_ui.step_simulation)
+        {
+          simulation_ui.step_simulation = false;
+          n_simulation_steps = 1;
+        }
+        else if (simulation_ui.simulating)
+        {
+          r32 sim_step_gap_us = (1000000.0 / simulation_ui.sim_frequency);
+          u32 time_since_last_sim = engine.frame_start - last_sim_time;
 
-        last_simulation_delta = end_sim_time - start_sim_time;
+          if (time_since_last_sim >= sim_step_gap_us)
+          {
+            n_simulation_steps = time_since_last_sim / sim_step_gap_us;
+          }
+        }
 
-        last_sim_time = end_sim_time;
+        if (n_simulation_steps > 0)
+        {
+          u64 start_sim_time = get_us();
+
+          for (u32 simulation_step = 0;
+               simulation_step < n_simulation_steps;
+               ++simulation_step)
+          {
+            simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
+          }
+
+          u64 end_sim_time = get_us();
+          last_sim_time = end_sim_time;
+
+          last_simulation_delta = (u32)(end_sim_time - start_sim_time) * (1.0/n_simulation_steps);
+        }
       }
 
       //
@@ -332,8 +355,6 @@ main(int argc, const char *argv[])
 
       update_view_panning(&view_panning, screen_mouse_pos);
       update_view_projection_matrix(&view_panning, window_size);
-
-      ImGui::Text("View offset: [%f %f]", view_panning.offset.x, view_panning.offset.y);
 
       //
       // Cell instance drawing

@@ -10,7 +10,7 @@
 ///
 
 
-enum struct BorderType
+enum struct BorderType : u32
 {
   FIXED,
   INFINITE,
