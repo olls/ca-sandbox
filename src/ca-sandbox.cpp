@@ -155,6 +155,7 @@ main(int argc, const char *argv[])
         cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
         cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
 
+#if 0
         // Debug cell block drawing
         {
 
@@ -173,6 +174,7 @@ main(int argc, const char *argv[])
           opengl_print_errors();
           glBindVertexArray(0);
         }
+#endif
 
         // Cell instance drawing
         {
@@ -184,10 +186,12 @@ main(int argc, const char *argv[])
           glBindVertexArray(0);
         }
 
+#if 0
         // Screen debug drawing
         {
           glGenVertexArrays(1, &screen_vao);
         }
+#endif
 
         // Load initial filename arguments
         if (argc >= 3)
@@ -228,8 +232,6 @@ main(int argc, const char *argv[])
       // Start frame
       //
 
-      // print("Frame Start\n");
-
       engine_frame_start(&engine);
       ImGui_ImplSdlGL3_NewFrame(engine.window.sdl_window);
 
@@ -246,9 +248,6 @@ main(int argc, const char *argv[])
       //
 
       // ImGui::ShowTestWindow();
-      // ImGui::ShowUserGuide();
-      // ImGui::ShowMetricsWindow();
-      // ImGui::ShowStyleEditor();
 
       do_simulation_ui(&simulation_ui, last_simulation_delta, &universe_ui.reload_cells_file);
       do_rule_ui(&rule_ui, &loaded_rule);
@@ -386,7 +385,7 @@ main(int argc, const char *argv[])
 
       glBindVertexArray(debug_cell_block_outline_drawing_vao);
       glUseProgram(debug_cell_block_outline_drawing_shader_program);
-      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix[0]);
+      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning.projection_matrix[0][0]);
 
       // Get attribute locations
       init_debug_cell_block_outline_drawing_attributes(&debug_cell_block_outline_drawing_vbo, debug_cell_block_outline_drawing_shader_program);
