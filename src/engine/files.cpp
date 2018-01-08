@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 
 /// @file
@@ -26,22 +28,28 @@ open_file(const char *filename, File *result, b32 write, s32 trunc_to)
   b32 success = true;
 
   s32 open_flags = O_RDONLY;
+  mode_t mode;
   s32 mmap_protection = PROT_READ;
   s32 mmap_flags = MAP_PRIVATE;
   if (write)
   {
-    open_flags = O_RDWR | O_TRUNC;
+    // Open with read/write, truncate, create if doesn't exist
+    open_flags = O_RDWR | O_TRUNC | O_CREAT;
+    // Only used if the file needs creating: user read and user write permissions
+    mode = S_IRUSR | S_IWUSR;
+
     mmap_protection = PROT_READ | PROT_WRITE;
     mmap_flags = MAP_SHARED;
   }
 
-  result->fd = open(filename, open_flags);
+  result->fd = open(filename, open_flags, mode);
   if (result->fd == -1)
   {
-    print("Failed to open file: \"%s\"\n", filename);
+    print("Failed to open file: \"%s\"  %s, %d", filename, strerror(errno), errno);
     success = false;
   }
-  else
+
+  if (success)
   {
     if (trunc_to < 0)
     {

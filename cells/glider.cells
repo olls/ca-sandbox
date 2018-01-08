@@ -1,14 +1,19 @@
-cell_block_dim: 8
 n_cell_blocks: 1
+cell_block_dim: 8
 
 border_type: TORUS
+border_min_block: 0 0
+border_min_cell: 0 0
+border_max_block: 10 10
+border_max_cell: 0 0
 
 CellBlock: 0, 0
-O O O O O O O O
-O O O X O O O O
-O O O O X O O O
-O O X X X O O O
-O O O O O O O O
-O O O O O O O O
-O O O O O O O O
-O O O O O O O O
+O O O O O O O O 
+O O O X O O O O 
+O O O O X O O O 
+O O X X X O O O 
+O O O O O O O O 
+O O O O O O O O 
+X X O O O O O O 
+X X O O O O O O 
+

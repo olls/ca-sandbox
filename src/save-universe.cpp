@@ -6,6 +6,8 @@
 #include "files.h"
 
 #include "universe.h"
+#include "simulate.h"
+#include "named-states.h"
 
 #include <string.h>
 #include <stdarg.h>
@@ -35,8 +37,32 @@ write_text(WriteString *writer, const char *text, ...)
 }
 
 
+void
+serialise_simulate_options(WriteString *file_writer, SimulateOptions *simulate_options)
+{
+  write_text(file_writer, "border_type: ");
+  switch (simulate_options->border.type)
+  {
+    case (BorderType::FIXED):
+      write_text(file_writer, "FIXED");
+    case (BorderType::INFINITE):
+      write_text(file_writer, "INFINITE");
+    case (BorderType::TORUS):
+      write_text(file_writer, "TORUS");
+  }
+  write_text(file_writer, "\n");
+
+  write_text(file_writer, "border_min_block: %d %d\n", simulate_options->border.min_corner_block.x, simulate_options->border.min_corner_block.y);
+  write_text(file_writer, "border_min_cell: %d %d\n", simulate_options->border.min_corner_cell.x, simulate_options->border.min_corner_cell.y);
+  write_text(file_writer, "border_max_block: %d %d\n", simulate_options->border.max_corner_block.x, simulate_options->border.max_corner_block.y);
+  write_text(file_writer, "border_max_cell: %d %d\n", simulate_options->border.max_corner_cell.x, simulate_options->border.max_corner_cell.y);
+
+  write_text(file_writer, "\n");
+}
+
+
 b32
-save_universe_to_file(const char *filename, Universe *universe)
+save_universe_to_file(const char *filename, Universe *universe, SimulateOptions *simulate_options, NamedStates *named_states)
 {
   b32 success = true;
 
@@ -95,6 +121,8 @@ save_universe_to_file(const char *filename, Universe *universe)
     write_text(&file_writer, "n_cell_blocks: %d\n", n_cell_blocks);
     write_text(&file_writer, "cell_block_dim: %d\n\n", universe->cell_block_dim);
 
+    serialise_simulate_options(&file_writer, simulate_options);
+
     u32 cell_block_n = 0;
 
     for (u32 hash_slot = 0;
@@ -120,7 +148,8 @@ save_universe_to_file(const char *filename, Universe *universe)
             {
               Cell *cell = get_cell_from_block(universe, cell_block, (s32vec2){(s32)cell_x, (s32)cell_y});
 
-              write_text(&file_writer, "%d ", cell->state);
+              String cell_state = get_state_name(named_states, cell->state);
+              write_text(&file_writer, "%.*s ", string_length(cell_state), cell_state.start);
             }
 
             write_text(&file_writer, "\n");

@@ -18,7 +18,7 @@
 
 
 void
-do_simulation_ui(SimulationUI *simulation, u64 frame_start, b32 *reload_universe)
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 *reload_universe)
 {
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoCollapse;
@@ -26,50 +26,51 @@ do_simulation_ui(SimulationUI *simulation, u64 frame_start, b32 *reload_universe
   ImGui::SetNextWindowSize(ImVec2(256, 256), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Simulation UI", NULL, window_flags))
   {
-    ImGui::Text("Mode: %s", simulation->mode == Mode::SIMULATOR ? "Simulator" : "Editor");
+    ImGui::Text("Mode: %s", simulation_ui->mode == Mode::SIMULATOR ? "Simulator" : "Editor");
 
-    if (simulation->mode == Mode::EDITOR)
+    if (simulation_ui->mode == Mode::EDITOR)
     {
-      if (ImGui::Button("Run simulation"))
+      if (ImGui::Button("Save and Run Simulation"))
       {
-        simulation->simulating = false;
-        simulation->mode = Mode::SIMULATOR;
-        simulation->simulation_step = 0;
+        simulation_ui->save_universe = true;
+        simulation_ui->simulating = false;
+        simulation_ui->mode = Mode::SIMULATOR;
+        simulation_ui->simulation_step = 0;
       }
 
     }
-    else if (simulation->mode == Mode::SIMULATOR)
+    else if (simulation_ui->mode == Mode::SIMULATOR)
     {
       ImGui::PushItemWidth(100);
-      ImGui::DragFloat("Simulations per second", &simulation->sim_frequency, 1, 0, 10000);
+      ImGui::DragFloat("Simulations per second", &simulation_ui->sim_frequency, 1, 0, 10000);
       ImGui::PopItemWidth();
 
-      if (simulation->simulating)
+      if (simulation_ui->simulating)
       {
         if (ImGui::Button("Pause Simulation"))
         {
-          simulation->simulating = false;
+          simulation_ui->simulating = false;
         }
       }
       else
       {
         if (ImGui::Button("Un-pause Simulation"))
         {
-          simulation->simulating = true;
-          simulation->last_sim_time = frame_start;
+          simulation_ui->simulating = true;
+          simulation_ui->last_sim_time = frame_start;
         }
 
         ImGui::SameLine();
-        simulation->step_simulation = ImGui::Button("Step Simulation");
+        simulation_ui->step_simulation = ImGui::Button("Step Simulation");
       }
 
-      ImGui::Text("Simulation Time: %.3fms", simulation->last_simulation_delta * 0.001);
-      ImGui::Text("Simulation Step: %lu", simulation->simulation_step);
+      ImGui::Text("Simulation Time: %.3fms", simulation_ui->last_simulation_delta * 0.001);
+      ImGui::Text("Simulation Step: %lu", simulation_ui->simulation_step);
 
       if (ImGui::Button("End simulation"))
       {
-        simulation->simulating = false;
-        simulation->mode = Mode::EDITOR;
+        simulation_ui->simulating = false;
+        simulation_ui->mode = Mode::EDITOR;
         *reload_universe = true;
       }
     }

@@ -41,6 +41,10 @@ void
 debug_print_named_states(NamedStates *named_states);
 
 
+String
+get_state_name(NamedStates *named_states, CellState state);
+
+
 CellState
 advance_state(NamedStates *named_states, CellState previous);
 

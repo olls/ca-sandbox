@@ -37,6 +37,9 @@ struct SimulationUI
 
   /// The amount of time the last simulation step took
   u32 last_simulation_delta;
+
+  /// Flag to tell the main loop to save the universe;
+  b32 save_universe;
 };
 
 

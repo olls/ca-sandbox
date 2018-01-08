@@ -21,6 +21,7 @@
 #include "simulate-options-ui.h"
 #include "universe-ui.h"
 #include "cells-editor.h"
+#include "save-universe.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -278,6 +279,16 @@ main(int argc, const char *argv[])
       do_rule_ui(&rule_ui, &loaded_rule);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+
+      //
+      // Save
+      //
+
+      if (simulation_ui.save_universe)
+      {
+        simulation_ui.save_universe = false;
+        running &= save_universe_to_file(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &loaded_rule.config.named_states);
+      }
 
       //
       // Load input files
