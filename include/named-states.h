@@ -41,4 +41,8 @@ void
 debug_print_named_states(NamedStates *named_states);
 
 
+CellState
+advance_state(NamedStates *named_states, CellState previous);
+
+
 #endif

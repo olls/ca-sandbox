@@ -20,14 +20,28 @@ struct SimulationUI
 {
   Mode mode;
 
+  /// Currently simulating, or paused
   b32 simulating;
+
+  /// The frequency of simulation steps
   r32 sim_frequency;
+
+  /// Step the simulation this frame, if paused
   b32 step_simulation;
+
+  /// The simulation step counter
+  u64 simulation_step;
+
+  /// The time of the last simulation step end
+  u64 last_sim_time;
+
+  /// The amount of time the last simulation step took
+  u32 last_simulation_delta;
 };
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u32 last_simulation_delta, b32 *reload_universe);
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 *reload_universe);
 
 
 #endif

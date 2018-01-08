@@ -231,7 +231,7 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
 /// Simulates one frame of the Universe.
 ///
 /// @param[in] universe
-/// @param[in] current_frame  the time in us of the current frame.
+/// @param[in] current_frame  a unique id for the current simulation step.
 ///
 /// First we iterate over every Cell in the Universe, copying its state into `Cell.previous_state`.
 ///   Next we iterate over every CellBlock and simulate it using simulate_cell_block() if it has not

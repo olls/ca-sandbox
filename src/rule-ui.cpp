@@ -17,24 +17,6 @@
 ///
 
 
-CellState
-advance_state(NamedStates *named_states, CellState previous)
-{
-  CellState result;
-
-  if (previous == named_states->n_states - 1)
-  {
-    result = 0;
-  }
-  else
-  {
-    result = previous + 1;
-  }
-
-  return result;
-}
-
-
 void
 display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 {

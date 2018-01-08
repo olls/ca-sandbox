@@ -27,8 +27,8 @@
 
 #include <GL/glew.h>
 
-#define DEBUG_CELL_BLOCK_DRAWING
-#define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
+// #define DEBUG_CELL_BLOCK_DRAWING
+// #define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
 // #define DEBUG_SCREEN_DRAWING
 
 /// @file
@@ -123,7 +123,10 @@ main(int argc, const char *argv[])
     SimulationUI simulation_ui = {
       .sim_frequency = INITIAL_SIM_FREQUENCY,
       .simulating = false,
-      .step_simulation = false
+      .step_simulation = false,
+      .simulation_step = 0,
+      .last_sim_time = get_us(),
+      .last_simulation_delta = 0
     };
 
     UniverseUI universe_ui = {};
@@ -135,8 +138,8 @@ main(int argc, const char *argv[])
       .offset = {0,0}
     };
 
-    u64 last_sim_time = get_us();
-    u32 last_simulation_delta = 0;
+    vec2 screen_mouse_pos;
+
 
     b32 init = true;
     b32 running = true;
@@ -248,11 +251,15 @@ main(int argc, const char *argv[])
         running = false;
       }
 
-      vec2 screen_mouse_pos = io.MousePos;
-      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
-      screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
-      screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
-      screen_mouse_pos.y *= -1;
+      if (!(io.MousePos.x == -1 &&
+            io.MousePos.y == -1))
+      {
+        screen_mouse_pos = io.MousePos;
+        screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
+        screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
+        screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
+        screen_mouse_pos.y *= -1;
+      }
 
       s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
 
@@ -267,15 +274,10 @@ main(int argc, const char *argv[])
 
       // ImGui::ShowTestWindow();
 
-      do_simulation_ui(&simulation_ui, last_simulation_delta, &universe_ui.reload_cells_file);
+      do_simulation_ui(&simulation_ui, engine.frame_start, &universe_ui.reload_cells_file);
       do_rule_ui(&rule_ui, &loaded_rule);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
-
-      if (cells_file_loaded)
-      {
-        do_cells_editor(&cells_editor, &universe, mouse_universe_pos);
-      }
 
       //
       // Load input files
@@ -331,7 +333,7 @@ main(int argc, const char *argv[])
         else if (simulation_ui.simulating)
         {
           r32 sim_step_gap_us = (1000000.0 / simulation_ui.sim_frequency);
-          u32 time_since_last_sim = engine.frame_start - last_sim_time;
+          u32 time_since_last_sim = engine.frame_start - simulation_ui.last_sim_time;
 
           if (time_since_last_sim >= sim_step_gap_us)
           {
@@ -347,13 +349,20 @@ main(int argc, const char *argv[])
                simulation_step < n_simulation_steps;
                ++simulation_step)
           {
-            simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, last_sim_time);
+            simulate_cells(&simulate_options, &cell_initialisation_options, &loaded_rule, &universe, ++simulation_ui.simulation_step);
           }
 
           u64 end_sim_time = get_us();
-          last_sim_time = end_sim_time;
+          simulation_ui.last_sim_time = end_sim_time;
 
-          last_simulation_delta = (u32)(end_sim_time - start_sim_time) * (1.0/n_simulation_steps);
+          simulation_ui.last_simulation_delta = (u32)(end_sim_time - start_sim_time) * (1.0/n_simulation_steps);
+        }
+      }
+      else if (simulation_ui.mode == Mode::EDITOR)
+      {
+        if (cells_file_loaded)
+        {
+          do_cells_editor(&cells_editor, &universe, &loaded_rule.config.named_states, mouse_universe_pos, view_panning.panning_last_frame, engine.frame_start);
         }
       }
 
@@ -365,7 +374,7 @@ main(int argc, const char *argv[])
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      r32 cell_width = 0.9;
+      r32 cell_width = 1;
 
       //
       // Cell instance drawing

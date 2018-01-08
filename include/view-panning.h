@@ -17,6 +17,11 @@ struct ViewPanning
   r32 scale_speed;
   r32 scale;
 
+  b32 currently_panning;
+
+  /// Used to filter out mouse release events, if they were caused by the end of a pan.
+  b32 panning_last_frame;
+
   vec2 last_mouse_pos;
   vec2 offset;
 

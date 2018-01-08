@@ -176,3 +176,21 @@ debug_print_named_states(NamedStates *named_states)
   }
   print("\n");
 }
+
+
+CellState
+advance_state(NamedStates *named_states, CellState previous)
+{
+  CellState result;
+
+  if (previous == named_states->n_states - 1)
+  {
+    result = 0;
+  }
+  else
+  {
+    result = previous + 1;
+  }
+
+  return result;
+}

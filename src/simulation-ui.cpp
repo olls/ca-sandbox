@@ -2,6 +2,8 @@
 
 #include "types.h"
 #include "print.h"
+#include "timing.h"
+
 #include "imgui.h"
 
 /// @file
@@ -16,7 +18,7 @@
 
 
 void
-do_simulation_ui(SimulationUI *simulation, u32 last_simulation_delta, b32 *reload_universe)
+do_simulation_ui(SimulationUI *simulation, u64 frame_start, b32 *reload_universe)
 {
   ImGuiWindowFlags window_flags = 0;
   window_flags |= ImGuiWindowFlags_NoCollapse;
@@ -24,7 +26,6 @@ do_simulation_ui(SimulationUI *simulation, u32 last_simulation_delta, b32 *reloa
   ImGui::SetNextWindowSize(ImVec2(256, 256), ImGuiCond_FirstUseEver);
   if (ImGui::Begin("Simulation UI", NULL, window_flags))
   {
-
     ImGui::Text("Mode: %s", simulation->mode == Mode::SIMULATOR ? "Simulator" : "Editor");
 
     if (simulation->mode == Mode::EDITOR)
@@ -33,6 +34,7 @@ do_simulation_ui(SimulationUI *simulation, u32 last_simulation_delta, b32 *reloa
       {
         simulation->simulating = false;
         simulation->mode = Mode::SIMULATOR;
+        simulation->simulation_step = 0;
       }
 
     }
@@ -54,13 +56,15 @@ do_simulation_ui(SimulationUI *simulation, u32 last_simulation_delta, b32 *reloa
         if (ImGui::Button("Un-pause Simulation"))
         {
           simulation->simulating = true;
+          simulation->last_sim_time = frame_start;
         }
 
         ImGui::SameLine();
         simulation->step_simulation = ImGui::Button("Step Simulation");
       }
 
-      ImGui::Text("Simulation Time: %.3fms", last_simulation_delta * 0.001);
+      ImGui::Text("Simulation Time: %.3fms", simulation->last_simulation_delta * 0.001);
+      ImGui::Text("Simulation Step: %lu", simulation->simulation_step);
 
       if (ImGui::Button("End simulation"))
       {
