@@ -6,6 +6,13 @@
 #include "universe.h"
 
 
+struct UniversePosition
+{
+  s32vec2 cell_block_position;
+  vec2 cell_position;
+};
+
+
 void
 normalise_cell_coord(Universe *universe, s32 *cell_block_coord, s32 *cell_coord);
 
@@ -36,6 +43,14 @@ cell_position_less_than(s32 cell_block_position_test, s32 cell_position_test,
 b32
 cell_position_less_than(s32vec2 cell_block_position_test, s32vec2 cell_position_test,
                         s32vec2 cell_block_position_bound, s32vec2 cell_position_bound);
+
+
+b32
+cell_position_equal_to(UniversePosition a, UniversePosition b);
+
+
+s32vec2
+cell_block_round(vec2 real_cell_block);
 
 
 #endif

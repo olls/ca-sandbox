@@ -79,6 +79,14 @@ vec2_to_s32vec2(vec2 a)
   return result;
 }
 
+/// Truncate s32 vector values to r32 vector.
+inline vec2
+s32vec2_to_vec2(s32vec2 a)
+{
+  vec2 result = {(r32)a.x, (r32)a.y};
+  return result;
+}
+
 template <typename vec>
 inline vec
 vec2_add(vec a, vec b)
@@ -236,6 +244,14 @@ inline s32vec3
 vec3_to_s32vec3(vec3 a)
 {
   s32vec3 result = {(s32)a.x, (s32)a.y, (s32)a.z};
+  return result;
+}
+
+/// Truncate s32 vector values to r32 vector.
+inline vec3
+s32vec3_to_vec3(s32vec3 a)
+{
+  vec3 result = {(r32)a.x, (r32)a.y, (r32)a.z};
   return result;
 }
 
@@ -408,6 +424,14 @@ inline s32vec4
 vec4_to_s32vec4(vec4 a)
 {
   s32vec4 result = {(s32)a.x, (s32)a.y, (s32)a.z, (s32)a.w};
+  return result;
+}
+
+/// Truncate s32 vector values to r32 vector.
+inline vec4
+s32vec4_to_vec4(s32vec4 a)
+{
+  vec4 result = {(r32)a.x, (r32)a.y, (r32)a.z, (r32)a.w};
   return result;
 }
 

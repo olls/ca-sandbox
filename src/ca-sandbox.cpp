@@ -20,11 +20,16 @@
 #include "simulation-ui.h"
 #include "simulate-options-ui.h"
 #include "universe-ui.h"
+#include "cells-editor.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
 
 #include <GL/glew.h>
+
+#define DEBUG_CELL_BLOCK_DRAWING
+#define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
+// #define DEBUG_SCREEN_DRAWING
 
 /// @file
 /// @brief Program root file.
@@ -123,6 +128,7 @@ main(int argc, const char *argv[])
 
     UniverseUI universe_ui = {};
     RuleUI rule_ui = {};
+    CellsEditor cells_editor = {};
 
     ViewPanning view_panning = {
       .scale = 0.3,
@@ -155,7 +161,7 @@ main(int argc, const char *argv[])
         cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
         cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
 
-#if 0
+#ifdef DEBUG_CELL_BLOCK_DRAWING
         // Debug cell block drawing
         {
 
@@ -164,7 +170,7 @@ main(int argc, const char *argv[])
           glBindVertexArray(debug_cell_block_outline_drawing_vao);
 
           // Generate and Bind VBO
-          create_opengl_buffer(&debug_cell_block_outline_drawing_vbo, sizeof(s32vec2), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
+          create_opengl_buffer(&debug_cell_block_outline_drawing_vbo, sizeof(UniversePosition), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
           glBindBuffer(debug_cell_block_outline_drawing_vbo.binding_target, debug_cell_block_outline_drawing_vbo.id);
 
           // Generate and Bind IBO
@@ -186,8 +192,7 @@ main(int argc, const char *argv[])
           glBindVertexArray(0);
         }
 
-#if 0
-        // Screen debug drawing
+#ifdef DEBUG_SCREEN_DRAWING
         {
           glGenVertexArrays(1, &screen_vao);
         }
@@ -243,6 +248,19 @@ main(int argc, const char *argv[])
         running = false;
       }
 
+      vec2 screen_mouse_pos = io.MousePos;
+      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
+      screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
+      screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
+      screen_mouse_pos.y *= -1;
+
+      s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
+
+      update_view_panning(&view_panning, screen_mouse_pos);
+      update_view_projection_matrix(&view_panning, window_size);
+
+      UniversePosition mouse_universe_pos = screen_position_to_universe_position(&view_panning, screen_mouse_pos);
+
       //
       // Draw imGui elements
       //
@@ -253,6 +271,11 @@ main(int argc, const char *argv[])
       do_rule_ui(&rule_ui, &loaded_rule);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+
+      if (cells_file_loaded)
+      {
+        do_cells_editor(&cells_editor, &universe, mouse_universe_pos);
+      }
 
       //
       // Load input files
@@ -338,28 +361,17 @@ main(int argc, const char *argv[])
       // Render
       //
 
-      s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
-
       glViewport(0, 0, window_size.x, window_size.y);
       glClearColor(1, 1, 1, 1);
       glClear(GL_COLOR_BUFFER_BIT);
 
-      r32 cell_width = 1;
-
-      vec2 screen_mouse_pos = io.MousePos;
-      screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
-      screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
-      screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
-      screen_mouse_pos.y *= -1;
-
-      update_view_panning(&view_panning, screen_mouse_pos);
-      update_view_projection_matrix(&view_panning, window_size);
+      r32 cell_width = 0.9;
 
       //
       // Cell instance drawing
       //
 
-      upload_cell_instances(&universe, &cell_instancing);
+      upload_cell_instances(&universe, &cell_instancing, &cells_editor);
 
       glBindVertexArray(cell_instance_drawing_vao);
       glUseProgram(cell_instance_drawing_shader_program);
@@ -376,12 +388,20 @@ main(int argc, const char *argv[])
       opengl_print_errors();
       glBindVertexArray(0);
 
-#if 0
+#ifdef DEBUG_CELL_BLOCK_DRAWING
       //
       // Test cell blocks drawing
       //
 
       debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+
+  #ifdef DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
+      UniversePosition origin = {};
+      GLushort origin_index = opengl_buffer_new_element(&debug_cell_block_outline_drawing_vbo, &origin);
+      GLushort mouse_index = opengl_buffer_new_element(&debug_cell_block_outline_drawing_vbo, &mouse_universe_pos);
+      opengl_buffer_new_element(&debug_cell_block_outline_drawing_ibo, &origin_index);
+      opengl_buffer_new_element(&debug_cell_block_outline_drawing_ibo, &mouse_index);
+  #endif
 
       glBindVertexArray(debug_cell_block_outline_drawing_vao);
       glUseProgram(debug_cell_block_outline_drawing_shader_program);
@@ -396,7 +416,7 @@ main(int argc, const char *argv[])
       glBindVertexArray(0);
 #endif
 
-#if 0
+#ifdef DEBUG_SCREEN_DRAWING
       //
       // Debug screen rendering
       //
@@ -405,6 +425,7 @@ main(int argc, const char *argv[])
       glUseProgram(screen_shader_program);
       glBindBuffer(general_vertex_buffer.binding_target, general_vertex_buffer.id);
 
+      // Draw mouse position line
       vec2 vertices[] = {{0,  0}, screen_mouse_pos};
       u32 vertices_pos = opengl_buffer_add_elements(&general_vertex_buffer, array_count(vertices), vertices);
 

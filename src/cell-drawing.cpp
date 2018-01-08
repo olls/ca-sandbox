@@ -7,6 +7,8 @@
 #include "opengl-general-buffers.h"
 
 #include "universe.h"
+#include "cell-block-coordinate-system.h"
+#include "cells-editor.h"
 
 #include <GL/glew.h>
 
@@ -124,7 +126,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 ///   frame is fast enough.
 ///
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
+upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, CellsEditor *cells_editor)
 {
   // Zero the buffer
   cell_instancing->buffer.elements_used = 0;
@@ -152,7 +154,10 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 
             Cell *cell = cell_block->cells + (cell_position.y * universe->cell_block_dim) + cell_position.x;
 
-            vec2 cell_position_ratio = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim);
+            UniversePosition current_cell = {
+              .cell_block_position = cell_block->block_position,
+              .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
+            };
 
             vec4 colours[] = {(vec4){0x60/255.0, 0x60/255.0, 0x60/255.0},
                               (vec4){0xff/255.0, 0xA0/255.0, 0xA0/255.0},
@@ -189,9 +194,15 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing)
 
             vec4 colour = colours[cell->state % array_count(colours)];
 
+            if (cells_editor->cell_highlighted &&
+                cell_position_equal_to(cells_editor->highlighted_cell, current_cell))
+            {
+              colour = vec4_add(colour, vec4{0.2, 0.2, 0.2, 0});
+            }
+
             CellInstance cell_instance = {
-              .block_position = cell_block->block_position,
-              .cell_position = cell_position_ratio,
+              .block_position = current_cell.cell_block_position,
+              .cell_position = current_cell.cell_position,
               .colour = colour
             };
 
@@ -226,9 +237,15 @@ init_debug_cell_block_outline_drawing_attributes(OpenGL_Buffer *debug_cell_block
 {
   glBindBuffer(debug_cell_block_outline_drawing_vbo->binding_target, debug_cell_block_outline_drawing_vbo->id);
 
-  GLuint attrib_location_screen_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "s32_cell_block_position");
-  glEnableVertexAttribArray(attrib_location_screen_position);
-  glVertexAttribIPointer(attrib_location_screen_position, 2, GL_INT, sizeof(s32vec2), (void *)0);
+  GLuint attrib_location_cell_block_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "s32_cell_block_position");
+  glEnableVertexAttribArray(attrib_location_cell_block_position);
+  glVertexAttribIPointer(attrib_location_cell_block_position, 2, GL_INT, sizeof(UniversePosition), (void *)(offsetof(UniversePosition, cell_block_position)));
+
+  GLuint attrib_location_cell_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "r32_cell_position");
+  glEnableVertexAttribArray(attrib_location_cell_position);
+  glVertexAttribPointer(attrib_location_cell_position, 2, GL_FLOAT, GL_FALSE, sizeof(UniversePosition), (void *)(offsetof(UniversePosition, cell_position)));
+
+  opengl_print_errors();
 }
 
 
@@ -248,11 +265,11 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
     {
       do
       {
-        s32vec2 square_vertices[] = {
-          vec2_add((s32vec2){0, 0}, cell_block->block_position),
-          vec2_add((s32vec2){1, 0}, cell_block->block_position),
-          vec2_add((s32vec2){1, 1}, cell_block->block_position),
-          vec2_add((s32vec2){0, 1}, cell_block->block_position)
+        UniversePosition square_vertices[] = {
+          {cell_block->block_position, {0.05, 0.05}},
+          {cell_block->block_position, {0.95, 0.05}},
+          {cell_block->block_position, {0.95, 0.95}},
+          {cell_block->block_position, {0.05, 0.95}}
         };
 
         GLushort index_a = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 0);
@@ -275,6 +292,7 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
       while (cell_block != 0);
     }
   }
+  opengl_print_errors();
 }
 
 

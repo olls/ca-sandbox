@@ -4,6 +4,7 @@
 uniform mat4 projection_matrix;
 
 in ivec2 s32_cell_block_position;
+in vec2 r32_cell_position;
 
 out vec4 colour_varying;
 
@@ -12,9 +13,8 @@ void
 main(void)
 {
   vec2 local_cell_block_position = vec2(s32_cell_block_position);
-  vec2 scaled_cell_block_position = local_cell_block_position;
+  local_cell_block_position += r32_cell_position;
 
-
-  gl_Position = projection_matrix * vec4(scaled_cell_block_position, 0.0, 1.0);
+  gl_Position = projection_matrix * vec4(local_cell_block_position, 0.0, 1.0);
   colour_varying = vec4(1, 0, 0, 1);
 }

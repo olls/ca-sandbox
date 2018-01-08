@@ -2,6 +2,8 @@
 
 #include "maths.h"
 
+#include "cell-block-coordinate-system.h"
+
 #include "imgui.h"
 #include "ccVector.h"
 
@@ -61,4 +63,30 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
       }
     }
   }
+}
+
+
+/// Inverses the cell block projection matrix to project a screen coordinate (from -1 -> 1) into a
+///   UniversePosition
+///
+UniversePosition
+screen_position_to_universe_position(ViewPanning *view_panning, vec2 screen_mouse_position)
+{
+  UniversePosition result;
+
+  mat4x4 inverse_proj;
+  mat4x4Inverse(inverse_proj, view_panning->projection_matrix);
+
+  vec2 scaled_offset = vec2_multiply(view_panning->offset, view_panning->scale);
+  vec2 offset_screen_mouse_position = vec2_subtract(screen_mouse_position, scaled_offset);
+
+  vec4 offset_screen_mouse_position_4 = {offset_screen_mouse_position.x, offset_screen_mouse_position.y, 0, 1};
+  vec4 cell_block_position_4 = mat4x4MultiplyVector(inverse_proj, offset_screen_mouse_position_4);
+  vec2 cell_block_position = {cell_block_position_4.x, cell_block_position_4.y};
+
+  result.cell_block_position = cell_block_round(cell_block_position);
+
+  result.cell_position = vec2_subtract(cell_block_position, s32vec2_to_vec2(result.cell_block_position));
+
+  return result;
 }

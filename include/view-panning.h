@@ -4,6 +4,8 @@
 #include "types.h"
 #include "vectors.h"
 
+#include "cell-block-coordinate-system.h"
+
 #include "ccVector.h"
 
 /// @file
@@ -28,6 +30,10 @@ update_view_projection_matrix(ViewPanning *view_panning, s32vec2 window_size);
 
 void
 update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos);
+
+
+UniversePosition
+screen_position_to_universe_position(ViewPanning *view_panning, vec2 screen_mouse_position);
 
 
 #endif

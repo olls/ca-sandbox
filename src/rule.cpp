@@ -11,6 +11,7 @@
 #include "neighbourhood-region.h"
 
 #include <string.h>
+#include "imgui.h"
 
 /// @file
 /// @brief  Functions for building a rule tree, and accessing it.

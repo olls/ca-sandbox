@@ -150,3 +150,43 @@ cell_position_less_than(s32vec2 cell_block_position_test, s32vec2 cell_position_
                                         cell_block_position_bound.y, cell_position_bound.y));
   return result;
 }
+
+
+b32
+cell_position_equal_to(UniversePosition a, UniversePosition b)
+{
+  b32 result = (a.cell_block_position.x == b.cell_block_position.x &&
+                a.cell_block_position.y == b.cell_block_position.y &&
+                a.cell_position.x == b.cell_position.x &&
+                a.cell_position.y == b.cell_position.y);
+  return result;
+}
+
+
+s32
+cell_block_round(r32 real_cell_block)
+{
+  if (real_cell_block < 0)
+  {
+    real_cell_block -= 1;
+  }
+
+  s32 result = (s32)(real_cell_block);
+  return result;
+}
+
+
+/// Round a real number of cell blocks handling zero cross over correctly.
+///   i.e: f(1.5) -> 1
+///        f(0.5) -> 0
+///        f(-0.5) -> -1
+///        f(-1.5) -> -2
+///
+s32vec2
+cell_block_round(vec2 real_cell_block)
+{
+  s32vec2 result;
+  result.x = cell_block_round(real_cell_block.x);
+  result.y = cell_block_round(real_cell_block.y);
+  return result;
+}
