@@ -44,7 +44,7 @@ struct SimulationUI
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 *reload_universe);
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe);
 
 
 #endif

@@ -45,10 +45,13 @@ serialise_simulate_options(WriteString *file_writer, SimulateOptions *simulate_o
   {
     case (BorderType::FIXED):
       write_text(file_writer, "FIXED");
+      break;
     case (BorderType::INFINITE):
       write_text(file_writer, "INFINITE");
+      break;
     case (BorderType::TORUS):
       write_text(file_writer, "TORUS");
+      break;
   }
   write_text(file_writer, "\n");
 
@@ -89,6 +92,8 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
   }
 
   print("n_cell_blocks: %d\n", n_cell_blocks);
+
+  // TODO: This only handles fixed 1 char length state names...
 
   u32 max_bytes_per_cell = 3;
 

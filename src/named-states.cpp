@@ -1,5 +1,6 @@
 #include "named-states.h"
 
+#include "util.h"
 #include "types.h"
 #include "text.h"
 #include "print.h"
@@ -14,6 +15,15 @@
 ///
 
 
+CellState
+get_next_unused_state_value(NamedStates *named_states)
+{
+  CellState result;
+  result = named_states->next_unused_state++;
+  return result;
+}
+
+
 /// Searches the array of state names in the rule configuration for state_name, retuning the
 ///   corresponding CellState via *resulting_state.  Function returns false, if the name is a
 ///   defined state name.
@@ -24,13 +34,13 @@ state_value_from_name(NamedStates *named_states, String state_name, CellState *r
   b32 result = false;
 
   for (u32 test_state_index = 0;
-       test_state_index < named_states->n_states;
+       test_state_index < named_states->states.n_elements;
        ++test_state_index)
   {
-    String *test_state_name = named_states->state_names + test_state_index;
-    if (strings_equal(&state_name, test_state_name))
+    NamedState *test_state_name = named_states->states.get(test_state_index);
+    if (strings_equal(&state_name, &test_state_name->name))
     {
-      *resulting_state = (CellState)test_state_index;
+      *resulting_state = test_state_name->value;
       result = true;
       break;
     }
@@ -65,14 +75,11 @@ read_state_name(NamedStates *named_states, String *string, CellState *resulting_
 
 
 b32
-find_state_names(String file_string, NamedStates *named_states)
+find_state_names(String file_string, NamedStates *named_states, u32 n_states)
 {
   b32 success = true;
 
-  named_states->state_names = allocate(String, named_states->n_states);
-
-  u32 n_states_found = 0;
-  while (n_states_found < named_states->n_states)
+  while (named_states->states.n_elements < n_states)
   {
     String state_name = {};
     b32 found_state_name = find_label_value(file_string, "State", &state_name);
@@ -85,11 +92,11 @@ find_state_names(String file_string, NamedStates *named_states)
       // Check name isn't in use
       b32 name_unique = true;
       for (u32 test_state_index = 0;
-           test_state_index < n_states_found;
+           test_state_index < named_states->states.n_elements;
            ++test_state_index)
       {
-        String *test_state_name = named_states->state_names + test_state_index;
-        if (strings_equal(test_state_name, &state_name))
+        NamedState *test_state_name = named_states->states.get(test_state_index);
+        if (strings_equal(&test_state_name->name, &state_name))
         {
           name_unique = false;
           break;
@@ -108,10 +115,15 @@ find_state_names(String file_string, NamedStates *named_states)
         char *state_name_text = allocate(char, string_length(state_name));
         copy_string(state_name_text, state_name.start, string_length(state_name));
 
-        named_states->state_names[n_states_found].start = state_name_text;
-        named_states->state_names[n_states_found].end = state_name_text + string_length(state_name);
+        NamedState new_named_state = {
+          .name = {
+            .start = state_name_text,
+            .end = state_name_text + string_length(state_name)
+          },
+          .value = get_next_unused_state_value(named_states)
+        };
 
-        ++n_states_found;
+        named_states->states.add(new_named_state);
       }
     }
     else
@@ -120,7 +132,7 @@ find_state_names(String file_string, NamedStates *named_states)
     }
   }
 
-  if (n_states_found != named_states->n_states)
+  if (named_states->states.n_elements != n_states)
   {
     print("Error whilst parsing rule, incorrect number of named rules.\n");
     success &= false;
@@ -130,16 +142,9 @@ find_state_names(String file_string, NamedStates *named_states)
 }
 
 
-u32
-read_named_states_list(NamedStates *named_states, String states_list_string, CellState **resulting_states)
+void
+read_named_states_list(NamedStates *named_states, String states_list_string, ExtendableArray<CellState> *resulting_states)
 {
-  u32 result = 0;
-
-  // Use ExtendableArray while we build the states list, as we don't know it's length until it is
-  //   finished.
-  ExtendableArray states_array = {};
-  new_extendable_array(sizeof(CellState), &states_array);
-
   while (states_list_string.current_position < states_list_string.end)
   {
     CellState named_state_value;
@@ -147,34 +152,47 @@ read_named_states_list(NamedStates *named_states, String states_list_string, Cel
 
     if (valid_state)
     {
-      add_to_extendable_array(&states_array, &named_state_value);
-      ++result;
+      resulting_states->add(named_state_value);
     }
   }
-
-  // Because we are using a CellState as the size of the extendable array elements, the
-  //   implementation allows us to cast extendable_array.elements to a CellState[] and use it as a
-  //   normal array.  This allows us to use the dynamic allocation of the ExtendableArray whilst
-  //   building it, but we can use it as a normal array afterwards.
-
-  *resulting_states = (CellState *)states_array.elements;
-  return result;
 }
 
 
 void
 debug_print_named_states(NamedStates *named_states)
 {
-  print("n_states: %d\n", named_states->n_states);
+  print("n_states: %d\n", named_states->states.n_elements);
   print("states:");
   for (u32 i = 0;
-       i < named_states->n_states;
+       i < named_states->states.n_elements;
        ++i)
   {
-    String state_name = named_states->state_names[i];
-    print(" %.*s", string_length(state_name), state_name.start);
+    NamedState *state_name = named_states->states.get(i);
+    print(" %.*s", string_length(state_name->name), state_name->name.start);
   }
   print("\n");
+}
+
+
+String
+get_state_name(NamedStates *named_states, CellState state)
+{
+  String result = {};
+
+  for (u32 state_index = 0;
+       state_index < named_states->states.n_elements;
+       ++state_index)
+  {
+    NamedState *named_state = named_states->states.get(state);
+
+    if (named_state->value == state)
+    {
+      result = named_state->name;
+      break;
+    }
+  }
+
+  return result;
 }
 
 
@@ -183,7 +201,7 @@ advance_state(NamedStates *named_states, CellState previous)
 {
   CellState result;
 
-  if (previous == named_states->n_states - 1)
+  if (previous == named_states->states.n_elements - 1)
   {
     result = 0;
   }
@@ -193,4 +211,45 @@ advance_state(NamedStates *named_states, CellState previous)
   }
 
   return result;
+}
+
+
+vec4
+get_state_colour(CellState state)
+{
+  vec4 colours[] = {(vec4){0x60/255.0, 0x60/255.0, 0x60/255.0, 1},
+                    (vec4){0xff/255.0, 0xA0/255.0, 0xA0/255.0, 1},
+                    (vec4){0xff/255.0, 0x7d/255.0, 0x00/255.0, 1},
+                    (vec4){0xff/255.0, 0x96/255.0, 0x19/255.0, 1},
+                    (vec4){0xff/255.0, 0xaf/255.0, 0x32/255.0, 1},
+                    (vec4){0xff/255.0, 0xc8/255.0, 0x4b/255.0, 1},
+                    (vec4){0xff/255.0, 0xe1/255.0, 0x64/255.0, 1},
+                    (vec4){0xff/255.0, 0xfa/255.0, 0x7d/255.0, 1},
+                    (vec4){0xfb/255.0, 0xff/255.0, 0x00/255.0, 1},
+                    (vec4){0x59/255.0, 0x59/255.0, 0xff/255.0, 1},
+                    (vec4){0x6a/255.0, 0x6a/255.0, 0xff/255.0, 1},
+                    (vec4){0x7a/255.0, 0x7a/255.0, 0xff/255.0, 1},
+                    (vec4){0x8b/255.0, 0x8b/255.0, 0xff/255.0, 1},
+                    (vec4){0x1b/255.0, 0xb0/255.0, 0x1b/255.0, 1},
+                    (vec4){0x24/255.0, 0xc8/255.0, 0x24/255.0, 1},
+                    (vec4){0x49/255.0, 0xff/255.0, 0x49/255.0, 1},
+                    (vec4){0x6a/255.0, 0xff/255.0, 0x6a/255.0, 1},
+                    (vec4){0xeb/255.0, 0x24/255.0, 0x24/255.0, 1},
+                    (vec4){0xff/255.0, 0x38/255.0, 0x38/255.0, 1},
+                    (vec4){0xff/255.0, 0x49/255.0, 0x49/255.0, 1},
+                    (vec4){0xff/255.0, 0x59/255.0, 0x59/255.0, 1},
+                    (vec4){0xb9/255.0, 0x38/255.0, 0xff/255.0, 1},
+                    (vec4){0xbf/255.0, 0x49/255.0, 0xff/255.0, 1},
+                    (vec4){0xc5/255.0, 0x59/255.0, 0xff/255.0, 1},
+                    (vec4){0xcb/255.0, 0x6a/255.0, 0xff/255.0, 1},
+                    (vec4){0x00/255.0, 0xff/255.0, 0x80/255.0, 1},
+                    (vec4){0xff/255.0, 0x80/255.0, 0x40/255.0, 1},
+                    (vec4){0xff/255.0, 0xff/255.0, 0x80/255.0, 1},
+                    (vec4){0x21/255.0, 0xd7/255.0, 0xd7/255.0, 1},
+                    (vec4){0x1b/255.0, 0xb0/255.0, 0xb0/255.0, 1},
+                    (vec4){0x18/255.0, 0x9c/255.0, 0x9c/255.0, 1},
+                    (vec4){0x15/255.0, 0x89/255.0, 0x89/255.0, 1}};
+
+  vec4 colour = colours[state % array_count(colours)];
+  return colour;
 }

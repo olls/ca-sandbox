@@ -2,6 +2,7 @@
 #define CELL_H_DEF
 
 #include "vectors.h"
+#include "extendable-array.h"
 
 /// @file
 /// @brief structs for cell storage, and configuration
@@ -32,8 +33,7 @@ struct CellInitialisationOptions
 {
   CellInitialisationType type;
 
-  CellState *set_of_initial_states;
-  u32 set_of_initial_states_size;
+  ExtendableArray<CellState> set_of_initial_states;
 };
 
 
@@ -41,8 +41,8 @@ CellState
 initialise_cell_state(CellInitialisationOptions *cell_initialisation_options, s32vec2 position);
 
 
-CellInitialisationOptions
-default_cell_initialisation_options();
+void
+default_cell_initialisation_options(CellInitialisationOptions *result);
 
 
 #endif

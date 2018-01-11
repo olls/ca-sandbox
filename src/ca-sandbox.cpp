@@ -22,6 +22,7 @@
 #include "universe-ui.h"
 #include "cells-editor.h"
 #include "save-universe.h"
+#include "named-states-ui.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -140,7 +141,6 @@ main(int argc, const char *argv[])
     };
 
     vec2 screen_mouse_pos;
-
 
     b32 init = true;
     b32 running = true;
@@ -275,10 +275,11 @@ main(int argc, const char *argv[])
 
       // ImGui::ShowTestWindow();
 
-      do_simulation_ui(&simulation_ui, engine.frame_start, &universe_ui.reload_cells_file);
+      do_simulation_ui(&simulation_ui, engine.frame_start, loaded_rule.rule_tree_built, &universe_ui.reload_cells_file);
       do_rule_ui(&rule_ui, &loaded_rule);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
+      do_named_states_ui(&loaded_rule.config);
 
       //
       // Save
@@ -302,22 +303,23 @@ main(int argc, const char *argv[])
         print("\nLoading rule file: %s\n", rule_ui.file_picker.selected_file);
         running &= load_rule_file(rule_ui.file_picker.selected_file, &loaded_rule.config);
 
-        destroy_rule_tree(&loaded_rule);
-        build_rule_tree(&loaded_rule);
-        // print_rule_tree(&loaded_rule);
-
         print("\n");
       }
 
       if (universe_ui.reload_cells_file && rule_file_loaded)
       {
         simulation_ui.simulating = false;
+        simulation_ui.mode = Mode::EDITOR;
 
         universe_ui.reload_cells_file = false;
         cells_file_loaded = true;
 
         simulate_options = default_simulation_options();
-        cell_initialisation_options = default_cell_initialisation_options();
+        if (cell_initialisation_options.set_of_initial_states.elements == 0)
+        {
+          cell_initialisation_options.set_of_initial_states.allocate_array();
+        }
+        default_cell_initialisation_options(&cell_initialisation_options);
 
         running &= load_universe(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
 

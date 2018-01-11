@@ -2,9 +2,11 @@
 #define LOAD_RULE_H_DEF
 
 #include "types.h"
+#include "comparison-operator.h"
 
-#include "rule.h"
 #include "cell.h"
+#include "neighbourhood-region.h"
+#include "named-states.h"
 
 /// @file
 /// @brief  structs for loading a .rule file into a Rule struct
@@ -26,7 +28,7 @@
 ///     The condition is represented by one of >, <, =, followed by the number to compare against.
 
 
-enum struct PatternCellStateType
+enum struct PatternCellStateType : s32
 {
   WILDCARD,
   STATE
@@ -37,14 +39,6 @@ struct PatternCellState
 {
   PatternCellStateType type;
   CellState state;
-};
-
-
-enum struct ComparisonOp
-{
-  GREATER_THAN,
-  LESS_THAN,
-  EQUALS
 };
 
 
@@ -59,6 +53,38 @@ struct RulePattern
 
   /// Left-to-right, top-to-bottom list of cell states in pattern
   PatternCellState cell_states[];
+};
+
+
+typedef ExtendableArray<RulePattern> RulePatterns;
+
+
+/// Holds the configuration of a rule, i.e: the parsed data from the rule file.
+///
+/// - NULL states indicate states which do not need simulating, these are used so an INFINITE border
+///     simulation can still run in finite time.
+///   - CellBlocks must be initialised with NULL states.
+///   - NULL state rules must be stable (i.e. No change in state) when inputs in neighbourhood
+///       region are also NULL states.
+///   - This allows the simulator to avoid simulating/creating a CellBlock if:
+///     - Its initial state is all NULL states
+///     - It is still in its initial state
+///     - There are no non-NULL state Cells within the rule neighbourhood of the CellBlock's border.
+///
+struct RuleConfiguration
+{
+  NeighbourhoodRegionShape neighbourhood_region_shape;
+
+  /// The distance the neighbourhood region extends from the centre cell, see
+  ///   get_neighbourhood_region_n_cells() for definitions
+  u32 neighbourhood_region_size;
+
+  NamedStates named_states;
+
+  /// Array of state values which are NULL states
+  ExtendableArray<CellState> null_states;
+
+  RulePatterns rule_patterns;
 };
 
 

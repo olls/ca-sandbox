@@ -3,35 +3,113 @@
 #include "types.h"
 #include "vectors.h"
 #include "allocate.h"
-#include "imgui.h"
 #include "print.h"
+#include "maths.h"
+#include "util.h"
 #include "file-picker.h"
+#include "comparison-operator.h"
+#include "extendable-array.h"
 
 #include "neighbourhood-region.h"
 #include "named-states.h"
 #include "rule.h"
 #include "load-rule.h"
 
+#include <stdio.h>
+#include "imgui.h"
+
 /// @file
 /// @brief  Provides GUI elements to modify the currently loaded Rule
 ///
 
 
+b32
+styled_cell_state_button(const char *id, String label, vec4 colour = {-1})
+{
+  ImGui::PushID(id);
+  if (colour.x != -1)
+  {
+    ImGui::PushStyleColor(ImGuiCol_Button, colour);
+  }
+
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {9, 6});
+
+  b32 result = ImGui::Button(label.start, label.end);
+
+  ImGui::PopStyleVar();
+  if (colour.x != -1)
+  {
+    ImGui::PopStyleColor();
+  }
+  ImGui::PopID();
+
+  return result;
+}
+
+
+void
+cell_state_button(const char *id, CellState *state, NamedStates *named_states)
+{
+  String state_string = get_state_name(named_states, *state);
+  if (styled_cell_state_button(id, state_string, get_state_colour(*state)))
+  {
+    *state = advance_state(named_states, *state);
+  }
+}
+
+
+void
+cell_state_button(const char *id, PatternCellState *pattern_cell, NamedStates *named_states)
+{
+  if (pattern_cell->type == PatternCellStateType::STATE)
+  {
+    cell_state_button(id, &pattern_cell->state, named_states);
+  }
+  else
+  {
+    String state_string = {};
+    switch (pattern_cell->type)
+    {
+      case (PatternCellStateType::WILDCARD):
+      {
+        state_string = new_string("*");
+      } break;
+      case (PatternCellStateType::NOT_USED):
+      {
+        state_string = new_string("-");
+      } break;
+      default:
+      {
+        state_string = {};
+      }
+    }
+    styled_cell_state_button(id, state_string);
+  }
+
+  if (ImGui::BeginPopupContextItem("pattern cell select wildcard context menu"))
+  {
+    ImGui::RadioButton("Wildcard", (s32 *)&pattern_cell->type, (s32)PatternCellStateType::WILDCARD); ImGui::SameLine();
+    ImGui::RadioButton("Match State", (s32 *)&pattern_cell->type, (s32)PatternCellStateType::STATE);
+    ImGui::EndPopup();
+  }
+}
+
+
 void
 display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 {
-  u32 n_cells = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
-
-  s32vec2 neighbourhood_region_area = get_neighbourhood_region_coverage(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
+  ImGui::NewLine();
 
   // Extract all cells in rule pattern into a grid so we can print them in the correct positions
 
+  s32vec2 neighbourhood_region_area = get_neighbourhood_region_coverage(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
   PatternCellState **cell_spacial_array = allocate(PatternCellState *, neighbourhood_region_area.x * neighbourhood_region_area.y);
   memset(cell_spacial_array, 0, sizeof(PatternCellState *) * neighbourhood_region_area.x * neighbourhood_region_area.y);
 
   // The position of the central cell in the spacial array
   s32vec2 centre_cell_position = vec2_divide(neighbourhood_region_area, 2);
 
+  u32 n_cells = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
   for (u32 cell_n = 0;
        cell_n < n_cells;
        ++cell_n)
@@ -44,13 +122,10 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
     cell_spacial_array[(cell_position.y * neighbourhood_region_area.x) + cell_position.x] = &rule_pattern->cell_states[cell_n];
   }
 
-  ImGui::PushID(rule_pattern);
-  ImGui::BeginGroup();
-
   // Iterate through the cell_spacial_array outputting each cell as a button
-
   const ImGuiStyle& style = ImGui::GetStyle();
   r32 padding = style.FramePadding.x;
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
 
   s32vec2 position;
   for (position.x = 0;
@@ -65,6 +140,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
     {
       u32 cell_spacial_position = (position.y * neighbourhood_region_area.x) + position.x;
       PatternCellState *pattern_cell = cell_spacial_array[cell_spacial_position];
+      ImGui::PushID(cell_spacial_position);
 
       if (pattern_cell == NULL)
       {
@@ -73,52 +149,63 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
       }
       else
       {
-        String state_string = {};
-
-        if (pattern_cell->type == PatternCellStateType::STATE)
-        {
-          state_string = rule_config->named_states.state_names[pattern_cell->state];
-        }
-        else if (pattern_cell->type == PatternCellStateType::WILDCARD)
-        {
-          state_string = new_string("*");
-        }
-        else if (pattern_cell->type == PatternCellStateType::NOT_USED)
-        {
-          state_string = new_string("-");
-        }
-
-        // Push cell_spacial_position to give this button a unique id from the other cells in this pattern
-        ImGui::PushID(cell_spacial_position);
-        if (ImGui::Button(state_string.start, state_string.end))
-        {
-          pattern_cell->state = advance_state(&rule_config->named_states, pattern_cell->state);
-        }
-        ImGui::PopID();
+        cell_state_button("cell state", pattern_cell, &rule_config->named_states);
       }
+      ImGui::PopID();
     }
 
     ImGui::EndGroup();
     ImGui::SameLine();
   }
 
+  ImGui::PopStyleVar();
+
+  // Same line needs to be called here to add a gap, now we have popped the 0 spacing style.
+  ImGui::SameLine();
+
   un_allocate(cell_spacial_array);
 
-  ImGui::Text("Result:");
-
-  String result_state_string = rule_config->named_states.state_names[rule_pattern->result];
-  ImGui::SameLine();
-  ImGui::PushID("resulting cell");
-
-  if (ImGui::Button(result_state_string.start, result_state_string.end))
+  // Second column
+  ImGui::BeginGroup();
   {
-    rule_pattern->result = advance_state(&rule_config->named_states, rule_pattern->result);
+    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::Text("Result:");
+    ImGui::SameLine();
+    cell_state_button("resulting cell", &rule_pattern->result, &rule_config->named_states);
+
+    ImGui::Checkbox("Count matching enabled for this pattern", (bool *)&rule_pattern->count_matching_enabled);
+
+    if (rule_pattern->count_matching_enabled)
+    {
+      ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {9, 6});
+
+      ImGui::AlignFirstTextHeightToWidgets();
+      ImGui::Text("n");
+      ImGui::SameLine();
+      cell_state_button("count matching state", &rule_pattern->count_matching_state, &rule_config->named_states);
+      ImGui::SameLine();
+      ImGui::Text("wildcard cells");
+      ImGui::SameLine();
+
+      // Drop down to select comparison operator
+      ImGui::PushItemWidth(50);
+      ImGui::Combo("##comparison operator", (s32*)&rule_pattern->count_matching_comparison, COMPARISON_OPERATOR_STRINGS, array_count(COMPARISON_OPERATOR_STRINGS));
+      ImGui::PopItemWidth();
+
+      ImGui::SameLine();
+
+      // Int input to select count matching n
+      s32 new_count_matching_n = (s32)rule_pattern->count_matching_n;
+      ImGui::PushItemWidth(85);
+      ImGui::InputInt("##count matching n",&new_count_matching_n);
+      ImGui::PopItemWidth();
+
+      ImGui::PopStyleVar();
+
+      rule_pattern->count_matching_n = (u32)clamp(0, (s32)n_cells, new_count_matching_n);
+    }
   }
-
-  ImGui::PopID();
-
   ImGui::EndGroup();
-  ImGui::PopID();
 
   ImGui::NewLine();
 }
@@ -139,7 +226,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
       rule_ui->file_picker.active = true;
       rule_ui->file_picker.current_item = 0;
       rule_ui->file_picker.root_directory = ".";
-      rule_ui->file_picker.current_path[0] = '\0';
+      copy_string(rule_ui->file_picker.current_path, "rules", 6);
     }
 
     if (rule_ui->file_picker.active)
@@ -154,19 +241,34 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
     }
 
     // Display all rule patterns
+    ImGui::TextWrapped("Modify each of the patterns below by clicking on the state buttons to change the state which it matches, or right clicking on them to change them to a wildcard match.");
 
     for (u32 rule_n = 0;
          rule_n < rule->config.rule_patterns.n_elements;
          ++rule_n)
     {
-      RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&rule->config.rule_patterns, rule_n);
-      display_rule_pattern(&rule->config, rule_pattern);
-    }
-  }
+      RulePattern *rule_pattern = rule->config.rule_patterns.get(rule_n);
 
-  if (ImGui::Button("Apply rules"))
-  {
-    build_rule_tree(rule);
+      ImGui::PushID(rule_n);
+      char label[32]; sprintf(label, "Pattern %d", rule_n);
+      if (ImGui::CollapsingHeader(label))
+      {
+        display_rule_pattern(&rule->config, rule_pattern);
+      }
+      ImGui::PopID();
+    }
+
+    if (ImGui::Button("Add pattern"))
+    {
+      RulePattern *new_rule_pattern = rule->config.rule_patterns.get_new_element();
+    }
+
+    if (ImGui::Button("Build rule tree from patterns"))
+    {
+      destroy_rule_tree(rule);
+      build_rule_tree(rule);
+      // print_rule_tree(rule);
+    }
   }
 
   ImGui::End();

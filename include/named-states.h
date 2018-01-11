@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "text.h"
+#include "extendable-array.h"
 
 #include "cell.h"
 
@@ -11,14 +12,22 @@
 ///
 
 
+struct NamedState
+{
+  String name;
+  CellState value;
+};
+
+
 struct NamedStates
 {
-  /// Number of cell states the rule uses
-  u32 n_states;
-
-  /// Array of state names, indexed by state value
-  String *state_names;
+  ExtendableArray<NamedState> states;
+  CellState next_unused_state;
 };
+
+
+CellState
+get_next_unused_state_value(NamedStates *named_states);
 
 
 b32
@@ -30,11 +39,11 @@ read_state_name(NamedStates *named_states, String *string, CellState *resulting_
 
 
 b32
-find_state_names(String file_string, NamedStates *named_states);
+find_state_names(String file_string, NamedStates *named_states, u32 n_states);
 
 
-u32
-read_named_states_list(NamedStates *named_states, String null_states_string, CellState **resulting_states);
+void
+read_named_states_list(NamedStates *named_states, String states_list_string, ExtendableArray<CellState> *resulting_states);
 
 
 void
@@ -47,6 +56,10 @@ get_state_name(NamedStates *named_states, CellState state);
 
 CellState
 advance_state(NamedStates *named_states, CellState previous);
+
+
+vec4
+get_state_colour(CellState state);
 
 
 #endif

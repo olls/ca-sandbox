@@ -9,6 +9,7 @@
 #include "universe.h"
 #include "cell-block-coordinate-system.h"
 #include "cells-editor.h"
+#include "named-states.h"
 
 #include <GL/glew.h>
 
@@ -152,47 +153,14 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, Cells
           {
             // TODO: Check if block is visible on screen?
 
-            Cell *cell = cell_block->cells + (cell_position.y * universe->cell_block_dim) + cell_position.x;
-
             UniversePosition current_cell = {
               .cell_block_position = cell_block->block_position,
               .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
             };
 
-            vec4 colours[] = {(vec4){0x60/255.0, 0x60/255.0, 0x60/255.0},
-                              (vec4){0xff/255.0, 0xA0/255.0, 0xA0/255.0},
-                              (vec4){0xff/255.0, 0x7d/255.0, 0x00/255.0},
-                              (vec4){0xff/255.0, 0x96/255.0, 0x19/255.0},
-                              (vec4){0xff/255.0, 0xaf/255.0, 0x32/255.0},
-                              (vec4){0xff/255.0, 0xc8/255.0, 0x4b/255.0},
-                              (vec4){0xff/255.0, 0xe1/255.0, 0x64/255.0},
-                              (vec4){0xff/255.0, 0xfa/255.0, 0x7d/255.0},
-                              (vec4){0xfb/255.0, 0xff/255.0, 0x00/255.0},
-                              (vec4){0x59/255.0, 0x59/255.0, 0xff/255.0},
-                              (vec4){0x6a/255.0, 0x6a/255.0, 0xff/255.0},
-                              (vec4){0x7a/255.0, 0x7a/255.0, 0xff/255.0},
-                              (vec4){0x8b/255.0, 0x8b/255.0, 0xff/255.0},
-                              (vec4){0x1b/255.0, 0xb0/255.0, 0x1b/255.0},
-                              (vec4){0x24/255.0, 0xc8/255.0, 0x24/255.0},
-                              (vec4){0x49/255.0, 0xff/255.0, 0x49/255.0},
-                              (vec4){0x6a/255.0, 0xff/255.0, 0x6a/255.0},
-                              (vec4){0xeb/255.0, 0x24/255.0, 0x24/255.0},
-                              (vec4){0xff/255.0, 0x38/255.0, 0x38/255.0},
-                              (vec4){0xff/255.0, 0x49/255.0, 0x49/255.0},
-                              (vec4){0xff/255.0, 0x59/255.0, 0x59/255.0},
-                              (vec4){0xb9/255.0, 0x38/255.0, 0xff/255.0},
-                              (vec4){0xbf/255.0, 0x49/255.0, 0xff/255.0},
-                              (vec4){0xc5/255.0, 0x59/255.0, 0xff/255.0},
-                              (vec4){0xcb/255.0, 0x6a/255.0, 0xff/255.0},
-                              (vec4){0x00/255.0, 0xff/255.0, 0x80/255.0},
-                              (vec4){0xff/255.0, 0x80/255.0, 0x40/255.0},
-                              (vec4){0xff/255.0, 0xff/255.0, 0x80/255.0},
-                              (vec4){0x21/255.0, 0xd7/255.0, 0xd7/255.0},
-                              (vec4){0x1b/255.0, 0xb0/255.0, 0xb0/255.0},
-                              (vec4){0x18/255.0, 0x9c/255.0, 0x9c/255.0},
-                              (vec4){0x15/255.0, 0x89/255.0, 0x89/255.0}};
+            Cell *cell = cell_block->cells + (cell_position.y * universe->cell_block_dim) + cell_position.x;
 
-            vec4 colour = colours[cell->state % array_count(colours)];
+            vec4 colour = get_state_colour(cell->state);
 
             if (cells_editor->cell_highlighted &&
                 cell_position_equal_to(cells_editor->highlighted_cell, current_cell))

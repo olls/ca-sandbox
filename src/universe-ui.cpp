@@ -32,8 +32,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *sim
       universe_ui->cells_file_picker.active = true;
       universe_ui->cells_file_picker.current_item = 0;
       universe_ui->cells_file_picker.root_directory = ".";
-      universe_ui->cells_file_picker.current_path[0] = '.'  ;
-      universe_ui->cells_file_picker.current_path[1] = '\0';
+      copy_string(universe_ui->cells_file_picker.current_path, "cells", 6);
     }
 
     if (universe_ui->cells_file_picker.active)

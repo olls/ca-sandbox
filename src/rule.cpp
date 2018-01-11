@@ -24,10 +24,10 @@ is_null_state(RuleConfiguration *rule_configuration, CellState state)
   b32 result = false;
 
   for (u32 null_state_index = 0;
-       null_state_index < rule_configuration->n_null_states;
+       null_state_index < rule_configuration->null_states.n_elements;
        ++null_state_index)
   {
-    CellState null_state = rule_configuration->null_states[null_state_index];
+    CellState null_state = *rule_configuration->null_states.get(null_state_index);
     result |= state == null_state;
   }
 
@@ -45,10 +45,10 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
   b32 found_match = false;
 
   for (u32 pattern_n = 0;
-       pattern_n < config->rule_patterns.next_free_element_position;
+       pattern_n < config->rule_patterns.n_elements;
        ++pattern_n)
   {
-    RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&config->rule_patterns, pattern_n);
+    RulePattern *rule_pattern = config->rule_patterns.get(pattern_n);
 
     b32 matches = true;
     u32 count_matching_state_n = 0;
@@ -132,7 +132,7 @@ find_node(Rule *rule, RuleNode *node)
        node_n < rule->rule_nodes_table.n_elements;
        ++node_n)
   {
-    RuleNode *test_node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, node_n);
+    RuleNode *test_node = rule->rule_nodes_table.get(node_n);
 
     if (node->is_leaf && test_node->is_leaf &&
         node->leaf_value == test_node->leaf_value)
@@ -144,7 +144,7 @@ find_node(Rule *rule, RuleNode *node)
     {
       b32 all_children_match = true;
       for (u32 child_n = 0;
-           child_n < rule->config.named_states.n_states;
+           child_n < rule->config.named_states.states.n_elements;
            ++child_n)
       {
         if (node->children[child_n] != test_node->children[child_n])
@@ -198,7 +198,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
     //   of all children to the same resulting node.
 
     for (CellState child_n = 0;
-         child_n < rule->config.named_states.n_states;
+         child_n < rule->config.named_states.states.n_elements;
          ++child_n)
     {
       // This is the list of inputs for the current child
@@ -220,8 +220,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
   else
   {
     // Create new node
-
-    node_position = add_to_extendable_array(&rule->rule_nodes_table, node);
+    node_position = rule->rule_nodes_table.add(node);
   }
 
   un_allocate(node);
@@ -242,18 +241,22 @@ build_rule_tree(Rule *result)
 
   if (result->rule_nodes_table.elements == 0)
   {
-    u32 rule_node_size = sizeof(RuleNode) + (result->config.named_states.n_states * sizeof(u32));
-    new_extendable_array(rule_node_size, &result->rule_nodes_table);
+    result->rule_nodes_table.un_allocate_array();
+    u32 n_states = result->config.named_states.states.n_elements;
+    result->rule_nodes_table.element_size = sizeof(RuleNode) + (n_states * sizeof(u32));
+    result->rule_nodes_table.allocate_array();
   }
 
   result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size);
 
-  u64 n_nodes_estimate = ipow((u64)result->config.named_states.n_states, (u64)result->n_inputs);
+  u64 n_nodes_estimate = ipow((u64)result->config.named_states.states.n_elements, (u64)result->n_inputs);
   print("Building rule tree: %lu\n", n_nodes_estimate);
 
   // The tree_path is used to store the route taken through the tree to reach a leaf node.
   CellState *tree_path = allocate(CellState, result->n_inputs);
   result->root_node = add_node_to_rule_tree(result, 0, tree_path, n_nodes_estimate);
+
+  result->rule_tree_built = true;
 
   un_allocate(tree_path);
 }
@@ -262,7 +265,8 @@ build_rule_tree(Rule *result)
 void
 destroy_rule_tree(Rule *rule)
 {
-  delete_extendable_array(&rule->rule_nodes_table);
+  rule->rule_tree_built = false;
+  rule->rule_nodes_table.un_allocate_array();
 }
 
 
@@ -271,7 +275,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
-  RuleNode *rule_node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, node_position);
+  RuleNode *rule_node = rule->rule_nodes_table.get(node_position);
 
   if (rule_node->is_leaf)
   {
@@ -289,7 +293,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
   {
     print("Node");
     for (CellState child_n = 0;
-         child_n < rule->config.named_states.n_states;
+         child_n < rule->config.named_states.states.n_elements;
          ++child_n)
     {
       inputs[depth] = child_n;
@@ -328,7 +332,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   CellState result;
 
-  RuleNode *node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, rule->root_node);
+  RuleNode *node = rule->rule_nodes_table.get(rule->root_node);
 
   u32 input_n = 0;
   b32 reached_result = false;
@@ -348,9 +352,9 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
       //   because it is a null state.  Therefore, use the first null state as the current state
       //   instead.  If there are no null states, the cell should always exist as
       //   create_any_new_cell_blocks_needed will create all the cell blocks.
-      if (rule->config.n_null_states > 0)
+      if (rule->config.null_states.n_elements > 0)
       {
-        current_state = rule->config.null_states[0];
+        current_state = *rule->config.null_states.get(0);
       }
 
       b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_delta, cell_block_position, cell_position, &current_state);
@@ -364,7 +368,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
       // Select the next node based on this input's state
       u32 next_node_position = node->children[current_state];
-      node = (RuleNode *)get_from_extendable_array(&rule->rule_nodes_table, next_node_position);
+      node = rule->rule_nodes_table.get(next_node_position);
       ++input_n;
     }
   }

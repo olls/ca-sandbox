@@ -258,14 +258,14 @@ debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initiali
   const char *cell_initialisation_types[] = {"RANDOM"};
   print("cell_initialisation_type: %s\n", cell_initialisation_types[(u32)cell_initialisation_options->type]);
 
-  print("set_of_initial_states_size: %u\n", cell_initialisation_options->set_of_initial_states_size);
+  print("set_of_initial_states_size: %u\n", cell_initialisation_options->set_of_initial_states.n_elements);
 
-  print("initial_states: ", cell_initialisation_options->set_of_initial_states_size);
+  print("initial_states: ", cell_initialisation_options->set_of_initial_states.n_elements);
   for (u32 i = 0;
-       i < cell_initialisation_options->set_of_initial_states_size;
+       i < cell_initialisation_options->set_of_initial_states.n_elements;
        ++i)
   {
-    print(" %d", cell_initialisation_options->set_of_initial_states[i]);
+    print(" %d", cell_initialisation_options->set_of_initial_states.get(i));
   }
   print("\n");
 }
@@ -292,9 +292,9 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
     if (success)
     {
-      cell_initialisation_options->set_of_initial_states_size = read_named_states_list(named_states, initial_states_string, &cell_initialisation_options->set_of_initial_states);
+      read_named_states_list(named_states, initial_states_string, &cell_initialisation_options->set_of_initial_states);
 
-      if (cell_initialisation_options->set_of_initial_states_size == 0)
+      if (cell_initialisation_options->set_of_initial_states.n_elements == 0)
       {
         print("No initial states found\n");
         success &= false;

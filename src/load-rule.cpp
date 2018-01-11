@@ -224,7 +224,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
 
 
 b32
-read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, ExtendableArray *rule_patterns)
+read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, RulePatterns *rule_patterns)
 {
   b32 success = true;
 
@@ -237,7 +237,7 @@ read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, 
     b32 found_pattern = read_rule_pattern(named_states, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
     {
-      add_to_extendable_array(rule_patterns, rule_pattern);
+      rule_patterns->add(rule_pattern);
     }
     else
     {
@@ -292,13 +292,19 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       .end = file.read_ptr + file.size
     };
 
-    rule_config->named_states.n_states = 0;
-    find_label_value_u32(file_string, "n_states", &rule_config->named_states.n_states);
-    b32 states_success = rule_config->named_states.n_states > 0;
+    u32 n_states = 0;
+    find_label_value_u32(file_string, "n_states", &n_states);
+    b32 states_success = n_states > 0;
 
     if (states_success)
     {
-      states_success &= find_state_names(file_string, &rule_config->named_states);
+      if (rule_config->named_states.states.elements == 0)
+      {
+        rule_config->named_states.states.allocate_array();
+      }
+      rule_config->named_states.states.clear_array();
+      rule_config->named_states.next_unused_state = 0;
+      states_success &= find_state_names(file_string, &rule_config->named_states, n_states);
     }
 
     success &= states_success;
@@ -322,8 +328,14 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     b32 null_states_found = find_label_value(file_string, "null_states", &null_states_string);
     if (null_states_found && states_success)
     {
-      rule_config->n_null_states = read_named_states_list(&rule_config->named_states, null_states_string, &rule_config->null_states);
-      if (rule_config->n_null_states == 0)
+      if (rule_config->null_states.elements == 0)
+      {
+        rule_config->null_states.allocate_array();
+      }
+      rule_config->null_states.clear_array();
+
+      read_named_states_list(&rule_config->named_states, null_states_string, &rule_config->null_states);
+      if (rule_config->null_states.n_elements == 0)
       {
         print("Error in null_states.\n");
         success &= false;
@@ -331,7 +343,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     }
     else
     {
-      rule_config->n_null_states = 0;
+      rule_config->null_states.n_elements = 0;
     }
 
     success &= rule_config->neighbourhood_region_size > 0;
@@ -346,19 +358,22 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
       print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
-      print("n_null_states: %d\n", rule_config->n_null_states);
-      print("null_states:", rule_config->n_null_states);
+      print("n_null_states: %d\n", rule_config->null_states.n_elements);
+      print("null_states:");
       for (u32 i = 0;
-           i < rule_config->n_null_states;
+           i < rule_config->null_states.n_elements;
            ++i)
       {
-        print(" %d", rule_config->null_states[i]);
+        print(" %d", rule_config->null_states.get(i));
       }
       print("\n");
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
-      new_extendable_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs), &rule_config->rule_patterns);
+      // Need to reallocate, as the size of RulePattern (dependant on n_inputs) might have changed
+      rule_config->rule_patterns.un_allocate_array();
+      rule_config->rule_patterns.element_size = sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs);
+      rule_config->rule_patterns.allocate_array();
 
       success &= read_rule_patterns(&rule_config->named_states, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)
@@ -367,12 +382,12 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       }
       else
       {
-        print("n_rule_patterns: %d\n", rule_config->rule_patterns.next_free_element_position);
+        print("n_rule_patterns: %d\n", rule_config->rule_patterns.n_elements);
         for (u32 rule_pattern_n = 0;
-             rule_pattern_n < rule_config->rule_patterns.next_free_element_position;
+             rule_pattern_n < rule_config->rule_patterns.n_elements;
              ++rule_pattern_n)
         {
-          RulePattern *rule_pattern = (RulePattern *)get_from_extendable_array(&rule_config->rule_patterns, rule_pattern_n);
+          RulePattern *rule_pattern = rule_config->rule_patterns.get(rule_pattern_n);
           print("Rule Pattern:\n");
           print("  result: %d\n", rule_pattern->result);
           print("  cells: ");
@@ -388,6 +403,10 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
             else if (cell.type == PatternCellStateType::STATE)
             {
               print("%d ", cell.state);
+            }
+            else if (cell.type == PatternCellStateType::NOT_USED)
+            {
+              print("- ", cell.state);
             }
           }
           print("\n");

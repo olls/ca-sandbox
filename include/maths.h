@@ -46,6 +46,28 @@ min(T a, T b)
 }
 
 
+template <typename T>
+T
+clamp(T lower_bound, T upper_bound, T v)
+{
+  T result = v;
+
+  result = min(upper_bound, result);
+  result = max(lower_bound, result);
+
+  return result;
+}
+
+
+template <typename T>
+void
+clamp(T lower_bound, T upper_bound, T *v)
+{
+  *v = min(upper_bound, *v);
+  *v = max(lower_bound, *v);
+}
+
+
 inline u64
 ipow(u64 base, u64 exp)
 {

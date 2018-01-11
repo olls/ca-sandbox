@@ -6,43 +6,11 @@
 
 #include "cell.h"
 #include "border.h"
-#include "neighbourhood-region.h"
-#include "named-states.h"
+#include "load-rule.h"
 
 /// @file
 /// @brief  structs for storing a rule
 ///
-
-
-/// Holds the configuration of a rule, i.e: the parsed data from the rule file.
-///
-/// - NULL states indicate states which do not need simulating, these are used so an INFINITE border
-///     simulation can still run in finite time.
-///   - CellBlocks must be initialised with NULL states.
-///   - NULL state rules must be stable (i.e. No change in state) when inputs in neighbourhood
-///       region are also NULL states.
-///   - This allows the simulator to avoid simulating/creating a CellBlock if:
-///     - Its initial state is all NULL states
-///     - It is still in its initial state
-///     - There are no non-NULL state Cells within the rule neighbourhood of the CellBlock's border.
-///
-struct RuleConfiguration
-{
-  NeighbourhoodRegionShape neighbourhood_region_shape;
-
-  /// The distance the neighbourhood region extends from the centre cell, see
-  ///   get_neighbourhood_region_n_cells() for definitions
-  u32 neighbourhood_region_size;
-
-  NamedStates named_states;
-
-  /// Array of state values which are NULL states
-  CellState *null_states;
-  /// Length of null_states
-  u32 n_null_states;
-
-  ExtendableArray rule_patterns;
-};
 
 
 struct RuleNode
@@ -80,11 +48,14 @@ struct Rule
 {
   RuleConfiguration config;
 
+  /// Indicates whether the rule tree has been built
+  b32 rule_tree_built;
+
   /// Number of inputs to the transition function, i.e: number of neighbours + centre cell
   u32 n_inputs;
 
   /// Array of all RuleNodes making up this rule.
-  ExtendableArray rule_nodes_table;
+  ExtendableArray<RuleNode> rule_nodes_table;
 
   /// Position of the rule tree's root node within the rule_nodes_table.
   u32 root_node;
