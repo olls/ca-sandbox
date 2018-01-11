@@ -210,7 +210,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 
 
 void
-do_rule_ui(RuleUI *rule_ui, Rule *rule)
+do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread)
 {
   ImGuiWindowFlags window_flags = 0;
 
@@ -238,6 +238,18 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
       rule_ui->reload_rule_file = true;
     }
 
+    if (rule_creation_thread->currently_running)
+    {
+      ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
+    }
+    else
+    {
+      if (ImGui::Button("Build rule tree from patterns"))
+      {
+        start_build_rule_tree_thread(rule_creation_thread, rule);
+      }
+    }
+
     // Display all rule patterns
     ImGui::TextWrapped("Modify each of the patterns below by clicking on the state buttons to change the state which it matches, or right clicking on them to change them to a wildcard match.");
 
@@ -259,13 +271,6 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
     if (ImGui::Button("Add pattern"))
     {
       RulePattern *new_rule_pattern = rule->config.rule_patterns.get_new_element();
-    }
-
-    if (ImGui::Button("Build rule tree from patterns"))
-    {
-      destroy_rule_tree(rule);
-      build_rule_tree(rule);
-      // print_rule_tree(rule);
     }
   }
 

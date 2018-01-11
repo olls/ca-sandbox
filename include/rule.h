@@ -8,6 +8,8 @@
 #include "border.h"
 #include "load-rule.h"
 
+#include <pthread.h>
+
 /// @file
 /// @brief  structs for storing a rule
 ///
@@ -62,12 +64,30 @@ struct Rule
 };
 
 
+struct Progress
+{
+  u64 total;
+  u64 done;
+};
+
+
+struct RuleCreationThread
+{
+  Rule *rule;
+
+  b32 currently_running;
+  pthread_t thread;
+
+  Progress progress;
+};
+
+
 b32
 is_null_state(RuleConfiguration *rule_configuration, CellState state);
 
 
-void
-build_rule_tree(Rule *result);
+b32
+start_build_rule_tree_thread(RuleCreationThread *rule_creation_thread, Rule *result);
 
 
 void

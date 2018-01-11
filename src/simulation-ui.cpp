@@ -39,6 +39,7 @@ do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_bui
       if (!rule_tree_built)
       {
         ImGui::Text("Rule tree not built");
+        simulation_ui->simulating = false;
       }
       else
       {

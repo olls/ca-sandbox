@@ -11,6 +11,7 @@
 #include "neighbourhood-region.h"
 
 #include <string.h>
+#include <pthread.h>
 #include "imgui.h"
 
 /// @file
@@ -185,7 +186,7 @@ find_node(Rule *rule, RuleNode *node)
 
 
 u32
-add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_estimate)
+add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *progress)
 {
   static u64 n_nodes_traced = 0;
 
@@ -199,13 +200,16 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
     node->is_leaf = true;
     node->leaf_value = use_rule_patterns_to_get_result(&rule->config, rule->n_inputs, tree_path);
 
+    progress->done += 1;
+
+#if 0
     u64 intervals = 20;
-    if (n_nodes_traced % (n_nodes_estimate / intervals) == 0)
+    if (progress->done % (progress->total / intervals) == 0)
     {
-      r64 percent_done = 100 * (r64)n_nodes_traced / (r64)n_nodes_estimate;
-      print("Generating rule tree: %.1lf\%, %lu/%lu\n", percent_done, n_nodes_traced, n_nodes_estimate);
+      r64 percent_done = 100 * (r64)progress->done / (r64)progress->total;
+      print("Generating rule tree: %.1lf\%, %lu/%lu\n", percent_done, progress->done, progress->total);
     }
-    ++n_nodes_traced;
+#endif
   }
   else
   {
@@ -220,7 +224,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
       // This is the list of inputs for the current child
       tree_path[depth] = child_n;
 
-      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path, n_nodes_estimate);
+      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path, progress);
       node->children[child_n] = child_position;
     }
   }
@@ -247,34 +251,67 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
 
 /// Set Rule.config values before calling!
 void
-build_rule_tree(Rule *result)
+build_rule_tree(RuleCreationThread *rule_creation_thread)
 {
-  // We can continue to use the existing table if the element_size (i.e: the n_states) has not
-  //   changed, as the tree will be rebuilt out of the existing nodes.  We currently destroy the
-  //   rule table before calling build_rule_tree if the file is reloaded to create a new table.
-  //   If the tree is altered via the GUI there is no way to change the n_states (currently), so we
-  //   don't need a new table.
+  Rule *rule = rule_creation_thread->rule;
 
-  if (result->rule_nodes_table.elements == 0)
+  rule->rule_tree_built = false;
+
+  // Re allocate the rule tree every time, this could be optimised... but is it worth it?
+  if (rule->rule_nodes_table.elements == 0)
   {
-    result->rule_nodes_table.un_allocate_array();
-    u32 n_states = result->config.named_states.states.n_elements;
-    result->rule_nodes_table.element_size = sizeof(RuleNode) + (n_states * sizeof(u32));
-    result->rule_nodes_table.allocate_array();
+    rule->rule_nodes_table.un_allocate_array();
+    u32 n_states = rule->config.named_states.states.n_elements;
+    rule->rule_nodes_table.element_size = sizeof(RuleNode) + (n_states * sizeof(u32));
+    rule->rule_nodes_table.allocate_array();
   }
 
-  result->n_inputs = get_neighbourhood_region_n_cells(result->config.neighbourhood_region_shape, result->config.neighbourhood_region_size);
+  rule->n_inputs = get_neighbourhood_region_n_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size);
 
-  u64 n_nodes_estimate = ipow((u64)result->config.named_states.states.n_elements, (u64)result->n_inputs);
-  print("Building rule tree: %lu\n", n_nodes_estimate);
+  rule_creation_thread->progress.total = ipow((u64)rule->config.named_states.states.n_elements, (u64)rule->n_inputs);
+  rule_creation_thread->progress.done = 0;
+  print("Building rule tree: %lu\n", rule_creation_thread->progress.total);
 
   // The tree_path is used to store the route taken through the tree to reach a leaf node.
-  CellState *tree_path = allocate(CellState, result->n_inputs);
-  result->root_node = add_node_to_rule_tree(result, 0, tree_path, n_nodes_estimate);
-
-  result->rule_tree_built = true;
-
+  CellState *tree_path = allocate(CellState, rule->n_inputs);
+  rule->root_node = add_node_to_rule_tree(rule, 0, tree_path, &rule_creation_thread->progress);
   un_allocate(tree_path);
+
+  rule->rule_tree_built = true;
+  rule_creation_thread->currently_running = false;
+}
+
+
+void *
+build_rule_tree_thread(void *rule_creation_thread)
+{
+  build_rule_tree((RuleCreationThread *)rule_creation_thread);
+
+  return NULL;
+}
+
+
+b32
+start_build_rule_tree_thread(RuleCreationThread *rule_creation_thread, Rule *result)
+{
+  b32 success = true;
+
+  if (!rule_creation_thread->currently_running)
+  {
+    rule_creation_thread->rule = result;
+
+    s32 error = pthread_create(&rule_creation_thread->thread, NULL, build_rule_tree_thread, (void *)rule_creation_thread);
+    if (error)
+    {
+      success &= false;
+    }
+    else
+    {
+      rule_creation_thread->currently_running = true;
+    }
+  }
+
+  return success;
 }
 
 

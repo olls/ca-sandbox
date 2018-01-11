@@ -18,7 +18,7 @@ struct RuleUI
 
 
 void
-do_rule_ui(RuleUI *rule_ui, Rule *rule);
+do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread);
 
 
 #endif

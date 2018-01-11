@@ -135,6 +135,8 @@ main(int argc, const char *argv[])
     RuleUI rule_ui = {};
     CellsEditor cells_editor = {};
 
+    RuleCreationThread rule_creation_ui = {};
+
     ViewPanning view_panning = {
       .scale = 0.3,
       .offset = {0,0}
@@ -273,10 +275,10 @@ main(int argc, const char *argv[])
       // Draw imGui elements
       //
 
-      // ImGui::ShowTestWindow();
+      ImGui::ShowTestWindow();
 
       do_simulation_ui(&simulation_ui, engine.frame_start, loaded_rule.rule_tree_built, &universe_ui.reload_cells_file);
-      do_rule_ui(&rule_ui, &loaded_rule);
+      do_rule_ui(&rule_ui, &loaded_rule, &rule_creation_ui);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
       do_named_states_ui(&loaded_rule.config);
