@@ -31,7 +31,9 @@
 enum struct PatternCellStateType : s32
 {
   WILDCARD,
-  STATE
+  STATE,
+  NOT_STATE,
+  OR_STATE // TODO: Better name?
 };
 
 

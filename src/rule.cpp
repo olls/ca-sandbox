@@ -54,6 +54,9 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
     b32 matches = true;
     u32 number_of_neighbours_matching_count_matching_states = 0;
 
+    b32 or_matching_enabled_on_this_pattern = false;
+    u32 number_of_neighbours_matching_or_states = 0;
+
     for (u32 input_n = 0;
          input_n < n_inputs;
          ++input_n)
@@ -85,6 +88,31 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
           }
         } break;
 
+        case (PatternCellStateType::NOT_STATE):
+        {
+          // Only allowed one state in an NOT_STATE  (for now...)
+          assert(pattern_input.group_states_used == 1);
+
+          if (pattern_input.states[0] == in)
+          {
+            matches = false;
+            break;
+          }
+        } break;
+
+        case (PatternCellStateType::OR_STATE):
+        {
+          or_matching_enabled_on_this_pattern = true;
+
+          // Only allowed one state in an OR_STATE
+          assert(pattern_input.group_states_used == 1);
+
+          if (pattern_input.states[0] == in)
+          {
+            number_of_neighbours_matching_or_states += 1;
+          }
+        } break;
+
         case (PatternCellStateType::WILDCARD):
         {
           if (rule_pattern->count_matching.enabled)
@@ -104,7 +132,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 
             if (this_state_in_count_matching_group)
             {
-              ++number_of_neighbours_matching_count_matching_states;
+              number_of_neighbours_matching_count_matching_states += 1;
             }
           }
         } break;
@@ -116,28 +144,42 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
       }
     }
 
-    // Now test the wildcard constraints
-    if (matches && rule_pattern->count_matching.enabled)
-    {
-      if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN)
-      {
-        matches = number_of_neighbours_matching_count_matching_states > rule_pattern->count_matching.comparison_n;
-      }
-      else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN)
-      {
-        matches = number_of_neighbours_matching_count_matching_states < rule_pattern->count_matching.comparison_n;
-      }
-      else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUALS)
-      {
-        matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
-      }
-    }
-
     if (matches)
     {
-      found_match = true;
-      result = rule_pattern->result;
-      break;
+      // Now test the wildcard constraints
+      if (rule_pattern->count_matching.enabled)
+      {
+        if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN)
+        {
+          matches = number_of_neighbours_matching_count_matching_states > rule_pattern->count_matching.comparison_n;
+        }
+        else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN)
+        {
+          matches = number_of_neighbours_matching_count_matching_states < rule_pattern->count_matching.comparison_n;
+        }
+        else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUALS)
+        {
+          matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
+        }
+      }
+
+      // If any OR_STATE is used in the pattern, we must have matched against one or more of them
+      if (or_matching_enabled_on_this_pattern)
+      {
+        if (number_of_neighbours_matching_or_states == 0)
+        {
+          matches = false;
+        }
+      }
+
+      if (matches)
+      {
+        // We match this pattern
+
+        found_match = true;
+        result = rule_pattern->result;
+        break;
+      }
     }
   }
 

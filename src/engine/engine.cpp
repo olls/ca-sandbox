@@ -97,6 +97,7 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 
   SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
                                             SDL_WINDOW_SHOWN |
+                                            SDL_WINDOW_MAXIMIZED |
                                             SDL_WINDOW_INPUT_FOCUS |
                                             SDL_WINDOW_RESIZABLE);
   u32 width = 0;

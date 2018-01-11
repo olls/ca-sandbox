@@ -109,7 +109,7 @@ read_count_matching_value(NamedStates *named_states, String *count_matching_stri
 b32
 is_pattern_cell_state_start_character(char character)
 {
-  b32 result = character == '*' || character == '[' || is_state_character(character);
+  b32 result = character == '*' || character == '[' || character == '(' || character == '!' || is_state_character(character);
   return result;
 }
 
@@ -252,11 +252,62 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
             }
           }
         }
+        else if (pattern_block.current_position[0] == '(')
+        {
+          // TODO: Allow state group in OR_STATE
+          // TODO: Need better name than OR_STATE
+
+          this_cell_state_pattern->type = PatternCellStateType::OR_STATE;
+
+          String or_state_string;
+          or_state_string.start = pattern_block.current_position + 1;
+          or_state_string.current_position = or_state_string.start;
+
+          // Find end of group
+          consume_until_char(&pattern_block, ')');
+          or_state_string.end = pattern_block.current_position;
+
+          if (or_state_string.end == pattern_block.end)
+          {
+            print("Error: Couldn't find end ')' of 'or' cell state in pattern.\n");
+            success &= false;
+            break;
+          }
+          else
+          {
+            b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states[0]);
+            if (!got_state)
+            {
+              print("Error: Couldn't read cell state in 'or' state in pattern.\n");
+              success &= false;
+              break;
+            }
+            else
+            {
+              this_cell_state_pattern->group_states_used = 1;
+            }
+          }
+        }
         else if (pattern_block.current_position[0] == '*')
         {
           this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
           ++pattern_block.current_position;
           this_cell_state_pattern->group_states_used = 0;
+        }
+        else if (pattern_block.current_position[0] == '!')
+        {
+          // TODO: Allow state group after not
+
+          this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
+
+          success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
+          this_cell_state_pattern->group_states_used = 1;
+
+          if (!success)
+          {
+            print("Error in rule pattern's pattern.\n");
+            break;
+          }
         }
         else
         {
@@ -477,7 +528,15 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
               {
                 print("%d ", cell.states[group_state_n]);
               }
-              if (cell.group_states_used > 1) print("]");
+              if (cell.group_states_used > 1) print("] ");
+            }
+            else if (cell.type == PatternCellStateType::NOT_STATE)
+            {
+              print("!%d ", cell.states[0]);
+            }
+            else if (cell.type == PatternCellStateType::OR_STATE)
+            {
+              print("(%d) ", cell.states[0]);
             }
           }
           print("\n");

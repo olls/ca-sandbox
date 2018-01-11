@@ -63,7 +63,9 @@ cell_state_button(const char *id, PatternCellState *pattern_cell, NamedStates *n
 {
   // TODO: This basically needs to be rewritten to handle the grouped states...
 
-  if (pattern_cell->type == PatternCellStateType::STATE)
+  if (pattern_cell->type == PatternCellStateType::STATE ||
+      pattern_cell->type == PatternCellStateType::NOT_STATE ||
+      pattern_cell->type == PatternCellStateType::OR_STATE)
   {
     cell_state_button(id, &pattern_cell->states[0], named_states);
   }
