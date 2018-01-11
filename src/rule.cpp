@@ -52,7 +52,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
     RulePattern *rule_pattern = config->rule_patterns.get(pattern_n);
 
     b32 matches = true;
-    u32 count_matching_state_n = 0;
+    u32 number_of_neighbours_matching_count_matching_states = 0;
 
     for (u32 input_n = 0;
          input_n < n_inputs;
@@ -87,10 +87,25 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 
         case (PatternCellStateType::WILDCARD):
         {
-          if (rule_pattern->count_matching_enabled &&
-              in == rule_pattern->count_matching_state)
+          if (rule_pattern->count_matching.enabled)
           {
-            ++count_matching_state_n;
+            b32 this_state_in_count_matching_group = false;
+
+            for (u32 count_matching_state_n = 0;
+                 count_matching_state_n < rule_pattern->count_matching.group_states_used;
+                 ++count_matching_state_n)
+            {
+              if (in == rule_pattern->count_matching.states[count_matching_state_n])
+              {
+                this_state_in_count_matching_group = true;
+                break;
+              }
+            }
+
+            if (this_state_in_count_matching_group)
+            {
+              ++number_of_neighbours_matching_count_matching_states;
+            }
           }
         } break;
       }
@@ -102,19 +117,19 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
     }
 
     // Now test the wildcard constraints
-    if (matches && rule_pattern->count_matching_enabled)
+    if (matches && rule_pattern->count_matching.enabled)
     {
-      if (rule_pattern->count_matching_comparison == ComparisonOp::GREATER_THAN)
+      if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN)
       {
-        matches = count_matching_state_n > rule_pattern->count_matching_n;
+        matches = number_of_neighbours_matching_count_matching_states > rule_pattern->count_matching.comparison_n;
       }
-      else if (rule_pattern->count_matching_comparison == ComparisonOp::LESS_THAN)
+      else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN)
       {
-        matches = count_matching_state_n < rule_pattern->count_matching_n;
+        matches = number_of_neighbours_matching_count_matching_states < rule_pattern->count_matching.comparison_n;
       }
-      else if (rule_pattern->count_matching_comparison == ComparisonOp::EQUALS)
+      else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUALS)
       {
-        matches = count_matching_state_n == rule_pattern->count_matching_n;
+        matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
       }
     }
 

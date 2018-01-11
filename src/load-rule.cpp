@@ -20,50 +20,84 @@ b32
 read_count_matching_value(NamedStates *named_states, String *count_matching_string, RulePattern *rule_pattern_result)
 {
   b32 success = true;
-  rule_pattern_result->count_matching_enabled = false;
+  rule_pattern_result->count_matching.enabled = false;
 
-  read_state_name(named_states, count_matching_string, &rule_pattern_result->count_matching_state);
+  // Read states group between []
+  consume_until_char(count_matching_string, '[');
+  String group_string;
+  group_string.start = count_matching_string->current_position + 1;
+  group_string.current_position = group_string.start;
 
-  consume_until_char(count_matching_string, ',');
+  // Find end of group
+  consume_until_char(count_matching_string, ']');
+  group_string.end = count_matching_string->current_position;
 
-  if (count_matching_string->current_position == count_matching_string->end)
+  if (group_string.end == count_matching_string->end)
   {
-    print("Error in count_matching rule matching state.\n");
+    print("Error: Couldn't find cell state group in count matching in pattern.\n");
     success &= false;
   }
   else
   {
-    consume_until(count_matching_string, is_comparison_op);
-    if (count_matching_string->current_position[0] == '>')
+    ExtendableArray<CellState> states;
+    states.allocate_array();
+    read_named_states_list(named_states, group_string, &states);
+    if (states.n_elements > MAX_PATTERN_STATES_GROUP)
     {
-      rule_pattern_result->count_matching_comparison = ComparisonOp::GREATER_THAN;
-    }
-    else if (count_matching_string->current_position[0] == '<')
-    {
-      rule_pattern_result->count_matching_comparison = ComparisonOp::LESS_THAN;
-    }
-    else if (count_matching_string->current_position[0] == '=')
-    {
-      rule_pattern_result->count_matching_comparison = ComparisonOp::EQUALS;
+      states.un_allocate_array();
+      success &= false;
+      print("Error: Too many states in count matching group.\n");
     }
     else
     {
-      print("Error in count_matching rule count comparison.\n");
-      success &= false;
-    }
+      // Copy contents of the temporary Extendable array into count_matching.states
+      memcpy(&rule_pattern_result->count_matching.states, states.elements, states.n_elements*states.element_size);
+      rule_pattern_result->count_matching.group_states_used = states.n_elements;
 
-    if (success)
-    {
-      consume_until(count_matching_string, is_num);
+      states.un_allocate_array();
+
+      consume_until_char(count_matching_string, ',');
+
       if (count_matching_string->current_position == count_matching_string->end)
       {
-        print("Error in count_matching rule comparison number.\n");
+        print("Error in count_matching rule matching state.\n");
         success &= false;
       }
       else
       {
-        rule_pattern_result->count_matching_n = get_u32(count_matching_string);
-        rule_pattern_result->count_matching_enabled = true;
+        consume_until(count_matching_string, is_comparison_op);
+        if (count_matching_string->current_position[0] == '>')
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN;
+        }
+        else if (count_matching_string->current_position[0] == '<')
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN;
+        }
+        else if (count_matching_string->current_position[0] == '=')
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::EQUALS;
+        }
+        else
+        {
+          print("Error in count_matching rule count comparison.\n");
+          success &= false;
+        }
+
+        if (success)
+        {
+          consume_until(count_matching_string, is_num);
+          if (count_matching_string->current_position == count_matching_string->end)
+          {
+            print("Error in count_matching rule comparison number.\n");
+            success &= false;
+          }
+          else
+          {
+            rule_pattern_result->count_matching.comparison_n = get_u32(count_matching_string);
+            rule_pattern_result->count_matching.enabled = true;
+          }
+        }
       }
     }
   }
@@ -92,9 +126,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
   while (!found_pattern)
   {
     line = get_line(file_string);
-
-    consume_until(&line, is_letter);
-    label.start = line.current_position;
+    label.start = line.start;
 
     consume_while(&line, is_label_char);
     label.end = line.current_position;
@@ -206,7 +238,6 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
           }
           else
           {
-            // print("GROUPIFYING\n");
             this_cell_state_pattern->group_states_used = 0;
             b32 got_state = true;
             while (got_state && this_cell_state_pattern->group_states_used < MAX_PATTERN_STATES_GROUP)
@@ -252,7 +283,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
     }
     else
     {
-      rule_pattern_result->count_matching_enabled = false;
+      rule_pattern_result->count_matching.enabled = false;
     }
   }
 
@@ -401,7 +432,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
            i < rule_config->null_states.n_elements;
            ++i)
       {
-        print(" %d", rule_config->null_states.get(i));
+        print(" %d", *rule_config->null_states.get(i));
       }
       print("\n");
 
@@ -451,10 +482,10 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
           }
           print("\n");
 
-          if (rule_pattern->count_matching_enabled)
+          if (rule_pattern->count_matching.enabled)
           {
             char comparison;
-            switch (rule_pattern->count_matching_comparison)
+            switch (rule_pattern->count_matching.comparison)
             {
               case (ComparisonOp::GREATER_THAN):
               {
@@ -470,7 +501,14 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
               } break;
             }
 
-            print("  count_matching: %d, %c %d\n", rule_pattern->count_matching_state, comparison, rule_pattern->count_matching_n);
+            print("  count_matching: [");
+            for (u32 count_matching_state_n = 0;
+                 count_matching_state_n < rule_pattern->count_matching.group_states_used;
+                 ++count_matching_state_n)
+            {
+              print("%d", rule_pattern->count_matching.states[count_matching_state_n]);
+            }
+            print("], %c %d\n", comparison, rule_pattern->count_matching.comparison_n);
           }
         }
       }

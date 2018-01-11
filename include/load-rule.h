@@ -51,10 +51,14 @@ struct RulePattern
 {
   CellState result;
 
-  b32 count_matching_enabled;
-  CellState count_matching_state;
-  ComparisonOp count_matching_comparison;
-  u32 count_matching_n;
+  struct
+  {
+    b32 enabled;
+    CellState states[MAX_PATTERN_STATES_GROUP];
+    u32 group_states_used;
+    ComparisonOp comparison;
+    u32 comparison_n;
+  } count_matching;
 
   /// Left-to-right, top-to-bottom list of cell states in pattern
   PatternCellState cell_states[];

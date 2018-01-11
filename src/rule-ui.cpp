@@ -171,36 +171,41 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
     ImGui::SameLine();
     cell_state_button("resulting cell", &rule_pattern->result, &rule_config->named_states);
 
-    ImGui::Checkbox("Count matching enabled for this pattern", (bool *)&rule_pattern->count_matching_enabled);
+    ImGui::Checkbox("Count matching enabled for this pattern", (bool *)&rule_pattern->count_matching.enabled);
 
-    if (rule_pattern->count_matching_enabled)
+    if (rule_pattern->count_matching.enabled)
     {
       ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {9, 6});
 
       ImGui::AlignFirstTextHeightToWidgets();
       ImGui::Text("n");
       ImGui::SameLine();
-      cell_state_button("count matching state", &rule_pattern->count_matching_state, &rule_config->named_states);
+      for (u32 count_matching_state_n = 0;
+           count_matching_state_n < rule_pattern->count_matching.group_states_used;
+           ++count_matching_state_n)
+      {
+        cell_state_button("count matching state", &rule_pattern->count_matching.states[count_matching_state_n], &rule_config->named_states);
+      }
       ImGui::SameLine();
       ImGui::Text("wildcard cells");
       ImGui::SameLine();
 
       // Drop down to select comparison operator
       ImGui::PushItemWidth(50);
-      ImGui::Combo("##comparison operator", (s32*)&rule_pattern->count_matching_comparison, COMPARISON_OPERATOR_STRINGS, array_count(COMPARISON_OPERATOR_STRINGS));
+      ImGui::Combo("##comparison operator", (s32*)&rule_pattern->count_matching.comparison, COMPARISON_OPERATOR_STRINGS, array_count(COMPARISON_OPERATOR_STRINGS));
       ImGui::PopItemWidth();
 
       ImGui::SameLine();
 
       // Int input to select count matching n
-      s32 new_count_matching_n = (s32)rule_pattern->count_matching_n;
+      s32 new_count_matching_n = (s32)rule_pattern->count_matching.comparison_n;
       ImGui::PushItemWidth(85);
-      ImGui::InputInt("##count matching n",&new_count_matching_n);
+      ImGui::InputInt("##count matching n", &new_count_matching_n);
       ImGui::PopItemWidth();
 
       ImGui::PopStyleVar();
 
-      rule_pattern->count_matching_n = (u32)clamp(0, (s32)n_cells, new_count_matching_n);
+      rule_pattern->count_matching.comparison_n = (u32)clamp(0, (s32)n_cells, new_count_matching_n);
     }
   }
   ImGui::EndGroup();
