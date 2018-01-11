@@ -90,8 +90,7 @@ find_label_value(String block, const char *search_label, String *value_result)
 
     // Read label
 
-    consume_until(&line, is_letter);
-    label.start = line.current_position;
+    label.start = line.start;
 
     consume_while(&line, is_label_char);
     label.end = line.current_position;

@@ -81,8 +81,15 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
 
   while (named_states->states.n_elements < n_states)
   {
+    String label_value = {};
+    b32 found_state_name = find_label_value(file_string, "State", &label_value);
+
     String state_name = {};
-    b32 found_state_name = find_label_value(file_string, "State", &state_name);
+    consume_until(&label_value, is_state_character);
+    state_name.start = label_value.current_position;
+
+    consume_while(&label_value, is_state_character);
+    state_name.end = label_value.current_position;
 
     // Move current position to state end so we don't read this state again
     file_string.current_position = state_name.end;

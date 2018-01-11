@@ -61,9 +61,11 @@ cell_state_button(const char *id, CellState *state, NamedStates *named_states)
 void
 cell_state_button(const char *id, PatternCellState *pattern_cell, NamedStates *named_states)
 {
+  // TODO: This basically needs to be rewritten to handle the grouped states...
+
   if (pattern_cell->type == PatternCellStateType::STATE)
   {
-    cell_state_button(id, &pattern_cell->state, named_states);
+    cell_state_button(id, &pattern_cell->states[0], named_states);
   }
   else
   {
@@ -73,10 +75,6 @@ cell_state_button(const char *id, PatternCellState *pattern_cell, NamedStates *n
       case (PatternCellStateType::WILDCARD):
       {
         state_string = new_string("*");
-      } break;
-      case (PatternCellStateType::NOT_USED):
-      {
-        state_string = new_string("-");
       } break;
       default:
       {
@@ -124,7 +122,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 
   // Iterate through the cell_spacial_array outputting each cell as a button
   const ImGuiStyle& style = ImGui::GetStyle();
-  r32 padding = style.FramePadding.x;
+  r32 padding = style.FramePadding.y;
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
 
   s32vec2 position;
@@ -144,7 +142,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 
       if (pattern_cell == NULL)
       {
-        r32 item_vertical_spacing = ImGui::GetItemsLineHeightWithSpacing() - padding;
+        r32 item_vertical_spacing = ImGui::GetItemsLineHeightWithSpacing();
         ImGui::Dummy(vec2{0, item_vertical_spacing});
       }
       else
@@ -251,7 +249,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule)
 
       ImGui::PushID(rule_n);
       char label[32]; sprintf(label, "Pattern %d", rule_n);
-      if (ImGui::CollapsingHeader(label))
+      if (ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen))
       {
         display_rule_pattern(&rule->config, rule_pattern);
       }

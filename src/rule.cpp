@@ -64,10 +64,23 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
       {
         case (PatternCellStateType::STATE):
         {
-          if (pattern_input.state != in)
+          // Look for a matching state in the PatternCellState group
+          b32 found_match_in_group = false;
+
+          for (u32 group_state_n = 0;
+               group_state_n < pattern_input.group_states_used;
+               ++group_state_n)
+          {
+            if (pattern_input.states[group_state_n] == in)
+            {
+              found_match_in_group = true;
+              break;
+            }
+          }
+
+          if (!found_match_in_group)
           {
             matches = false;
-            break;
           }
         } break;
 
@@ -79,6 +92,11 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
             ++count_matching_state_n;
           }
         } break;
+      }
+
+      if (!matches)
+      {
+        break;
       }
     }
 
@@ -194,8 +212,6 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], u64 n_nodes_
     node->is_leaf = false;
 
     // Generate all children by iterating over all states for this level/neighbour
-    // If the rule pattern is NOT_USED for this input, only run the branch once and set the result
-    //   of all children to the same resulting node.
 
     for (CellState child_n = 0;
          child_n < rule->config.named_states.states.n_elements;

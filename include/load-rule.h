@@ -35,10 +35,15 @@ enum struct PatternCellStateType : s32
 };
 
 
+/// Maximum number of state values which can be grouped / or'd together in a pattern (using the [S1, S2] syntax)
+const u32 MAX_PATTERN_STATES_GROUP = 16;
+
+
 struct PatternCellState
 {
   PatternCellStateType type;
-  CellState state;
+  CellState states[MAX_PATTERN_STATES_GROUP];
+  u32 group_states_used;
 };
 
 
