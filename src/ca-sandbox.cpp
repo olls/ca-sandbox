@@ -23,6 +23,7 @@
 #include "cells-editor.h"
 #include "save-universe.h"
 #include "named-states-ui.h"
+#include "save-rule-config.h"
 
 #include "imgui.h"
 #include "imgui_impl_sdl_gl3.h"
@@ -273,7 +274,7 @@ main(int argc, const char *argv[])
 
       ImGui::ShowTestWindow();
 
-      do_simulation_ui(&simulation_ui, engine.frame_start, loaded_rule.rule_tree_built, &universe_ui.reload_cells_file);
+      do_simulation_ui(&simulation_ui, engine.frame_start, loaded_rule.rule_tree_built, &universe_ui.reload_cells_file, &universe_ui.save_cells_file);
       do_rule_ui(&rule_ui, &loaded_rule, &rule_creation_thread);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
@@ -283,10 +284,16 @@ main(int argc, const char *argv[])
       // Save
       //
 
-      if (simulation_ui.save_universe)
+      if (universe_ui.save_cells_file)
       {
-        simulation_ui.save_universe = false;
+        universe_ui.save_cells_file = false;
         running &= save_universe_to_file(universe_ui.cells_file_picker.selected_file, &universe, &simulate_options, &loaded_rule.config.named_states);
+      }
+
+      if (rule_ui.save_rule_file)
+      {
+        rule_ui.save_rule_file = false;
+        running &= save_rule_config_to_file(rule_ui.file_picker.selected_file, &loaded_rule.config);
       }
 
       //

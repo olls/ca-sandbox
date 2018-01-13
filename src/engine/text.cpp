@@ -55,7 +55,16 @@ get_file_string(const char *filename, File *file)
 char *
 copy_string(char *dest, const char *source, u32 size)
 {
-  return (char *)strncpy((char *)dest, (const char *)source, size);
+  return strncpy(dest, source, size);
+}
+
+
+void
+append_string(WriteString *dest, String source)
+{
+  u32 copy_length = min(string_length(source), (u32)(dest->end - dest->current_position));
+  copy_string(dest->current_position, source.start, copy_length);
+  dest->current_position += copy_length;
 }
 
 

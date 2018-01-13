@@ -45,6 +45,11 @@ do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *sim
     {
       universe_ui->reload_cells_file = true;
     }
+
+    if (ImGui::Button("Save cells file"))
+    {
+      universe_ui->save_cells_file = true;
+    }
   }
 
   ImGui::End();

@@ -37,14 +37,11 @@ struct SimulationUI
 
   /// The amount of time the last simulation step took
   u32 last_simulation_delta;
-
-  /// Flag to tell the main loop to save the universe;
-  b32 save_universe;
 };
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe);
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe, b32 *save_universe);
 
 
 #endif

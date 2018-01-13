@@ -14,6 +14,7 @@ struct RuleUI
 {
   FilePicker file_picker;
   b32 reload_rule_file;
+  b32 save_rule_file;
 };
 
 

@@ -5,6 +5,7 @@
 #include "text.h"
 #include "print.h"
 #include "allocate.h"
+#include "maths.h"
 #include "parsing.h"
 #include "extendable-array.h"
 
@@ -259,4 +260,21 @@ get_state_colour(CellState state)
 
   vec4 colour = colours[state % array_count(colours)];
   return colour;
+}
+
+
+u32
+get_longest_state_name_length(NamedStates *named_states)
+{
+  u32 result = 0;
+
+  for (u32 state_n = 0;
+       state_n < named_states->states.n_elements;
+       ++state_n)
+  {
+    NamedState *named_state = named_states->states.get(state_n);
+    result = max(result, string_length(named_state->name));
+  }
+
+  return result;
 }

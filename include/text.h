@@ -46,6 +46,10 @@ char *
 copy_string(char *dest, const char *source, u32 size);
 
 
+void
+append_string(WriteString *dest, String source);
+
+
 b32
 str_eq(const char *a, const char *b, u32 n);
 

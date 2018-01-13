@@ -18,7 +18,7 @@
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe)
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe, b32 *save_universe)
 {
   if (ImGui::Begin("Simulation UI"))
   {
@@ -28,7 +28,7 @@ do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_bui
     {
       if (ImGui::Button("Save Universe and Run Simulation"))
       {
-        simulation_ui->save_universe = true;
+        *save_universe = true;
         simulation_ui->simulating = false;
         simulation_ui->mode = Mode::SIMULATOR;
         simulation_ui->simulation_step = 0;

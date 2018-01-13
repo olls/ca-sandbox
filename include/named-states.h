@@ -62,4 +62,8 @@ vec4
 get_state_colour(CellState state);
 
 
+u32
+get_longest_state_name_length(NamedStates *named_states);
+
+
 #endif

@@ -245,6 +245,11 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
       rule_ui->reload_rule_file = true;
     }
 
+    if (ImGui::Button("Save rule file"))
+    {
+      rule_ui->save_rule_file = true;
+    }
+
     if (!rule_creation_thread->currently_running)
     {
       if (ImGui::Button("Build rule tree from patterns"))

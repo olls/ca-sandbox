@@ -2,16 +2,11 @@
 
 #include "print.h"
 #include "text.h"
-#include "assert.h"
-#include "files.h"
-#include "maths.h"
 
 #include "universe.h"
 #include "simulate.h"
 #include "named-states.h"
 
-#include <string.h>
-#include <stdarg.h>
 #include <stdio.h>
 
 /// @file
@@ -65,15 +60,7 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
     fprintf(file_stream, "cell_block_dim: %d\n\n", universe->cell_block_dim);
     serialise_simulate_options(file_stream, simulate_options);
 
-    // Find longest state name, so we know how far to pad states.
-    u32 max_state_length = 0;
-    for (u32 state_n = 0;
-         state_n < named_states->states.n_elements;
-         ++state_n)
-    {
-      NamedState *named_state = named_states->states.get(state_n);
-      max_state_length = max(max_state_length, string_length(named_state->name));
-    }
+    u32 max_state_length = get_longest_state_name_length(named_states);
 
     u32 cell_block_n = 0;
     for (u32 hash_slot = 0;
