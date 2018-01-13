@@ -1860,7 +1860,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
         ImGui::SameLine(); ImGui::PushItemWidth(120); ImGui::Combo("##output_type", &output_dest, "To Clipboard\0To TTY\0"); ImGui::PopItemWidth();
         ImGui::SameLine(); ImGui::Checkbox("Only Modified Fields", &output_only_modified);
 
-        ImGui::Text("Tip: Left-click on colored square to open color picker,\nRight-click to open edit options menu.");
+        ImGui::TextWrapped("Tip: Left-click on colored square to open color picker,\nRight-click to open edit options menu.");
 
         static ImGuiTextFilter filter;
         filter.Draw("Filter colors", 200);

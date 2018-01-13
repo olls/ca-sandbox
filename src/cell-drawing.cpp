@@ -2,6 +2,7 @@
 
 #include "util.h"
 #include "print.h"
+#include "colour.h"
 #include "opengl-util.h"
 #include "opengl-buffer.h"
 #include "opengl-general-buffers.h"
@@ -165,7 +166,7 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, Cells
             if (cells_editor->cell_highlighted &&
                 cell_position_equal_to(cells_editor->highlighted_cell, current_cell))
             {
-              colour = vec4_add(colour, vec4{0.2, 0.2, 0.2, 0});
+              colour = lighten_colour(colour);
             }
 
             CellInstance cell_instance = {
@@ -201,27 +202,35 @@ draw_cell_instances(CellInstancing *cell_instancing)
 
 
 void
-init_debug_cell_block_outline_drawing_attributes(OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, GLuint debug_cell_block_outline_drawing_shader_program)
+init_general_universe_attributes(OpenGL_Buffer *general_universe_vbo, GLuint general_universe_shader_program)
 {
-  glBindBuffer(debug_cell_block_outline_drawing_vbo->binding_target, debug_cell_block_outline_drawing_vbo->id);
+  glBindBuffer(general_universe_vbo->binding_target, general_universe_vbo->id);
 
-  GLuint attrib_location_cell_block_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "s32_cell_block_position");
+  GLuint attrib_location_cell_block_position = glGetAttribLocation(general_universe_shader_program, "s32_cell_block_position");
   glEnableVertexAttribArray(attrib_location_cell_block_position);
-  glVertexAttribIPointer(attrib_location_cell_block_position, 2, GL_INT, sizeof(UniversePosition), (void *)(offsetof(UniversePosition, cell_block_position)));
+  glVertexAttribIPointer(attrib_location_cell_block_position, 2, GL_INT, sizeof(GeneralUnvierseVertex),
+                         (void *)(offsetof(GeneralUnvierseVertex, vertex) + offsetof(UniversePosition, cell_block_position)));
 
-  GLuint attrib_location_cell_position = glGetAttribLocation(debug_cell_block_outline_drawing_shader_program, "r32_cell_position");
+  GLuint attrib_location_cell_position = glGetAttribLocation(general_universe_shader_program, "r32_cell_position");
   glEnableVertexAttribArray(attrib_location_cell_position);
-  glVertexAttribPointer(attrib_location_cell_position, 2, GL_FLOAT, GL_FALSE, sizeof(UniversePosition), (void *)(offsetof(UniversePosition, cell_position)));
+  glVertexAttribPointer(attrib_location_cell_position, 2, GL_FLOAT, GL_FALSE, sizeof(GeneralUnvierseVertex),
+                        (void *)(offsetof(GeneralUnvierseVertex, vertex) + offsetof(UniversePosition, cell_position)));
+
+  GLuint attrib_location_colour = glGetAttribLocation(general_universe_shader_program, "colour");
+  glEnableVertexAttribArray(attrib_location_colour);
+  glVertexAttribPointer(attrib_location_colour, 4, GL_FLOAT, GL_FALSE, sizeof(GeneralUnvierseVertex), (void *)(offsetof(GeneralUnvierseVertex, colour)));
 
   opengl_print_errors();
 }
 
 
-void
-debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
+BufferDrawingLocation
+debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo)
 {
-  debug_cell_block_outline_drawing_vbo->elements_used = 0;
-  debug_cell_block_outline_drawing_ibo->elements_used = 0;
+  BufferDrawingLocation ibo_items = {
+    .start_position = general_universe_ibo->elements_used,
+    .n_elements = 0
+  };
 
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
@@ -233,26 +242,29 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
     {
       do
       {
-        UniversePosition square_vertices[] = {
-          {cell_block->block_position, {0.05, 0.05}},
-          {cell_block->block_position, {0.95, 0.05}},
-          {cell_block->block_position, {0.95, 0.95}},
-          {cell_block->block_position, {0.05, 0.95}}
+        vec4 red = {1, 0, 0, 1};
+        GeneralUnvierseVertex square_vertices[] = {
+          {{cell_block->block_position, {0.05, 0.05}}, red},
+          {{cell_block->block_position, {0.95, 0.05}}, red},
+          {{cell_block->block_position, {0.95, 0.95}}, red},
+          {{cell_block->block_position, {0.05, 0.95}}, red}
         };
 
-        GLushort index_a = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 0);
-        GLushort index_b = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 1);
-        GLushort index_c = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 2);
-        GLushort index_d = opengl_buffer_new_element(debug_cell_block_outline_drawing_vbo, square_vertices + 3);
+        GLushort vbo_index_a = opengl_buffer_new_element(general_universe_vbo, square_vertices + 0);
+        GLushort vbo_index_b = opengl_buffer_new_element(general_universe_vbo, square_vertices + 1);
+        GLushort vbo_index_c = opengl_buffer_new_element(general_universe_vbo, square_vertices + 2);
+        GLushort vbo_index_d = opengl_buffer_new_element(general_universe_vbo, square_vertices + 3);
 
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_a);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_b);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_b);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_c);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_c);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_d);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_d);
-        opengl_buffer_new_element(debug_cell_block_outline_drawing_ibo, &index_a);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
+        opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
+
+        ibo_items.n_elements += 8;
 
         // Follow any hashmap collision chains
         cell_block = cell_block->next_block;
@@ -261,15 +273,19 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *debug
     }
   }
   opengl_print_errors();
+
+  return ibo_items;
 }
 
 
 void
-debug_cell_block_outline_draw(OpenGL_Buffer *debug_cell_block_outline_drawing_vbo, OpenGL_Buffer *debug_cell_block_outline_drawing_ibo)
+debug_cell_block_outline_draw(OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo, BufferDrawingLocation ibo_outline_elements)
 {
-  glBindBuffer(debug_cell_block_outline_drawing_vbo->binding_target, debug_cell_block_outline_drawing_vbo->id);
-  glBindBuffer(debug_cell_block_outline_drawing_ibo->binding_target, debug_cell_block_outline_drawing_ibo->id);
-  glDrawElements(GL_LINES, debug_cell_block_outline_drawing_ibo->elements_used, GL_UNSIGNED_SHORT, 0);
+  glBindBuffer(general_universe_vbo->binding_target, general_universe_vbo->id);
+  glBindBuffer(general_universe_ibo->binding_target, general_universe_ibo->id);
+
+  void *general_universe_ibo_offset = (void *)(intptr_t)(ibo_outline_elements.start_position * sizeof(GLushort));
+  glDrawElements(GL_LINES, ibo_outline_elements.n_elements, GL_UNSIGNED_SHORT, general_universe_ibo_offset);
 
   opengl_print_errors();
 }

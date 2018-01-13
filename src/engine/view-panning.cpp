@@ -60,20 +60,31 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
   update_view_scaling(view_panning, screen_mouse_pos);
 
   view_panning->panning_last_frame = view_panning->currently_panning;
-  view_panning->currently_panning = false;
 
   // Mouse position difference between last frame and this frame
   vec2 d_mouse = vec2_subtract(screen_mouse_pos, view_panning->last_mouse_pos);
   view_panning->last_mouse_pos = screen_mouse_pos;
 
-  if (!io.WantCaptureMouse &&
-      io.MouseDown[0] &&
-      (vec2Length(d_mouse) > DRAG_THRESHOLD || view_panning->panning_last_frame))
+  if (io.KeyCtrl &&
+      !io.WantCaptureMouse &&
+      ImGui::IsMouseClicked(0))
+  {
+    view_panning->currently_panning = true;
+  }
+
+  if (view_panning->currently_panning &&
+      io.KeyCtrl &&
+      !io.WantCaptureMouse &&
+      ImGui::IsMouseDown(0))
   {
     vec2 scaled_mouse_pos = vec2_divide(d_mouse, view_panning->scale);
     view_panning->offset = vec2_add(view_panning->offset, scaled_mouse_pos);
 
     view_panning->currently_panning = true;
+  }
+  else
+  {
+    view_panning->currently_panning = false;
   }
 }
 

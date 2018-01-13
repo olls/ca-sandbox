@@ -245,16 +245,16 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
       rule_ui->reload_rule_file = true;
     }
 
-    if (rule_creation_thread->currently_running)
-    {
-      ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
-    }
-    else
+    if (!rule_creation_thread->currently_running)
     {
       if (ImGui::Button("Build rule tree from patterns"))
       {
         start_build_rule_tree_thread(rule_creation_thread, rule);
       }
+    }
+    else
+    {
+      ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
     }
 
     // Display all rule patterns

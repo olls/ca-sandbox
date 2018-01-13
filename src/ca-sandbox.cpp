@@ -50,7 +50,7 @@ const r32 INITIAL_SIM_FREQUENCY = 30;
 ///
 /// TODO: Shader compilation should probably be moved to the locations where the shaders are used.
 b32
-init_shaders(GLuint *debug_cell_block_outline_drawing_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *screen_shader_program)
+init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *screen_shader_program)
 {
   b32 success = true;
 
@@ -59,12 +59,12 @@ init_shaders(GLuint *debug_cell_block_outline_drawing_shader_program, GLuint *ce
     GL_FRAGMENT_SHADER
   };
 
-  const char *debug_cell_block_outline_drawing_filenames[] = {
-    "src/shaders/debug-cell-block-outlines.glvs",
+  const char *general_cell_block[] = {
+    "src/shaders/general-universe.glvs",
     "src/shaders/screen.glfs"
   };
 
-  success &= create_shader_program(debug_cell_block_outline_drawing_filenames, shader_types, 2, debug_cell_block_outline_drawing_shader_program);
+  success &= create_shader_program(general_cell_block, shader_types, 2, general_universe_shader_program);
 
   const char *cells_filenames[] = {
     "src/shaders/cell-instancing.glvs",
@@ -95,11 +95,11 @@ main(int argc, const char *argv[])
 
   if (success)
   {
-    GLuint debug_cell_block_outline_drawing_shader_program = 0;
-    OpenGL_Buffer debug_cell_block_outline_drawing_vbo = {};
-    OpenGL_Buffer debug_cell_block_outline_drawing_ibo = {};
-    GLuint debug_cell_block_outline_drawing_vao = 0;
-    GLuint test_cell_blocks_drawing_mat4_projection_matrix_uniform = 0;
+    GLuint general_universe_shader_program = 0;
+    GLuint general_universe_vao = 0;
+    OpenGL_Buffer general_universe_vbo = {};
+    OpenGL_Buffer general_universe_ibo = {};
+    GLuint general_universe_mat4_projection_matrix_uniform = 0;
 
     OpenGL_Buffer general_vertex_buffer = {};
     OpenGL_Buffer general_index_buffer = {};
@@ -135,7 +135,7 @@ main(int argc, const char *argv[])
     RuleUI rule_ui = {};
     CellsEditor cells_editor = {};
 
-    RuleCreationThread rule_creation_ui = {};
+    RuleCreationThread rule_creation_thread = {};
 
     ViewPanning view_panning = {
       .scale = 0.3,
@@ -158,38 +158,35 @@ main(int argc, const char *argv[])
 
         opengl_create_general_buffers(&general_vertex_buffer, &general_index_buffer);
 
-        b32 shader_success = init_shaders(&debug_cell_block_outline_drawing_shader_program, &cell_instance_drawing_shader_program, &screen_shader_program);
+        b32 shader_success = init_shaders(&general_universe_shader_program, &cell_instance_drawing_shader_program, &screen_shader_program);
         running &= shader_success;
 
-        // Uniforms
-        test_cell_blocks_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(debug_cell_block_outline_drawing_shader_program, "projection_matrix");
-        cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
-        cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
-        cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
-
-#ifdef DEBUG_CELL_BLOCK_DRAWING
-        // Debug cell block drawing
+        // General universe drawing
         {
+          general_universe_mat4_projection_matrix_uniform = glGetUniformLocation(general_universe_shader_program, "projection_matrix");
 
           // Generate and Bind VAO
-          glGenVertexArrays(1, &debug_cell_block_outline_drawing_vao);
-          glBindVertexArray(debug_cell_block_outline_drawing_vao);
+          glGenVertexArrays(1, &general_universe_vao);
+          glBindVertexArray(general_universe_vao);
 
           // Generate and Bind VBO
-          create_opengl_buffer(&debug_cell_block_outline_drawing_vbo, sizeof(UniversePosition), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
-          glBindBuffer(debug_cell_block_outline_drawing_vbo.binding_target, debug_cell_block_outline_drawing_vbo.id);
+          create_opengl_buffer(&general_universe_vbo, sizeof(GeneralUnvierseVertex), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
+          glBindBuffer(general_universe_vbo.binding_target, general_universe_vbo.id);
 
           // Generate and Bind IBO
-          create_opengl_buffer(&debug_cell_block_outline_drawing_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STREAM_DRAW);
-          glBindBuffer(debug_cell_block_outline_drawing_ibo.binding_target, debug_cell_block_outline_drawing_ibo.id);
+          create_opengl_buffer(&general_universe_ibo, sizeof(GLushort), GL_ELEMENT_ARRAY_BUFFER, GL_STREAM_DRAW);
+          glBindBuffer(general_universe_ibo.binding_target, general_universe_ibo.id);
 
           opengl_print_errors();
           glBindVertexArray(0);
         }
-#endif
 
         // Cell instance drawing
         {
+          cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "projection_matrix");
+          cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_block_dim");
+          cell_instance_drawing_cell_width_uniform = glGetUniformLocation(cell_instance_drawing_shader_program, "cell_width");
+
           glGenVertexArrays(1, &cell_instance_drawing_vao);
           glBindVertexArray(cell_instance_drawing_vao);
 
@@ -254,10 +251,9 @@ main(int argc, const char *argv[])
         running = false;
       }
 
-      if (!(io.MousePos.x == -1 &&
-            io.MousePos.y == -1))
+      if (ImGui::IsMousePosValid())
       {
-        screen_mouse_pos = io.MousePos;
+        screen_mouse_pos = ImGui::GetMousePos();
         screen_mouse_pos = vec2_divide(screen_mouse_pos, vec2(io.DisplaySize));
         screen_mouse_pos = vec2_multiply(screen_mouse_pos, 2);
         screen_mouse_pos = vec2_subtract(screen_mouse_pos, 1);
@@ -278,10 +274,10 @@ main(int argc, const char *argv[])
       ImGui::ShowTestWindow();
 
       do_simulation_ui(&simulation_ui, engine.frame_start, loaded_rule.rule_tree_built, &universe_ui.reload_cells_file);
-      do_rule_ui(&rule_ui, &loaded_rule, &rule_creation_ui);
+      do_rule_ui(&rule_ui, &loaded_rule, &rule_creation_thread);
       do_simulate_options_ui(&simulate_options, &universe);
       do_universe_ui(&universe_ui, &universe, &simulate_options, &cell_initialisation_options, &loaded_rule.config.named_states);
-      do_named_states_ui(&loaded_rule.config);
+      do_named_states_ui(&loaded_rule.config, &cells_editor.active_state);
 
       //
       // Save
@@ -304,8 +300,9 @@ main(int argc, const char *argv[])
 
         print("\nLoading rule file: %s\n", rule_ui.file_picker.selected_file);
         running &= load_rule_file(rule_ui.file_picker.selected_file, &loaded_rule.config);
-
         print("\n");
+
+        start_build_rule_tree_thread(&rule_creation_thread, &loaded_rule);
       }
 
       if (universe_ui.reload_cells_file && rule_file_loaded)
@@ -377,7 +374,7 @@ main(int argc, const char *argv[])
       {
         if (cells_file_loaded)
         {
-          do_cells_editor(&cells_editor, &universe, &loaded_rule.config.named_states, mouse_universe_pos, view_panning.panning_last_frame, engine.frame_start);
+          do_cells_editor(&cells_editor, &universe, &cell_initialisation_options, &loaded_rule.config.named_states, mouse_universe_pos, view_panning.currently_panning);
         }
       }
 
@@ -412,29 +409,79 @@ main(int argc, const char *argv[])
       opengl_print_errors();
       glBindVertexArray(0);
 
+      //
+      // General universe triangles drawing
+      //
+
+      if (cells_editor.cell_block_highlighted)
+      {
+        general_universe_vbo.elements_used = 0;
+        general_universe_ibo.elements_used = 0;
+
+        vec4 potential_cell_block_colour = {0.8, 0.8, 0.8, 1};
+
+        GeneralUnvierseVertex cell_block_vertices[] = {
+          {{cells_editor.highlighted_cell_block, {0, 0}}, potential_cell_block_colour},
+          {{cells_editor.highlighted_cell_block, {1, 0}}, potential_cell_block_colour},
+          {{cells_editor.highlighted_cell_block, {1, 1}}, potential_cell_block_colour},
+          {{cells_editor.highlighted_cell_block, {0, 1}}, potential_cell_block_colour}
+        };
+
+        GLushort vbo_index_a = opengl_buffer_new_element(&general_universe_vbo, cell_block_vertices + 0);
+        GLushort vbo_index_b = opengl_buffer_new_element(&general_universe_vbo, cell_block_vertices + 1);
+        GLushort vbo_index_c = opengl_buffer_new_element(&general_universe_vbo, cell_block_vertices + 2);
+        GLushort vbo_index_d = opengl_buffer_new_element(&general_universe_vbo, cell_block_vertices + 3);
+
+        GLuint first_index = opengl_buffer_new_element(&general_universe_ibo, &vbo_index_a);
+        opengl_buffer_new_element(&general_universe_ibo, &vbo_index_b);
+        opengl_buffer_new_element(&general_universe_ibo, &vbo_index_c);
+        opengl_buffer_new_element(&general_universe_ibo, &vbo_index_a);
+        opengl_buffer_new_element(&general_universe_ibo, &vbo_index_c);
+        GLuint last_index = opengl_buffer_new_element(&general_universe_ibo, &vbo_index_d);
+
+        glBindVertexArray(general_universe_vao);
+        glUseProgram(general_universe_shader_program);
+        glUniformMatrix4fv(general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning.projection_matrix[0][0]);
+
+        // Get attribute locations
+        init_general_universe_attributes(&general_universe_vbo, general_universe_shader_program);
+
+        void *general_universe_ibo_offset = (void *)(intptr_t)(first_index * sizeof(GLushort));
+        glDrawElements(GL_TRIANGLES, (last_index - first_index) + 1, GL_UNSIGNED_SHORT, general_universe_ibo_offset);
+
+        opengl_print_errors();
+        glBindVertexArray(0);
+      }
+
 #ifdef DEBUG_CELL_BLOCK_DRAWING
       //
-      // Test cell blocks drawing
+      // Debug cell blocks drawing
       //
 
-      debug_cell_block_outline_drawing_upload(&universe, &debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+      general_universe_vbo.elements_used = 0;
+      general_universe_ibo.elements_used = 0;
+
+      BufferDrawingLocation ibo_outlines = debug_cell_block_outline_drawing_upload(&universe, &general_universe_vbo, &general_universe_ibo);
 
   #ifdef DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
-      UniversePosition origin = {};
-      GLushort origin_index = opengl_buffer_new_element(&debug_cell_block_outline_drawing_vbo, &origin);
-      GLushort mouse_index = opengl_buffer_new_element(&debug_cell_block_outline_drawing_vbo, &mouse_universe_pos);
-      opengl_buffer_new_element(&debug_cell_block_outline_drawing_ibo, &origin_index);
-      opengl_buffer_new_element(&debug_cell_block_outline_drawing_ibo, &mouse_index);
+      GeneralUnvierseVertex origin_vertex = {{}, {1, 0, 0, 1}};
+      GeneralUnvierseVertex mouse_vertex = {mouse_universe_pos, {1, 0, 0, 1}};
+      GLushort origin_index = opengl_buffer_new_element(&general_universe_vbo, &origin_vertex);
+      GLushort mouse_index = opengl_buffer_new_element(&general_universe_vbo, &mouse_vertex);
+      opengl_buffer_new_element(&general_universe_ibo, &origin_index);
+      opengl_buffer_new_element(&general_universe_ibo, &mouse_index);
+
+      ibo_outlines.n_elements += 2;
   #endif
 
-      glBindVertexArray(debug_cell_block_outline_drawing_vao);
-      glUseProgram(debug_cell_block_outline_drawing_shader_program);
-      glUniformMatrix4fv(test_cell_blocks_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning.projection_matrix[0][0]);
+      glBindVertexArray(general_universe_vao);
+      glUseProgram(general_universe_shader_program);
+      glUniformMatrix4fv(general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning.projection_matrix[0][0]);
 
       // Get attribute locations
-      init_debug_cell_block_outline_drawing_attributes(&debug_cell_block_outline_drawing_vbo, debug_cell_block_outline_drawing_shader_program);
+      init_general_universe_attributes(&general_universe_vbo, general_universe_shader_program);
 
-      debug_cell_block_outline_draw(&debug_cell_block_outline_drawing_vbo, &debug_cell_block_outline_drawing_ibo);
+      debug_cell_block_outline_draw(&general_universe_vbo, &general_universe_ibo, ibo_outlines);
 
       opengl_print_errors();
       glBindVertexArray(0);

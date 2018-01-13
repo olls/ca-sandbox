@@ -5,16 +5,18 @@
 #include "allocate.h"
 #include "print.h"
 #include "extendable-array.h"
+#include "colour.h"
 
 #include "rule.h"
 #include "named-states.h"
 
 #include "imgui.h"
+#include "imgui_user.h"
 #include <stdio.h>
 
 
 void
-do_named_states_ui(RuleConfiguration *rule_config)
+do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_state)
 {
   NamedStates *named_states = &rule_config->named_states;
 
@@ -40,7 +42,15 @@ do_named_states_ui(RuleConfiguration *rule_config)
         state_buffer[old_state_length] = '\0';
 
         ImGui::PushID(state_n);
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, get_state_colour(named_state->value));
+        vec4 state_colour = get_state_colour(named_state->value);
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
+        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
+        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
+        ImGui::RadioButton("##make state active", currently_active_state, named_state->value);
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+
+        ImGui::PushItemWidth(-70);
         if (ImGui::InputText("##state editing", state_buffer, array_count(state_buffer)))
         {
           u32 new_state_length = strlen(state_buffer)+1;
@@ -51,7 +61,6 @@ do_named_states_ui(RuleConfiguration *rule_config)
           state_name->start = new_state_buffer;
           state_name->end = state_name->start + new_state_length-1;
         }
-        ImGui::PopStyleColor();
 
         b32 was_null_state = is_null_state(rule_config, named_state->value);
         b32 is_now_null_state = was_null_state;

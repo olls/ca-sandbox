@@ -11,19 +11,22 @@
 
 struct CellsEditor
 {
-  /// Indicates whether a cell is currently being hovered over with the mouse
-  b32 cell_highlighted;
+  b32 cell_highlighted;  //< Indicates whether a cell is currently being hovered over with the mouse
+  UniversePosition highlighted_cell;  //< The position of the cell currently highlighted
 
-  /// The position of the cell currently highlighted
-  UniversePosition highlighted_cell;
+  b32 cell_block_highlighted;  //< Indicates whether a potential cell block is currently being hovered over with the mouse
+  s32vec2 highlighted_cell_block;  //< The position of the potential cell block currently highlighted
 
-  /// Needed for de-bouncing clicks
-  u64 last_click_time;
+  CellState active_state;
+
+  CellState drag_state;
+  b32 currently_dragging_state;
+  b32 currently_dragging_cell_block_creation;
 };
 
 
 void
-do_cells_editor(CellsEditor *cells_editor, Universe *universe, NamedStates *named_states, UniversePosition mouse_universe_position, b32 panning_last_frame, u64 frame_time);
+do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, UniversePosition mouse_universe_position, b32 currently_panning);
 
 
 #endif

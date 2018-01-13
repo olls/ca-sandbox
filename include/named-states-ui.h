@@ -5,7 +5,7 @@
 
 
 void
-do_named_states_ui(RuleConfiguration *rule_config);
+do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_selected_state);
 
 
 #endif
