@@ -4,6 +4,7 @@
 #include "text.h"
 #include "assert.h"
 #include "files.h"
+#include "maths.h"
 
 #include "universe.h"
 #include "simulate.h"
@@ -18,49 +19,33 @@
 ///
 
 // TODO: Update the file format
-
-void
-write_text(WriteString *writer, const char *text, ...)
-{
-  char buf[1024];
-  va_list aptr;
-  va_start(aptr, text);
-  vsnprintf(buf, 1024, text, aptr);
-  va_end(aptr);
-
-  u32 length = strlen(buf);
-  assert(writer->current_position + length < writer->end);
-
-  memcpy(writer->current_position, buf, length);
-
-  writer->current_position += length;
-}
+// TODO: Fix long state names not working
 
 
 void
-serialise_simulate_options(WriteString *file_writer, SimulateOptions *simulate_options)
+serialise_simulate_options(FILE *file_stream, SimulateOptions *simulate_options)
 {
-  write_text(file_writer, "border_type: ");
+  const char *border_type;
   switch (simulate_options->border.type)
   {
     case (BorderType::FIXED):
-      write_text(file_writer, "FIXED");
+      border_type = "FIXED";
       break;
     case (BorderType::INFINITE):
-      write_text(file_writer, "INFINITE");
+      border_type = "INFINITE";
       break;
     case (BorderType::TORUS):
-      write_text(file_writer, "TORUS");
+      border_type = "TORUS";
       break;
   }
-  write_text(file_writer, "\n");
+  fprintf(file_stream, "border_type: %s\n", border_type);
 
-  write_text(file_writer, "border_min_block: %d %d\n", simulate_options->border.min_corner_block.x, simulate_options->border.min_corner_block.y);
-  write_text(file_writer, "border_min_cell: %d %d\n", simulate_options->border.min_corner_cell.x, simulate_options->border.min_corner_cell.y);
-  write_text(file_writer, "border_max_block: %d %d\n", simulate_options->border.max_corner_block.x, simulate_options->border.max_corner_block.y);
-  write_text(file_writer, "border_max_cell: %d %d\n", simulate_options->border.max_corner_cell.x, simulate_options->border.max_corner_cell.y);
+  fprintf(file_stream, "border_min_block: %d %d\n", simulate_options->border.min_corner_block.x, simulate_options->border.min_corner_block.y);
+  fprintf(file_stream, "border_min_cell: %d %d\n", simulate_options->border.min_corner_cell.x, simulate_options->border.min_corner_cell.y);
+  fprintf(file_stream, "border_max_block: %d %d\n", simulate_options->border.max_corner_block.x, simulate_options->border.max_corner_block.y);
+  fprintf(file_stream, "border_max_cell: %d %d\n", simulate_options->border.max_corner_cell.x, simulate_options->border.max_corner_cell.y);
 
-  write_text(file_writer, "\n");
+  fprintf(file_stream, "\n");
 }
 
 
@@ -69,67 +54,28 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
 {
   b32 success = true;
 
-  u32 n_cell_blocks = 0;
-
-  for (u32 hash_slot = 0;
-       hash_slot < universe->hashmap_size;
-       ++hash_slot)
+  FILE *file_stream = fopen(filename, "w");
+  if (file_stream == NULL)
   {
-    CellBlock *cell_block = universe->hashmap[hash_slot];
-
-    if (cell_block != 0 &&
-        cell_block->slot_in_use)
-    {
-      do
-      {
-        ++n_cell_blocks;
-
-        // Follow any hashmap collision chains
-        cell_block = cell_block->next_block;
-      }
-      while (cell_block != 0);
-    }
-  }
-
-  print("n_cell_blocks: %d\n", n_cell_blocks);
-
-  // TODO: This only handles fixed 1 char length state names...
-
-  u32 max_bytes_per_cell = 3;
-
-  // Pad all lines to same length to keep positioning simple.
-  u32 file_width = max_bytes_per_cell * universe->cell_block_dim;
-
-  u32 n_cell_block_extra_lines = 2; // label + blank line
-  u32 n_cell_block_lines = universe->cell_block_dim + n_cell_block_extra_lines;
-
-  u32 n_header_lines = 3; // n_cell_blocks, cell_block_dim, blank line
-
-  u32 estimated_file_lines = n_cell_blocks * (n_cell_block_lines + n_header_lines);
-  u32 estimated_file_size = estimated_file_lines * file_width;
-
-  print("estimated_file_size: %d\n", estimated_file_size);
-
-  File file;
-  if (!open_file(filename, &file, true, estimated_file_size))
-  {
-    success = false;
+    print("Error: Failed to open file %s", filename);
+    success &= false;
   }
   else
   {
-    WriteString file_writer = {
-      .start = file.write_ptr,
-      .current_position = file.write_ptr,
-      .end = file.write_ptr + file.size
-    };
+    fprintf(file_stream, "cell_block_dim: %d\n\n", universe->cell_block_dim);
+    serialise_simulate_options(file_stream, simulate_options);
 
-    write_text(&file_writer, "n_cell_blocks: %d\n", n_cell_blocks);
-    write_text(&file_writer, "cell_block_dim: %d\n\n", universe->cell_block_dim);
-
-    serialise_simulate_options(&file_writer, simulate_options);
+    // Find longest state name, so we know how far to pad states.
+    u32 max_state_length = 0;
+    for (u32 state_n = 0;
+         state_n < named_states->states.n_elements;
+         ++state_n)
+    {
+      NamedState *named_state = named_states->states.get(state_n);
+      max_state_length = max(max_state_length, string_length(named_state->name));
+    }
 
     u32 cell_block_n = 0;
-
     for (u32 hash_slot = 0;
          hash_slot < universe->hashmap_size;
          ++hash_slot)
@@ -141,7 +87,7 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
       {
         do
         {
-          write_text(&file_writer, "CellBlock: %d, %d\n", cell_block->block_position.x, cell_block->block_position.y);
+          fprintf(file_stream, "CellBlock: %d, %d\n", cell_block->block_position.x, cell_block->block_position.y);
 
           for (u32 cell_y = 0;
                cell_y < universe->cell_block_dim;
@@ -154,12 +100,12 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
               Cell *cell = get_cell_from_block(universe, cell_block, (s32vec2){(s32)cell_x, (s32)cell_y});
 
               String cell_state = get_state_name(named_states, cell->state);
-              write_text(&file_writer, "%.*s ", string_length(cell_state), cell_state.start);
+              fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state), cell_state.start);
             }
 
-            write_text(&file_writer, "\n");
+            fprintf(file_stream, "\n");
           }
-          write_text(&file_writer, "\n");
+          fprintf(file_stream, "\n");
 
           ++cell_block_n;
 
@@ -170,7 +116,9 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
       }
     }
 
-    close_file(&file, file_writer.current_position - file_writer.start);
+    fprintf(file_stream, "n_cell_blocks: %d\n", cell_block_n);
+
+    fclose(file_stream);
   }
 
   return success;
