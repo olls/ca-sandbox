@@ -223,8 +223,8 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
 
   if (ImGui::Begin("Rule Editor", NULL, window_flags))
   {
-    u32 string_length = strlen(rule_ui->file_picker.selected_file);
-    ImGui::Text("Rule file: %.*s", string_length, rule_ui->file_picker.selected_file);
+    u32 filename_length = strlen(rule_ui->file_picker.selected_file);
+    ImGui::Text("Rule file: %.*s", filename_length, rule_ui->file_picker.selected_file);
 
     if (ImGui::Button("Change rule file"))
     {
@@ -265,16 +265,19 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
     // Display all rule patterns
     ImGui::TextWrapped("Modify each of the patterns below by clicking on the state buttons to change the state which it matches, or right clicking on them to change them to a wildcard match.");
 
-    for (u32 rule_n = 0;
-         rule_n < rule->config.rule_patterns.n_elements;
-         ++rule_n)
+    for (u32 rule_pattern_n = 0;
+         rule_pattern_n < rule->config.rule_patterns.n_elements;
+         ++rule_pattern_n)
     {
-      RulePattern *rule_pattern = rule->config.rule_patterns.get(rule_n);
+      RulePattern *rule_pattern = rule->config.rule_patterns.get(rule_pattern_n);
 
-      ImGui::PushID(rule_n);
-      char label[32]; sprintf(label, "Pattern %d", rule_n);
-      if (ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen))
+      char label[64 + MAX_COMMENT_LENGTH];
+      sprintf(label, "Pattern %d: %s###pattern_%d", rule_pattern_n, rule_pattern->comment, rule_pattern_n);
+
+      ImGui::PushID(rule_pattern_n);
+      if (ImGui::CollapsingHeader(label))
       {
+        ImGui::InputText("Comment", rule_pattern->comment, MAX_COMMENT_LENGTH);
         display_rule_pattern(&rule->config, rule_pattern);
       }
       ImGui::PopID();

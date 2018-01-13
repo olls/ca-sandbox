@@ -1,6 +1,7 @@
 #include "load-rule.h"
 
 #include "types.h"
+#include "maths.h"
 #include "text.h"
 #include "print.h"
 #include "files.h"
@@ -131,7 +132,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
     consume_while(&line, is_label_char);
     label.end = line.current_position;
 
-    if (string_equals(label, "Result:"))
+    if (string_equals(label, "Pattern:"))
     {
       found_pattern = true;
     }
@@ -147,194 +148,228 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
     }
   }
 
-  file_string->current_position = line.end;
 
   if (!found_pattern)
   {
+    file_string->current_position = line.end;
     success &= false;
   }
   else
   {
-    // Get result value
     consume_until_char(&line, ':');
+    // Move past ":"
+    ++line.current_position;
+    consume_while(&line, is_whitespace);
+
+    // Read comment from after "Pattern: "
     if (line.current_position == line.end)
     {
-      success &= false;
-      return success;
+      rule_pattern_result->comment[0] = '\0';
     }
-    ++line.current_position;
-
-    String state_name_string = {.start = line.current_position,
-                                .current_position = line.current_position,
-                                .end = line.end};
-    success &= read_state_name(named_states, &state_name_string, &rule_pattern_result->result);
-    if (!success)
+    else
     {
-      print("Error in rule pattern's result value.\n");
-      return success;
+      u32 comment_length = line.end - line.current_position;
+      comment_length = min(comment_length, MAX_COMMENT_LENGTH);
+      copy_string(rule_pattern_result->comment, line.current_position, comment_length);
+      rule_pattern_result->comment[comment_length] = '\0';
     }
 
-    // Bounds for the whole of this pattern rule
-    String pattern_block = {
-      .start = line.end,
-      .current_position = line.end,
-      .end = file_string->end
-    };
+    // Get "Result:" label
+    line = get_line(file_string);
+    label.start = line.start;
 
-    // Find next blank line, i.e: '\n\n', to set the end of the pattern_block to.
-    b32 found_block_end = false;
-    while (!found_block_end)
+    consume_while(&line, is_label_char);
+    label.end = line.current_position;
+
+    file_string->current_position = line.end;
+
+    if (!string_equals(label, "Result:"))
     {
-      consume_until(&pattern_block, is_newline);
-
-      if (pattern_block.current_position[1] == '\n' || pattern_block.current_position == pattern_block.end)
-      {
-        pattern_block.end = pattern_block.current_position;
-        found_block_end = true;
-      }
-      else
-      {
-        ++pattern_block.current_position;
-      }
+      print("Error: \"Pattern:\" defined without \"Result:\"\n");
     }
-
-    pattern_block.current_position = pattern_block.start;
-    file_string->current_position = pattern_block.end;
-
-    // Get pattern of cells
-
-    for (u32 cell_n = 0;
-         cell_n < n_inputs;
-         ++cell_n)
+    else
     {
-      consume_until(&pattern_block, is_pattern_cell_state_start_character);
-
-      if (pattern_block.current_position == pattern_block.end)
+      // Get result value
+      consume_until_char(&line, ':');
+      if (line.current_position == line.end)
       {
         success &= false;
-        break;
+        return success;
       }
-      else
+      ++line.current_position;
+
+      String state_name_string = {.start = line.current_position,
+                                  .current_position = line.current_position,
+                                  .end = line.end};
+      success &= read_state_name(named_states, &state_name_string, &rule_pattern_result->result);
+      if (!success)
       {
-        PatternCellState *this_cell_state_pattern = rule_pattern_result->cell_states + cell_n;
+        print("Error in rule pattern's result value.\n");
+        return success;
+      }
 
-        if (pattern_block.current_position[0] == '[')
+      // Bounds for the whole of this pattern rule
+      String pattern_block = {
+        .start = line.end,
+        .current_position = line.end,
+        .end = file_string->end
+      };
+
+      // Find next blank line, i.e: '\n\n', to set the end of the pattern_block to.
+      b32 found_block_end = false;
+      while (!found_block_end)
+      {
+        consume_until(&pattern_block, is_newline);
+
+        if (pattern_block.current_position[1] == '\n' || pattern_block.current_position == pattern_block.end)
         {
-          this_cell_state_pattern->type = PatternCellStateType::STATE;
-
-          String group_string;
-          group_string.start = pattern_block.current_position + 1;
-          group_string.current_position = group_string.start;
-
-          // Find end of group
-          consume_until_char(&pattern_block, ']');
-          group_string.end = pattern_block.current_position;
-
-          if (group_string.end == pattern_block.end)
-          {
-            print("Error: Couldn't find end of cell state group in pattern.\n");
-            success &= false;
-            break;
-          }
-          else
-          {
-            this_cell_state_pattern->group_states_used = 0;
-            b32 got_state = true;
-            while (got_state && this_cell_state_pattern->group_states_used < MAX_PATTERN_STATES_GROUP)
-            {
-              CellState *state_slot = this_cell_state_pattern->states + this_cell_state_pattern->group_states_used;
-              got_state &= read_state_name(named_states, &group_string, state_slot);
-
-              if (got_state)
-              {
-                this_cell_state_pattern->group_states_used += 1;
-              }
-            }
-          }
+          pattern_block.end = pattern_block.current_position;
+          found_block_end = true;
         }
-        else if (pattern_block.current_position[0] == '(')
+        else
         {
-          // TODO: Allow state group in OR_STATE
-          // TODO: Need better name than OR_STATE
+          ++pattern_block.current_position;
+        }
+      }
 
-          this_cell_state_pattern->type = PatternCellStateType::OR_STATE;
+      pattern_block.current_position = pattern_block.start;
+      file_string->current_position = pattern_block.end;
 
-          String or_state_string;
-          or_state_string.start = pattern_block.current_position + 1;
-          or_state_string.current_position = or_state_string.start;
+      // Get pattern of cells
 
-          // Find end of group
-          consume_until_char(&pattern_block, ')');
-          or_state_string.end = pattern_block.current_position;
+      for (u32 cell_n = 0;
+           cell_n < n_inputs;
+           ++cell_n)
+      {
+        consume_until(&pattern_block, is_pattern_cell_state_start_character);
 
-          if (or_state_string.end == pattern_block.end)
+        if (pattern_block.current_position == pattern_block.end)
+        {
+          success &= false;
+          break;
+        }
+        else
+        {
+          PatternCellState *this_cell_state_pattern = rule_pattern_result->cell_states + cell_n;
+
+          if (pattern_block.current_position[0] == '[')
           {
-            print("Error: Couldn't find end ')' of 'or' cell state in pattern.\n");
-            success &= false;
-            break;
-          }
-          else
-          {
-            b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states[0]);
-            if (!got_state)
+            this_cell_state_pattern->type = PatternCellStateType::STATE;
+
+            String group_string;
+            group_string.start = pattern_block.current_position + 1;
+            group_string.current_position = group_string.start;
+
+            // Find end of group
+            consume_until_char(&pattern_block, ']');
+            group_string.end = pattern_block.current_position;
+
+            if (group_string.end == pattern_block.end)
             {
-              print("Error: Couldn't read cell state in 'or' state in pattern.\n");
+              print("Error: Couldn't find end of cell state group in pattern.\n");
               success &= false;
               break;
             }
             else
             {
-              this_cell_state_pattern->group_states_used = 1;
+              this_cell_state_pattern->group_states_used = 0;
+              b32 got_state = true;
+              while (got_state && this_cell_state_pattern->group_states_used < MAX_PATTERN_STATES_GROUP)
+              {
+                CellState *state_slot = this_cell_state_pattern->states + this_cell_state_pattern->group_states_used;
+                got_state &= read_state_name(named_states, &group_string, state_slot);
+
+                if (got_state)
+                {
+                  this_cell_state_pattern->group_states_used += 1;
+                }
+              }
+            }
+          }
+          else if (pattern_block.current_position[0] == '(')
+          {
+            // TODO: Allow state group in OR_STATE
+            // TODO: Need better name than OR_STATE
+
+            this_cell_state_pattern->type = PatternCellStateType::OR_STATE;
+
+            String or_state_string;
+            or_state_string.start = pattern_block.current_position + 1;
+            or_state_string.current_position = or_state_string.start;
+
+            // Find end of group
+            consume_until_char(&pattern_block, ')');
+            or_state_string.end = pattern_block.current_position;
+
+            if (or_state_string.end == pattern_block.end)
+            {
+              print("Error: Couldn't find end ')' of 'or' cell state in pattern.\n");
+              success &= false;
+              break;
+            }
+            else
+            {
+              b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states[0]);
+              if (!got_state)
+              {
+                print("Error: Couldn't read cell state in 'or' state in pattern.\n");
+                success &= false;
+                break;
+              }
+              else
+              {
+                this_cell_state_pattern->group_states_used = 1;
+              }
+            }
+          }
+          else if (pattern_block.current_position[0] == '*')
+          {
+            this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
+            ++pattern_block.current_position;
+            this_cell_state_pattern->group_states_used = 0;
+          }
+          else if (pattern_block.current_position[0] == '!')
+          {
+            // TODO: Allow state group after not
+
+            this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
+
+            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
+            this_cell_state_pattern->group_states_used = 1;
+
+            if (!success)
+            {
+              print("Error in rule pattern's pattern.\n");
+              break;
+            }
+          }
+          else
+          {
+            this_cell_state_pattern->type = PatternCellStateType::STATE;
+            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
+            this_cell_state_pattern->group_states_used = 1;
+
+            if (!success)
+            {
+              print("Error in rule pattern's pattern.\n");
+              break;
             }
           }
         }
-        else if (pattern_block.current_position[0] == '*')
-        {
-          this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
-          ++pattern_block.current_position;
-          this_cell_state_pattern->group_states_used = 0;
-        }
-        else if (pattern_block.current_position[0] == '!')
-        {
-          // TODO: Allow state group after not
-
-          this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
-
-          success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
-          this_cell_state_pattern->group_states_used = 1;
-
-          if (!success)
-          {
-            print("Error in rule pattern's pattern.\n");
-            break;
-          }
-        }
-        else
-        {
-          this_cell_state_pattern->type = PatternCellStateType::STATE;
-          success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
-          this_cell_state_pattern->group_states_used = 1;
-
-          if (!success)
-          {
-            print("Error in rule pattern's pattern.\n");
-            break;
-          }
-        }
       }
-    }
 
-    // Get any optional labels for this pattern
+      // Get any optional labels for this pattern
 
-    String count_matching_string = {};
-    b32 count_matching_exists = find_label_value(pattern_block, "count_matching", &count_matching_string);
-    if (count_matching_exists)
-    {
-      success &= read_count_matching_value(named_states, &count_matching_string, rule_pattern_result);
-    }
-    else
-    {
-      rule_pattern_result->count_matching.enabled = false;
+      String count_matching_string = {};
+      b32 count_matching_exists = find_label_value(pattern_block, "count_matching", &count_matching_string);
+      if (count_matching_exists)
+      {
+        success &= read_count_matching_value(named_states, &count_matching_string, rule_pattern_result);
+      }
+      else
+      {
+        rule_pattern_result->count_matching.enabled = false;
+      }
     }
   }
 

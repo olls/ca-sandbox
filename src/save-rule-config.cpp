@@ -79,6 +79,8 @@ serialise_null_states(FILE *file_stream, RuleConfiguration *rule_config)
 void
 serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfiguration *rule_config)
 {
+  fprintf(file_stream, "Pattern: %s\n", rule_pattern->comment);
+
   String result_string = get_state_name(&rule_config->named_states, rule_pattern->result);
   fprintf(file_stream, "Result: %.*s\n", string_length(result_string), result_string.start);
 

@@ -40,7 +40,6 @@ enum struct PatternCellStateType : s32
 /// Maximum number of state values which can be grouped / or'd together in a pattern (using the [S1, S2] syntax)
 const u32 MAX_PATTERN_STATES_GROUP = 16;
 
-
 struct PatternCellState
 {
   PatternCellStateType type;
@@ -49,8 +48,11 @@ struct PatternCellState
 };
 
 
+const u32 MAX_COMMENT_LENGTH = 512;
+
 struct RulePattern
 {
+  char comment[MAX_COMMENT_LENGTH];
   CellState result;
 
   struct
