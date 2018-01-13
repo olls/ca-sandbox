@@ -1,0 +1,479 @@
+neighbourhood_region_shape: VON_NEUMANN
+neighbourhood_region_size: 1
+
+null_states: Ground
+
+n_states: 29
+State: Ground            0
+
+State: S                 1
+State: S0                2
+State: S1                3
+State: S00               4
+State: S01               5
+State: S10               6
+State: S11               7
+State: S000              8
+
+State: East_Ordinary     9
+State: North_Ordinary   10
+State: West_Ordinary    11
+State: South_Ordinary   12
+
+State: East_Ordinary_E  13
+State: North_Ordinary_E 14
+State: West_Ordinary_E  15
+State: South_Ordinary_E 16
+
+State: East_Special     17
+State: North_Special    18
+State: West_Special     19
+State: South_Special    20
+
+State: East_Special_E   21
+State: North_Special_E  22
+State: West_Special_E   23
+State: South_Special_E  24
+
+State: C00              25
+State: C01              26
+State: C10              27
+State: C11              28
+
+
+// Annihilation of OTS
+Result: Ground
+          (South_Special_E)
+(East_Special_E) [North_Ordinary, East_Ordinary, South_Ordinary, West_Ordinary, North_Ordinary_E, East_Ordinary_E, South_Ordinary_E, West_Ordinary_E] (West_Special_E)
+          (North_Special_E)
+
+
+// Annihilation of STS
+Result: Ground
+          (South_Ordinary_E)
+(East_Ordinary_E) [North_Special, East_Special, South_Special, West_Special, North_Special_E, East_Special_E, South_Special_E, West_Special_E] (West_Ordinary_E)
+          (North_Ordinary_E)
+
+// Annihilation of Confluent Cells
+Result: Ground
+          (South_Special_E)
+(East_Special_E) [C00, C01, C10, C11] (West_Special_E)
+          (North_Special_E)
+
+
+// [Quiescent, Excited] OTS -> Excited OTS
+
+Result: East_Ordinary_E
+          (South_Ordinary_E)
+(East_Ordinary_E) [East_Ordinary, East_Ordinary_E] *
+          (North_Ordinary_E)
+
+Result: South_Ordinary_E
+          (South_Ordinary_E)
+(East_Ordinary_E) [South_Ordinary, South_Ordinary_E] (West_Ordinary_E)
+          *
+
+Result: West_Ordinary_E
+  (South_Ordinary_E)
+* [West_Ordinary, West_Ordinary_E] (West_Ordinary_E)
+  (North_Ordinary_E)
+
+Result: North_Ordinary_E
+          *
+(East_Ordinary_E) [North_Ordinary, North_Ordinary_E] (West_Ordinary_E)
+          (North_Ordinary_E)
+
+
+// C10 Inputs
+
+Result: East_Ordinary_E
+      (C10)
+(C10) [East_Ordinary, East_Ordinary_E] *
+      (C10)
+
+Result: South_Ordinary_E
+      (C10)
+(C10) [South_Ordinary, South_Ordinary_E] (C10)
+      *
+
+Result: West_Ordinary_E
+  (C10)
+* [West_Ordinary, West_Ordinary_E] (C10)
+  (C10)
+
+Result: North_Ordinary_E
+      *
+(C10) [North_Ordinary, North_Ordinary_E] (C10)
+      (C10)
+
+
+// C11 inputs
+
+Result: East_Ordinary_E
+      (C11)
+(C11) [East_Ordinary, East_Ordinary_E] *
+      (C11)
+
+Result: South_Ordinary_E
+      (C11)
+(C11) [South_Ordinary, South_Ordinary_E] (C11)
+      *
+
+Result: West_Ordinary_E
+  (C11)
+* [West_Ordinary, West_Ordinary_E] (C11)
+  (C11)
+
+Result: North_Ordinary_E
+      *
+(C11) [North_Ordinary, North_Ordinary_E] (C11)
+      (C11)
+
+
+// Excited OTS -> Quiescent STS
+
+Result: East_Ordinary
+  *
+* East_Ordinary_E *
+  *
+
+Result: South_Ordinary
+  *
+* South_Ordinary_E *
+  *
+
+Result: West_Ordinary
+  *
+* West_Ordinary_E *
+  *
+
+Result: North_Ordinary
+  *
+* North_Ordinary_E *
+  *
+
+
+// [Quiescent, Excited] STS -> Excited STS
+
+Result: East_Special_E
+          (South_Special_E)
+(East_Special_E) [East_Special, East_Special_E] *
+          (North_Special_E)
+
+Result: South_Special_E
+          (South_Special_E)
+(East_Special_E) [South_Special, South_Special_E] (West_Special_E)
+          *
+
+Result: West_Special_E
+  (South_Special_E)
+* [West_Special, West_Special_E] (West_Special_E)
+  (North_Special_E)
+
+Result: North_Special_E
+          *
+(East_Special_E) [North_Special, North_Special_E] (West_Special_E)
+          (North_Special_E)
+
+
+// C10 Inputs
+
+Result: East_Special_E
+      (C10)
+(C10) [East_Special, East_Special_E] *
+      (C10)
+
+Result: South_Special_E
+      (C10)
+(C10) [South_Special, South_Special_E] (C10)
+      *
+
+Result: West_Special_E
+  (C10)
+* [West_Special, West_Special_E] (C10)
+  (C10)
+
+Result: North_Special_E
+      *
+(C10) [North_Special, North_Special_E] (C10)
+      (C10)
+
+
+// C11 inputs
+
+Result: East_Special_E
+      (C11)
+(C11) [East_Special, East_Special_E] *
+      (C11)
+
+Result: South_Special_E
+      (C11)
+(C11) [South_Special, South_Special_E] (C11)
+      *
+
+Result: West_Special_E
+  (C11)
+* [West_Special, West_Special_E] (C11)
+  (C11)
+
+Result: North_Special_E
+      *
+(C11) [North_Special, North_Special_E] (C11)
+      (C11)
+
+
+// Excited STS -> Quiescent STS
+
+Result: East_Special
+  *
+* East_Special_E *
+  *
+
+Result: South_Special
+  *
+* South_Special_E *
+  *
+
+Result: West_Special
+  *
+* West_Special_E *
+  *
+
+Result: North_Special
+  *
+* North_Special_E *
+  *
+
+
+//
+// Confluent State Rules
+//
+
+Result: C01
+          South_Ordinary_E
+!East_Ordinary    C00     !West_Ordinary
+          !North_Ordinary
+
+Result: C01
+          !South_Ordinary
+East_Ordinary_E    C00    !West_Ordinary
+          !North_Ordinary
+
+Result: C01
+          !South_Ordinary
+!East_Ordinary    C00     !West_Ordinary
+          North_Ordinary_E
+
+Result: C01
+          !South_Ordinary
+!East_Ordinary    C00    (West_Ordinary_E)
+          !North_Ordinary
+
+
+Result: C11
+          South_Ordinary_E
+!East_Ordinary    C01     !West_Ordinary
+          !North_Ordinary
+
+Result: C11
+          !South_Ordinary
+East_Ordinary_E    010    !West_Ordinary
+          !North_Ordinary
+
+Result: C11
+          !South_Ordinary
+!East_Ordinary    C01     !West_Ordinary
+          North_Ordinary_E
+
+Result: C11
+          !South_Ordinary
+!East_Ordinary    C01    (West_Ordinary_E)
+          !North_Ordinary
+
+
+Result: C01
+          South_Ordinary_E
+!East_Ordinary    C10     !West_Ordinary
+          !North_Ordinary
+
+Result: C01
+          !South_Ordinary
+East_Ordinary_E    100    !West_Ordinary
+          !North_Ordinary
+
+Result: C01
+          !South_Ordinary
+!East_Ordinary    C10     !West_Ordinary
+          North_Ordinary_E
+
+Result: C01
+          !South_Ordinary
+!East_Ordinary    C10    (West_Ordinary_E)
+          !North_Ordinary
+
+
+Result: C10
+   *
+*  C01 *
+   *
+
+Result: C00
+   *
+*  C10 *
+   *
+
+Result: C10
+   *
+*  C11 *
+   *
+
+//
+// Construction
+//
+
+// a cell in the ground state Ground, given an input, will transition to the S (newly sensitised) state in the next cycle
+Result: S
+          (South_Ordinary_E)
+(East_Ordinary_E) Ground         (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: S
+          (South_Special_E)
+(East_Special_E) Ground         (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S11 state, given an input, will transition into the quiescent confluent state C00
+Result: C00
+          (South_Ordinary_E)
+(East_Ordinary_E) S11       (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: C00
+          (South_Special_E)
+(East_Special_E) S11       (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S11 state, given no input, will transition into the south-directed special transmission state
+Result: South_Special
+  *
+* S11 *
+  *
+
+// a cell in the S1 state, given an input, will transition into the S11 state
+Result: S11
+          (South_Ordinary_E)
+(East_Ordinary_E) S1       (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: S11
+          (South_Special_E)
+(East_Special_E) S1       (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S1 state, given no input, will transition into the S10 state
+Result: S10
+  *
+* S1 *
+  *
+
+// a cell in the S10 state, given an input, will transition into the west-directed special transmission state
+Result: West_Special
+          (South_Ordinary_E)
+(East_Ordinary_E) S10       (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: West_Special
+          (South_Special_E)
+(East_Special_E) S10       (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S10 state, given no input, will transition into the north-directed special transmission state
+Result: North_Special
+  *
+* S10 *
+  *
+
+// a cell in the S state, given an input, will transition into the S1 state
+Result: S1
+          (South_Ordinary_E)
+(East_Ordinary_E) S         (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: S1
+          (South_Special_E)
+(East_Special_E) S         (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S state, given no input, will transition into the S0 state
+Result: S0
+  *
+* S *
+  *
+
+// a cell in the S01 state, given an input, will transition into the east-directed special transmission state
+Result: East_Special
+          (South_Ordinary_E)
+(East_Ordinary_E) S01       (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: East_Special
+          (South_Special_E)
+(East_Special_E) S01       (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S01 state, given no input, will transition into the south-directed ordinary transmission state
+Result: South_Ordinary
+  *
+* S01 *
+  *
+
+// a cell in the S0 state, given an input, will transition into the S01 state
+Result: S01
+          (South_Ordinary_E)
+(East_Ordinary_E) S0        (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: S01
+          (South_Special_E)
+(East_Special_E) S0        (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S0 state, given no input, will transition into the S00 state
+Result: S00
+  *
+* S0 *
+  *
+
+// a cell in the S00 state, given an input, will transition into the west-directed ordinary transmission state
+Result: West_Ordinary
+          (South_Ordinary_E)
+(East_Ordinary_E) S00       (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: West_Ordinary
+          (South_Special_E)
+(East_Special_E) S00       (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S00 state, given no input, will transition into the S000 state
+Result: S000
+  *
+* S00 *
+  *
+
+// a cell in the S000 state, given an input, will transition into the north-directed ordinary transmission state
+Result: North_Ordinary
+          (South_Ordinary_E)
+(East_Ordinary_E) S000      (West_Ordinary_E)
+          (North_Ordinary_E)
+
+Result: North_Ordinary
+          (South_Special_E)
+(East_Special_E) S000      (West_Special_E)
+          (North_Special_E)
+
+// a cell in the S000 state, given no input, will transition into the east-directed ordinary transmission state
+Result: East_Ordinary
+  *
+* S000 *
+  *

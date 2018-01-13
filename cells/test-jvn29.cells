@@ -1,0 +1,24 @@
+n_cell_blocks: 2
+cell_block_dim: 8
+
+border_type: INFINITE
+
+CellBlock: 0, 0
+Ground        Ground            Ground           Ground           Ground            Ground           Ground        Ground
+Ground        Ground            Ground           Ground           Ground            Ground           Ground        Ground
+Ground        East_Ordinary     East_Ordinary_E  East_Ordinary_E  South_Ordinary    Ground           Ground        Ground
+Ground        North_Ordinary_E  Ground           Ground           South_Ordinary_E  Ground           Ground        Ground
+Ground        North_Ordinary    West_Ordinary_E  West_Ordinary_E  C00               East_Special     East_Special  East_Special
+Ground        Ground            Ground           Ground           Ground            Ground           Ground        Ground
+Ground        Ground            Ground           Ground           Ground            Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary    West_Ordinary    West_Ordinary     West_Ordinary    Ground        Ground
+
+CellBlock: 0, 1
+Ground        West_Ordinary_E   West_Ordinary    West_Ordinary    West_Ordinary     West_Ordinary_E  Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary    West_Ordinary    West_Ordinary_E   Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary    West_Ordinary_E  West_Ordinary     Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary    West_Ordinary_E  West_Ordinary_E   Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary_E  West_Ordinary    West_Ordinary     Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary_E  West_Ordinary    West_Ordinary_E   Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary_E  West_Ordinary_E  West_Ordinary     Ground           Ground        Ground
+Ground        West_Ordinary_E   West_Ordinary_E  West_Ordinary_E  West_Ordinary_E   Ground           Ground        Ground
