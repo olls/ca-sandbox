@@ -1,4 +1,3 @@
-n_cell_blocks: 11
 cell_block_dim: 4
 
 border_type: INFINITE
@@ -8,68 +7,69 @@ border_max_block: 10 10
 border_max_cell: 0 0
 
 CellBlock: 0, 0
-O O O O 
-O O O O 
-O O O X 
-O O O X 
+O  O  O  O  
+O  O  O  O  
+O  O  O  X  
+O  O  O  X  
 
 CellBlock: 1, 0
-O O O O 
-O O O O 
-X O X O 
-Y X X X 
+O  O  O  O  
+O  O  O  O  
+X  O  X  O  
+Y  X  X  X  
 
 CellBlock: 0, 1
-X Y O X 
-X X O Y 
-X X O X 
-O O O Y 
+X  Y  O  X  
+X  X  O  Y  
+X  X  O  X  
+O  O  O  Y  
 
 CellBlock: 2, 0
-O Y O O 
-O X X X 
-O O Y X 
-X X X X 
+O  Y  O  O  
+O  X  X  X  
+O  O  Y  X  
+X  X  X  X  
 
 CellBlock: 1, 1
-O X O X 
-O X O X 
-O X X X 
-X O X O 
+O  X  O  X  
+O  X  O  X  
+O  X  X  X  
+X  O  X  O  
 
 CellBlock: 3, 0
-O O O O 
-O O O O 
-X O O O 
-O O O O 
+O  O  O  O  
+O  O  O  O  
+X  O  O  O  
+O  O  O  O  
 
 CellBlock: 0, 2
-O O O O 
-O O O O 
-O O O O 
-O O O O 
+O  O  O  O  
+O  O  O  O  
+O  O  O  O  
+O  O  O  O  
 
 CellBlock: 2, 1
-O X O O 
-O X O O 
-X X X X 
-O O Y X 
+O  X  O  O  
+O  X  O  O  
+X  X  X  X  
+O  O  Y  X  
 
 CellBlock: 1, 2
-O O O O 
-O O O O 
-O O O O 
-O O O O 
+O  O  O  O  
+O  O  O  O  
+O  O  O  O  
+O  O  O  O  
 
 CellBlock: 3, 1
-O O O O 
-O O O O 
-O O O O 
-X O O O 
+O  O  O  O  
+O  O  O  O  
+O  O  O  O  
+X  O  O  O  
 
 CellBlock: 2, 2
-O X X X 
-O Y O O 
-O O O O 
-O O O O 
+O  X  X  X  
+O  Y  O  O  
+O  O  O  O  
+O  O  O  O  
 
+n_cell_blocks: 11

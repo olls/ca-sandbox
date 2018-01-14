@@ -8,18 +8,21 @@ neighbourhood_region_size: 1
 
 null_states: O
 
+Pattern:
 Result: Y
 * * *
 * X *
 * * *
 
+Pattern:
 Result: O
 * * *
 * Y *
 * * *
 
+Pattern:
 Result: X
 * * *
 * O *
 * * *
-count_matching: X, > 0
+count_matching: [X], > 0

@@ -5,24 +5,28 @@ State: O
 State: X
 null_states: O
 
+Pattern:
 Result: 1
 * * *
 * O *
 * * *
-count_matching: X, = 2
+count_matching: [X], = 2
 
+Pattern:
 Result: X
 * * *
 * O *
 * * *
-count_matching: X, = 3
+count_matching: [X], = 3
 
+Pattern:
 Result: X
 * * *
 * O *
 * * *
-count_matching: X, = 4
+count_matching: [X], = 4
 
+Pattern:
 Result: O
 * * *
 * X *

@@ -1,4 +1,3 @@
-n_cell_blocks: 4
 cell_block_dim: 9
 
 border_type: INFINITE
@@ -8,46 +7,47 @@ border_max_block: 5 5
 border_max_cell: 0 0
 
 CellBlock: 0, 0
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O X X O O O O O 
-O O X X O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  X  X  O  O  O  O  O  
+O  O  X  X  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
 
 CellBlock: 1, 0
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O X X O O 
-O O O O X O O O X 
-O O O X O O O O O 
-O O O X O O O X O 
-O O O X O O O O O 
-O O O O X O O O X 
-O O O O O X X O O 
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  X  X  O  O  
+O  O  O  O  X  O  O  O  X  
+O  O  O  X  O  O  O  O  O  
+O  O  O  X  O  O  O  X  O  
+O  O  O  X  O  O  O  O  O  
+O  O  O  O  X  O  O  O  X  
+O  O  O  O  O  X  X  O  O  
 
 CellBlock: 2, 0
-O O O O O O O O X 
-O O O O O O X O X 
-O O O O X X O O O 
-O O O O X X O O O 
-X O O O X X O O O 
-X X O O O O X O X 
-X O O O O O O O X 
-O O O O O O O O O 
-O O O O O O O O O 
+O  O  O  O  O  O  O  O  X  
+O  O  O  O  O  O  X  O  X  
+O  O  O  O  X  X  O  O  O  
+O  O  O  O  X  X  O  O  O  
+X  O  O  O  X  X  O  O  O  
+X  X  O  O  O  O  X  O  X  
+X  O  O  O  O  O  O  O  X  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
 
 CellBlock: 4, 0
-O O O O O O O O O 
-O O O O O O O O O 
-X X O O O O O O O 
-X X O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
-O O O O O O O O O 
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+X  X  O  O  O  O  O  O  O  
+X  X  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
+O  O  O  O  O  O  O  O  O  
 
+n_cell_blocks: 4

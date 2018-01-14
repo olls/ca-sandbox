@@ -5,14 +5,15 @@ State: O
 State: X
 null_states: O
 
-// Survives
+Pattern:
 Result: X
 * * *
 * X *
 * * *
 
+Pattern:
 Result: X
 * * *
 * O *
 * * *
-count_matching: X, = 3
+count_matching: [X], = 3

@@ -11,65 +11,70 @@ null_states: O
 neighbourhood_region_shape: MOORE
 neighbourhood_region_size: 1
 
-// Dies under-population
+Pattern: Dies under-population
 Result: Y
 * * *
 * X *
 * * *
-count_matching: X, < 3
+count_matching: [X], < 3
 
 
-// Survives
+Pattern: Survives
 Result: X
 * * *
 * X *
 * * *
-count_matching: X, = 3
+count_matching: [X], = 3
 
-// Decays
+Pattern: Decays
 Result: Z
 * * *
 * Y *
 * * *
 
+Pattern: Decays
 Result: A
 * * *
 * Z *
 * * *
 
+Pattern: Decays
 Result: B
 * * *
 * A *
 * * *
 
+Pattern: Decays
 Result: O
 * * *
 * B *
 * * *
 
+Pattern:
 Result: X
 * * *
 * X *
 * * *
-count_matching: X, = 4
+count_matching: [X], = 4
 
+Pattern:
 Result: X
 * * *
 * X *
 * * *
-count_matching: X, = 5
+count_matching: [X], = 5
 
 
-// Dies overpopulation
+Pattern: Dies overpopulation
 Result: Y
 * * *
 * X *
 * * *
-count_matching: X, > 5
+count_matching: [X], > 5
 
-// Born
+Pattern: Born
 Result: X
 * * *
 * O *
 * * *
-count_matching: X, = 3
+count_matching: [X], = 3
