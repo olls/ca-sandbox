@@ -239,6 +239,22 @@ get_existing_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 }
 
 
+void
+delete_cell_block(Universe *universe, s32vec2 search_cell_block_position)
+{
+  CellBlock **cell_block_slot = get_cell_block_slot(universe, search_cell_block_position);
+  CellBlock *cell_block = *cell_block_slot;
+
+  if (cell_block_slot != 0 &&
+      cell_block != 0)
+  {
+    // Preserve any chain
+    *cell_block_slot = cell_block->next_block;
+    un_allocate(cell_block);
+  }
+}
+
+
 /// Get a Cell from a position within the CellBlock
 Cell *
 get_cell_from_block(Universe *universe, CellBlock *cell_block, s32vec2 cell_coord)

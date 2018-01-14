@@ -22,6 +22,11 @@ struct CellsEditor
   CellState drag_state;
   b32 currently_dragging_state;
   b32 currently_dragging_cell_block_creation;
+
+  /// The position of the cell block the mouse was hovering over, when the context menu was opened.
+  s32vec2 current_context_menu_cell_block;
+  /// The name state of the cell which the mouse was hovering over, when the context menu was opened.
+  String current_contex_menu_cell_state;
 };
 
 

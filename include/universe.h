@@ -95,6 +95,10 @@ CellBlock *
 get_existing_cell_block(Universe *universe, s32vec2 search_cell_block_position);
 
 
+void
+delete_cell_block(Universe *universe, s32vec2 search_cell_block_position);
+
+
 Cell *
 get_cell_from_block(Universe *universe, CellBlock *cell_block, s32vec2 cell_coord);
 

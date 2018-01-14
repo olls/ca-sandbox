@@ -15,6 +15,8 @@ const u32 CLICK_DEBOUNCE = 100000; // 1/10th second
 void
 do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, UniversePosition universe_mouse_position, b32 currently_panning)
 {
+  ImGui::PushID("cells editor");
+
   cells_editor->cell_highlighted = false;
   cells_editor->cell_block_highlighted = false;
 
@@ -85,6 +87,15 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
         Cell *cell = get_cell_from_block(universe, hovered_cell_block, cell_position);
         cell->state = cells_editor->drag_state;
       }
+      else if (ImGui::IsMouseClicked(1))
+      {
+        cells_editor->current_context_menu_cell_block = universe_mouse_position.cell_block_position;
+
+        Cell *cell = get_cell_from_block(universe, hovered_cell_block, cell_position);
+        cells_editor->current_contex_menu_cell_state = get_state_name(named_states, cell->state);;
+
+        ImGui::OpenPopup("cell block context menu");
+      }
     }
   }
 
@@ -93,4 +104,17 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
     cells_editor->currently_dragging_cell_block_creation = false;
     cells_editor->currently_dragging_state = false;
   }
+
+  if (ImGui::BeginPopup("cell block context menu"))
+  {
+    ImGui::Text("Cell State: %.*s", string_length(cells_editor->current_contex_menu_cell_state), cells_editor->current_contex_menu_cell_state.start);
+    if (ImGui::Button("Delete cell block"))
+    {
+      ImGui::CloseCurrentPopup();
+      delete_cell_block(universe, cells_editor->current_context_menu_cell_block);
+    }
+    ImGui::EndPopup();
+  }
+
+  ImGui::PopID();
 }
