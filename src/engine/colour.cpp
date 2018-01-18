@@ -3,6 +3,8 @@
 #include "vectors.h"
 #include "maths.h"
 
+#include "imgui.h"
+
 
 vec4
 lighten_colour(vec4 colour, r32 amount)

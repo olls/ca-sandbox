@@ -319,8 +319,7 @@ build_rule_tree(RuleCreationThread *rule_creation_thread)
   {
     rule->rule_nodes_table.un_allocate_array();
     u32 n_states = rule->config.named_states.states.n_elements;
-    rule->rule_nodes_table.element_size = sizeof(RuleNode) + (n_states * sizeof(u32));
-    rule->rule_nodes_table.allocate_array();
+    rule->rule_nodes_table.allocate_array(sizeof(RuleNode) + (n_states * sizeof(u32)));
   }
 
   rule->n_inputs = get_neighbourhood_region_n_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size);
@@ -357,6 +356,8 @@ start_build_rule_tree_thread(RuleCreationThread *rule_creation_thread, Rule *res
   {
     rule_creation_thread->rule = result;
 
+// #define RULE_BUILDER_THREADING
+#ifdef RULE_BUILDER_THREADING
     s32 error = pthread_create(&rule_creation_thread->thread, NULL, build_rule_tree_thread, (void *)rule_creation_thread);
     if (error)
     {
@@ -366,6 +367,9 @@ start_build_rule_tree_thread(RuleCreationThread *rule_creation_thread, Rule *res
     {
       rule_creation_thread->currently_running = true;
     }
+#else
+    build_rule_tree(rule_creation_thread);
+#endif
   }
 
   return success;

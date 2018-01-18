@@ -2,7 +2,6 @@
 
 #include "types.h"
 #include "print.h"
-#include "timing.h"
 #include "opengl-util.h"
 
 #include <SDL2/SDL.h>
@@ -15,9 +14,7 @@
 ///
 
 
-const u32 FPS = 60;
-
-#ifdef GDB_DEBUG
+#ifdef _DEBUG
 const b32 FULLSCREEN = false;
 const u32 WINDOW_WIDTH = 1920;
 const u32 WINDOW_HEIGHT = 1080;
@@ -28,57 +25,9 @@ const u32 WINDOW_HEIGHT = 720;
 #endif
 
 
-/// Should be called before the main-loop starts. Sets up the frame timing.
-void
-engine_setup_loop(Engine *engine)
-{
-  engine->useconds_per_frame = 1000000 / FPS;
-  engine->frame_dt = engine->useconds_per_frame;
-
-  engine->fps.frame_count = 0;
-  engine->fps.last_update = get_us();
-}
-
-
-/// Should be called at the start of a frame. Used to measure the frame time.
-void
-engine_frame_start(Engine *engine)
-{
-  engine->frame_start = get_us();
-}
-
-
-/// Should be called at the end of a frame. Swaps the SDL frame buffers, and maintains the FPS.
-void
-engine_frame_end(Engine *engine)
-{
-  SDL_GL_SwapWindow(engine->window.sdl_window);
-
-  ++engine->fps.frame_count;
-  if (engine->frame_start >= engine->fps.last_update + seconds_in_us(1))
-  {
-    engine->fps.last_update = engine->frame_start;
-    engine->fps.current_avg = engine->fps.frame_count;
-    engine->fps.frame_count = 0;
-  }
-
-  engine->frame_dt = get_us() - engine->frame_start;
-
-  if (engine->frame_dt < engine->useconds_per_frame)
-  {
-    sleep_us(engine->useconds_per_frame - engine->frame_dt);
-    engine->frame_dt = engine->useconds_per_frame;
-  }
-  else
-  {
-    print("Missed frame rate: %d\n", engine->frame_dt);
-  }
-}
-
-
 /// Initialises SDL and OpenGL, and creates the window.
 b32
-init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
+start_engine(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 {
   b32 success = true;
 
@@ -112,16 +61,16 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
     height = WINDOW_HEIGHT;
   }
 
-  engine->window.sdl_window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-  if (!engine->window.sdl_window)
+  engine->sdl_window = SDL_CreateWindow(window_name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
+  if (!engine->sdl_window)
   {
     print("Failed to initialise SDL window: %s\n", SDL_GetError());
     success = false;
     return success;
   }
 
-  engine->window.gl_context = SDL_GL_CreateContext(engine->window.sdl_window);
-  if (!engine->window.gl_context)
+  engine->gl_context = SDL_GL_CreateContext(engine->sdl_window);
+  if (!engine->gl_context)
   {
     print("Failed to create OpenGL context.\n");
     success = false;
@@ -159,11 +108,19 @@ init_sdl(u32 argc, const char *argv[], const char window_name[], Engine *engine)
 }
 
 
+/// Swap the window buffers to update the screen
+void
+engine_swap_buffers(Engine *engine)
+{
+  SDL_GL_SwapWindow(engine->sdl_window);
+}
+
+
 /// De-initialises SDL
 void
 stop_engine(Engine *engine)
 {
-  SDL_GL_DeleteContext(engine->window.gl_context);
-  SDL_DestroyWindow(engine->window.sdl_window);
+  SDL_GL_DeleteContext(engine->gl_context);
+  SDL_DestroyWindow(engine->sdl_window);
   SDL_Quit();
 }

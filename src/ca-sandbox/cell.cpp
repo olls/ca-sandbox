@@ -30,6 +30,7 @@ default_cell_initialisation_options(CellInitialisationOptions *result)
   result->type = CellInitialisationType::RANDOM;
 
   CellState zero_state = 0;
-  result->set_of_initial_states.clear_array();
+  result->set_of_initial_states.un_allocate_array();
+  result->set_of_initial_states.allocate_array();
   result->set_of_initial_states.add(zero_state);
 }

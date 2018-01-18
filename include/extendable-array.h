@@ -29,17 +29,13 @@ struct ExtendableArray
   T *elements;
 
   void
-  allocate_array();
+  allocate_array(u32 _element_size=sizeof(T));
 
   void
   un_allocate_array();
 
   void
   clear_array();
-
-  ExtendableArray(u32 _element_size=sizeof(T));
-
-  ~ExtendableArray();
 
   T *
   get(u32 position);
@@ -66,21 +62,13 @@ struct ExtendableArray
 
 
 template <typename T>
-ExtendableArray<T>::ExtendableArray(u32 _element_size)
-  : array_size(EXTENDABLE_ARRAY_INITIAL_SIZE),
-    element_size(_element_size),
-    next_free_element_position(0),
-    elements(0)
-{
-}
-
-
-template <typename T>
 void
-ExtendableArray<T>::allocate_array()
+ExtendableArray<T>::allocate_array(u32 _element_size)
 {
+  this->element_size = _element_size;
   this->array_size = EXTENDABLE_ARRAY_INITIAL_SIZE;
   this->elements = (T *)allocate_size(this->element_size, this->array_size);
+  this->n_elements = 0;
 }
 
 
@@ -191,13 +179,6 @@ ExtendableArray<T>::get_new_element()
   u32 new_position = this->add(0);
   T *result = this->get(new_position);
   return result;
-}
-
-
-template <typename T>
-ExtendableArray<T>::~ExtendableArray()
-{
-  this->un_allocate_array();
 }
 
 

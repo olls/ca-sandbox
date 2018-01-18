@@ -45,7 +45,7 @@ open_file(const char *filename, File *result, b32 write, s32 trunc_to)
   result->fd = open(filename, open_flags, mode);
   if (result->fd == -1)
   {
-    print("Failed to open file: \"%s\"  %s, %d", filename, strerror(errno), errno);
+    print("Failed to open file: \"%s\"  %s, %d\n", filename, strerror(errno), errno);
     success = false;
   }
 

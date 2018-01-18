@@ -5,7 +5,7 @@
 ///
 
 void
-print(const char format[], ...);
+print(const char format[], ...)  __attribute__((format(printf, 1, 2)));
 
 
 #endif

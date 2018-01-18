@@ -9,6 +9,7 @@
 #include "file-picker.h"
 #include "comparison-operator.h"
 #include "extendable-array.h"
+#include "colour.h"
 
 #include "neighbourhood-region.h"
 #include "named-states.h"
@@ -32,11 +33,8 @@ styled_cell_state_button(const char *id, String label, vec4 colour = {-1})
     ImGui::PushStyleColor(ImGuiCol_Button, colour);
   }
 
-  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {9, 6});
+  b32 result = ImGui::Button(label.start, label.start + string_length(label));
 
-  b32 result = ImGui::Button(label.start, label.end);
-
-  ImGui::PopStyleVar();
   if (colour.x != -1)
   {
     ImGui::PopStyleColor();
@@ -95,6 +93,218 @@ cell_state_button(const char *id, PatternCellState *pattern_cell, NamedStates *n
 }
 
 
+b32
+cell_state_button(String label, vec2 item_spacing, vec2 frame_padding)
+{
+  b32 result;
+
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, item_spacing);
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, frame_padding);
+
+  result = ImGui::Button(label.start, label.end);
+
+  ImGui::PopStyleVar(2);
+  return result;
+}
+
+
+/// Creates a list of check-boxes for all the named states, allowing the user to choose which states
+///   are in the PatternCell.states[] group.
+///
+void
+multi_cell_state_selector(PatternCellState *pattern_cell, NamedStates *named_states)
+{
+  ImGui::BeginChild("multi cell state selector", {0, 200});
+
+  for (u32 state_n = 0;
+       state_n < named_states->states.n_elements;
+       ++state_n)
+  {
+    NamedState *named_state = named_states->states.get(state_n);
+
+    bool state_was_selected = false;
+    u32 previously_selected_state_position_in_group;
+
+    // Determine whether the state is currently in the pattern cell's group
+    for (u32 state_n = 0;
+         state_n < pattern_cell->group_states_used;
+         ++state_n)
+    {
+      CellState test_state = pattern_cell->states[state_n];
+      if (test_state == named_state->value)
+      {
+        state_was_selected = true;
+        previously_selected_state_position_in_group = state_n;
+        break;
+      }
+    }
+
+    ImGui::PushID(state_n);
+    vec4 state_colour = get_state_colour(named_state->value);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, {0, 0, 0, 0.5});
+
+    bool state_now_selected = state_was_selected;
+    b32 pressed = ImGui::Checkbox("###make state active", &state_now_selected);
+
+    ImGui::PopStyleColor(4);
+    ImGui::SameLine();
+
+    ImGui::PushItemWidth(-70);
+    ImGui::Text("%.*s", string_length(named_state->name), named_state->name.start);
+
+    ImGui::PopID();
+
+    if (pressed &&
+        !state_was_selected &&
+        state_now_selected)
+    {
+      // Put state in states[] if the check-box is checked and state wasn't already in the group.
+
+      if (pattern_cell->group_states_used == MAX_PATTERN_STATES_GROUP)
+      {
+        // TODO: Make this an ImGui error message.
+        assert(!"Ran out of state slots in PatternCellState group.");
+      }
+      else
+      {
+        pattern_cell->states[pattern_cell->group_states_used] = named_state->value;
+        pattern_cell->group_states_used += 1;
+      }
+    }
+    else if (pressed &&
+             state_was_selected &&
+             !state_now_selected)
+    {
+      // Remove state from states[] if the check-box is not checked but state __was__ in the group.
+
+      if (pattern_cell->group_states_used > 1)
+      {
+        pattern_cell->group_states_used -= 1;
+
+        // Move last state in the group into the position of the state we are removing from the group.
+
+        u32 move_to_position = previously_selected_state_position_in_group;
+        u32 move_from_position = pattern_cell->group_states_used;
+
+        // If the positions are equal, the state we are removing must have been at the end of the
+        //   group, so decrementing group_states_used is enough to remove it.
+        if (move_to_position != move_from_position)
+        {
+          pattern_cell->states[move_to_position] = pattern_cell->states[move_from_position];
+        }
+      }
+    }
+  }
+
+  ImGui::EndChild();
+}
+
+
+void
+pattern_cell_state_menu(PatternCellState *pattern_cell, NamedStates *named_states)
+{
+  ImGui::Combo("Cell Pattern Type", (s32*)&pattern_cell->type, PATTERN_CELL_STATE_TYPE_NAMES, array_count(PATTERN_CELL_STATE_TYPE_NAMES));
+
+  switch (pattern_cell->type)
+  {
+    case (PatternCellStateType::WILDCARD):
+    {
+      ImGui::Spacing();
+      ImGui::TextWrapped("This cell will match any state.  It will also contribute towards a \"count matching\" constraint, if it matches the count matching state.");
+    } break;
+
+    case (PatternCellStateType::STATE):
+    {
+      ImGui::TextWrapped("This cell will match if any of the following selected states match.");
+      ImGui::Spacing();
+      multi_cell_state_selector(pattern_cell, named_states);
+
+    } break;
+
+    case (PatternCellStateType::NOT_STATE):
+    {
+      ImGui::TextWrapped("This cell will match any cell, as long as it isn't one of the following states.");
+      ImGui::Spacing();
+      multi_cell_state_selector(pattern_cell, named_states);
+
+    } break;
+
+    case (PatternCellStateType::OR_STATE):
+    {
+      ImGui::TextWrapped("This pattern will match, if one or more of the \"OR\" cell patterns match.");
+      ImGui::Spacing();
+      multi_cell_state_selector(pattern_cell, named_states);
+
+     } break;
+  }
+}
+
+
+/// Create GUI for modifying a single PatternCellState.
+///
+/// Draws a button showing the basic pattern cell configuration, with a menu when clicked for
+/// modification.
+///
+void
+pattern_cell_state_button(PatternCellState *pattern_cell, NamedStates *named_states, vec2 item_spacing, vec2 frame_padding)
+{
+  String button_label = {};
+
+  switch (pattern_cell->type)
+  {
+    case (PatternCellStateType::WILDCARD):
+    {
+      button_label = new_string("*");
+    } break;
+
+    case (PatternCellStateType::STATE):
+    {
+      if (pattern_cell->group_states_used == 1)
+      {
+        CellState state = pattern_cell->states[0];
+        String state_name = get_state_name(named_states, state);
+        button_label = state_name;
+      }
+      else
+      {
+        button_label = new_string_fmt("[%d states]", pattern_cell->group_states_used);
+      }
+    } break;
+
+    case (PatternCellStateType::NOT_STATE):
+    {
+      CellState state = pattern_cell->states[0];
+      String state_name = get_state_name(named_states, state);
+      button_label = new_string_fmt("!%.*s", string_length(state_name), state_name.start);
+    } break;
+
+    case (PatternCellStateType::OR_STATE):
+    {
+      CellState state = pattern_cell->states[0];
+      String state_name = get_state_name(named_states, state);
+      button_label = new_string_fmt("(%.*s)", string_length(state_name), state_name.start);
+    } break;
+  }
+
+  b32 button_pressed = cell_state_button(button_label, item_spacing, frame_padding);
+
+  if (button_pressed)
+  {
+    ImGui::OpenPopup("pattern cell state menu");
+  }
+
+  ImGui::SetNextWindowContentWidth(300);
+  if (ImGui::BeginPopup("pattern cell state menu"))
+  {
+    pattern_cell_state_menu(pattern_cell, named_states);
+    ImGui::EndPopup();
+  }
+}
+
+
 void
 display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 {
@@ -123,9 +333,9 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
   }
 
   // Iterate through the cell_spacial_array outputting each cell as a button
-  const ImGuiStyle& style = ImGui::GetStyle();
-  r32 padding = style.FramePadding.y;
-  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0, 0});
+
+  vec2 cell_btn_item_spacing = {1, 1};
+  vec2 cell_btn_frame_padding = {9, 6};
 
   s32vec2 position;
   for (position.x = 0;
@@ -144,21 +354,26 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 
       if (pattern_cell == NULL)
       {
-        r32 item_vertical_spacing = ImGui::GetItemsLineHeightWithSpacing();
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, cell_btn_frame_padding);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, cell_btn_item_spacing);
+        r32 item_vertical_spacing = ImGui::GetItemsLineHeightWithSpacing() - cell_btn_item_spacing.y;
         ImGui::Dummy(vec2{0, item_vertical_spacing});
+        ImGui::PopStyleVar(2);
       }
       else
       {
-        cell_state_button("cell state", pattern_cell, &rule_config->named_states);
+        pattern_cell_state_button(pattern_cell, &rule_config->named_states, cell_btn_item_spacing, cell_btn_frame_padding);
       }
+
       ImGui::PopID();
     }
 
     ImGui::EndGroup();
-    ImGui::SameLine();
-  }
 
-  ImGui::PopStyleVar();
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, cell_btn_item_spacing);
+    ImGui::SameLine();
+    ImGui::PopStyleVar(1);
+  }
 
   // Same line needs to be called here to add a gap, now we have popped the 0 spacing style.
   ImGui::SameLine();
@@ -263,7 +478,10 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
     }
 
     // Display all rule patterns
-    ImGui::TextWrapped("Modify each of the patterns below by clicking on the state buttons to change the state which it matches, or right clicking on them to change them to a wildcard match.");
+    ImGui::TextWrapped(
+"""Modify each of the patterns below by clicking on the state buttons to \
+change the state which it matches, or right clicking on them to change them \
+to a wildcard match.""");
 
     for (u32 rule_pattern_n = 0;
          rule_pattern_n < rule->config.rule_patterns.n_elements;

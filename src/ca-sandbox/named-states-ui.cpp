@@ -46,8 +46,9 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
         ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
+        ImGui::PushStyleColor(ImGuiCol_CheckMark, {0, 0, 0, 0.5});
         ImGui::RadioButton("##make state active", currently_active_state, named_state->value);
-        ImGui::PopStyleColor(3);
+        ImGui::PopStyleColor(4);
         ImGui::SameLine();
 
         ImGui::PushItemWidth(-70);

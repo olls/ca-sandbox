@@ -1,11 +1,16 @@
 #include "text.h"
 
+#include "util.h"
 #include "types.h"
+#include "assert.h"
 #include "maths.h"
 #include "vectors.h"
 #include "files.h"
+#include "allocate.h"
 
 #include <string.h>
+#include <cstdarg>
+#include <stdio.h>
 
 /// @file
 /// @brief  Text utility functions and structs
@@ -24,6 +29,34 @@ new_string(const char *c_string)
 
   result.start = c_string;
   result.current_position = result.start;
+  result.end = result.start + length;
+
+  return result;
+}
+
+
+String
+new_string_fmt(const char *c_string_format, ...)
+{
+  String result = {};
+
+  va_list args;
+  va_start(args, c_string_format);
+
+  char buffer[512];
+  s32 length = vsnprintf(buffer, array_count(buffer), c_string_format, args);
+  assert(length >= 0);
+  va_end(args);
+
+  // vnsprint_f returns number of bytes which would have been written __without the buffer size
+  //   limit__.  Also we need to add one for the NULL byte, which vnsprint_f writes, but doesn't
+  //   include in the count.
+  length = min(length, (s32)array_count(buffer)) + 1;
+
+  char *new_buffer = allocate(char, length);
+  copy_string(new_buffer, buffer, length);
+
+  result.start = new_buffer;
   result.end = result.start + length;
 
   return result;

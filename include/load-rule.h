@@ -37,6 +37,14 @@ enum struct PatternCellStateType : s32
 };
 
 
+static const char *PATTERN_CELL_STATE_TYPE_NAMES[] = {
+  "Wildcard state",
+  "Match one of n states",
+  "Match all state except",
+  "\"OR\" State"
+};
+
+
 /// Maximum number of state values which can be grouped / or'd together in a pattern (using the [S1, S2] syntax)
 const u32 MAX_PATTERN_STATES_GROUP = 16;
 

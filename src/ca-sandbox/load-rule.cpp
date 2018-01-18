@@ -526,8 +526,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
       // Need to reallocate, as the size of RulePattern (dependant on n_inputs) might have changed
       rule_config->rule_patterns.un_allocate_array();
-      rule_config->rule_patterns.element_size = sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs);
-      rule_config->rule_patterns.allocate_array();
+      rule_config->rule_patterns.allocate_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs));
 
       success &= read_rule_patterns(&rule_config->named_states, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)

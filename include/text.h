@@ -39,6 +39,10 @@ new_string(const char *c_string);
 
 
 String
+new_string_fmt(const char *c_string_format, ...)  __attribute__((format(printf, 1, 2)));
+
+
+String
 get_file_string(const char *filename, File *file);
 
 

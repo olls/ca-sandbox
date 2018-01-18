@@ -36,4 +36,32 @@ struct FPS_Counter
 };
 
 
+/// Keeps track of state for the engine code, including frame timings.
+struct FrameTiming
+{
+  FPS_Counter fps;
+
+  /// Number of micro-seconds per frame, this is fixed and calculated from FPS.
+  u32 useconds_per_frame;
+
+  /// The number of micro-seconds the last frame took.
+  u32 frame_dt;
+
+  /// The time (in useconds) when engine_frame_start() was called.
+  u64 frame_start;
+};
+
+
+void
+engine_setup_loop(FrameTiming *frame_timing);
+
+
+void
+engine_frame_start(FrameTiming *frame_timing);
+
+
+void
+engine_frame_end(FrameTiming *frame_timing);
+
+
 #endif
