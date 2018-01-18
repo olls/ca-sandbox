@@ -79,7 +79,9 @@ file_picker(const char *picker_name, FilePicker *picker)
 
     tinydir_open_sorted(&tinydir_package.dir, current_dirrctory.start);
 
+    ImGui::PushItemWidth(-1);
     ImGui::ListBox("##file-picker", &picker->current_item, &get_filename_from_tinydir_file, &tinydir_package, tinydir_package.dir.n_files, 8);
+    ImGui::PopItemWidth();
 
     if (ImGui::Button("Select"))
     {
@@ -162,6 +164,12 @@ file_picker(const char *picker_name, FilePicker *picker)
 
         picker->active = false;
       }
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel"))
+    {
+      picker->active = false;
     }
 
     tinydir_close(&tinydir_package.dir);
