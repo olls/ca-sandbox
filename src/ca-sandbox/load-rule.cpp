@@ -51,9 +51,9 @@ read_count_matching_value(NamedStates *named_states, String *count_matching_stri
     }
     else
     {
-      // Copy contents of the temporary Extendable array into count_matching.states
-      memcpy(&rule_pattern_result->count_matching.states, states.elements, states.n_elements*states.element_size);
-      rule_pattern_result->count_matching.group_states_used = states.n_elements;
+      // Copy contents of the temporary Extendable array into count_matching.states_group
+      memcpy(&rule_pattern_result->count_matching.states_group.states, states.elements, states.n_elements*states.element_size);
+      rule_pattern_result->count_matching.states_group.states_used = states.n_elements;
 
       states.un_allocate_array();
 
@@ -272,16 +272,16 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
             }
             else
             {
-              this_cell_state_pattern->group_states_used = 0;
+              this_cell_state_pattern->states_group.states_used = 0;
               b32 got_state = true;
-              while (got_state && this_cell_state_pattern->group_states_used < MAX_PATTERN_STATES_GROUP)
+              while (got_state && this_cell_state_pattern->states_group.states_used < MAX_PATTERN_STATES_GROUP)
               {
-                CellState *state_slot = this_cell_state_pattern->states + this_cell_state_pattern->group_states_used;
+                CellState *state_slot = this_cell_state_pattern->states_group.states + this_cell_state_pattern->states_group.states_used;
                 got_state &= read_state_name(named_states, &group_string, state_slot);
 
                 if (got_state)
                 {
-                  this_cell_state_pattern->group_states_used += 1;
+                  this_cell_state_pattern->states_group.states_used += 1;
                 }
               }
             }
@@ -309,7 +309,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
             }
             else
             {
-              b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states[0]);
+              b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states_group.states[0]);
               if (!got_state)
               {
                 print("Error: Couldn't read cell state in 'or' state in pattern.\n");
@@ -318,7 +318,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
               }
               else
               {
-                this_cell_state_pattern->group_states_used = 1;
+                this_cell_state_pattern->states_group.states_used = 1;
               }
             }
           }
@@ -326,7 +326,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
           {
             this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
             ++pattern_block.current_position;
-            this_cell_state_pattern->group_states_used = 0;
+            this_cell_state_pattern->states_group.states_used = 0;
           }
           else if (pattern_block.current_position[0] == '!')
           {
@@ -334,8 +334,8 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
 
             this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
 
-            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
-            this_cell_state_pattern->group_states_used = 1;
+            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states_group.states[0]);
+            this_cell_state_pattern->states_group.states_used = 1;
 
             if (!success)
             {
@@ -346,8 +346,8 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
           else
           {
             this_cell_state_pattern->type = PatternCellStateType::STATE;
-            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states[0]);
-            this_cell_state_pattern->group_states_used = 1;
+            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states_group.states[0]);
+            this_cell_state_pattern->states_group.states_used = 1;
 
             if (!success)
             {
@@ -555,22 +555,22 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
             }
             else if (cell.type == PatternCellStateType::STATE)
             {
-              if (cell.group_states_used > 1) print("[");
+              if (cell.states_group.states_used > 1) print("[");
               for (u32 group_state_n = 0;
-                   group_state_n < cell.group_states_used;
+                   group_state_n < cell.states_group.states_used;
                    ++group_state_n)
               {
-                print("%d ", cell.states[group_state_n]);
+                print("%d ", cell.states_group.states[group_state_n]);
               }
-              if (cell.group_states_used > 1) print("] ");
+              if (cell.states_group.states_used > 1) print("] ");
             }
             else if (cell.type == PatternCellStateType::NOT_STATE)
             {
-              print("!%d ", cell.states[0]);
+              print("!%d ", cell.states_group.states[0]);
             }
             else if (cell.type == PatternCellStateType::OR_STATE)
             {
-              print("(%d) ", cell.states[0]);
+              print("(%d) ", cell.states_group.states[0]);
             }
           }
           print("\n");
@@ -596,10 +596,10 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
             print("  count_matching: [");
             for (u32 count_matching_state_n = 0;
-                 count_matching_state_n < rule_pattern->count_matching.group_states_used;
+                 count_matching_state_n < rule_pattern->count_matching.states_group.states_used;
                  ++count_matching_state_n)
             {
-              print("%d", rule_pattern->count_matching.states[count_matching_state_n]);
+              print("%d", rule_pattern->count_matching.states_group.states[count_matching_state_n]);
             }
             print("], %c %d\n", comparison, rule_pattern->count_matching.comparison_n);
           }

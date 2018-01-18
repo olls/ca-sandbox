@@ -133,16 +133,16 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
           } break;
           case (PatternCellStateType::STATE):
           {
-            if (pattern_cell->group_states_used > 1)
+            if (pattern_cell->states_group.states_used > 1)
             {
               this_cell_length += 2;  // "[" ... "]"
-              this_cell_length += 2 * (pattern_cell->group_states_used-1);  // ", " between each state
+              this_cell_length += 2 * (pattern_cell->states_group.states_used-1);  // ", " between each state
             }
             for (u32 group_state_n = 0;
-                 group_state_n < pattern_cell->group_states_used;
+                 group_state_n < pattern_cell->states_group.states_used;
                  ++group_state_n)
             {
-              CellState state = pattern_cell->states[group_state_n];
+              CellState state = pattern_cell->states_group.states[group_state_n];
               String state_name = get_state_name(&rule_config->named_states, state);
               this_cell_length += string_length(state_name);
             }
@@ -150,14 +150,14 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
           case (PatternCellStateType::NOT_STATE):
           {
             this_cell_length += 1;  // "!"
-            CellState state = pattern_cell->states[0];
+            CellState state = pattern_cell->states_group.states[0];
             String state_name = get_state_name(&rule_config->named_states, state);
             this_cell_length += string_length(state_name);
           } break;
           case (PatternCellStateType::OR_STATE):
           {
             this_cell_length += 2;  // "(" ... ")"
-            CellState state = pattern_cell->states[0];
+            CellState state = pattern_cell->states_group.states[0];
             String state_name = get_state_name(&rule_config->named_states, state);
             this_cell_length += string_length(state_name);
           } break;
@@ -199,40 +199,40 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
           } break;
           case (PatternCellStateType::STATE):
           {
-            if (pattern_cell->group_states_used > 1)
+            if (pattern_cell->states_group.states_used > 1)
             {
               append_string(&cell_string, new_string("["));
             }
 
             for (u32 group_state_n = 0;
-                 group_state_n < pattern_cell->group_states_used;
+                 group_state_n < pattern_cell->states_group.states_used;
                  ++group_state_n)
             {
-              CellState state = pattern_cell->states[group_state_n];
+              CellState state = pattern_cell->states_group.states[group_state_n];
               String state_name = get_state_name(&rule_config->named_states, state);
               append_string(&cell_string, state_name);
 
-              if (group_state_n != pattern_cell->group_states_used-1)
+              if (group_state_n != pattern_cell->states_group.states_used-1)
               {
                 append_string(&cell_string, new_string(", "));
               }
             }
 
-            if (pattern_cell->group_states_used > 1)
+            if (pattern_cell->states_group.states_used > 1)
             {
               append_string(&cell_string, new_string("]"));
             }
           } break;
           case (PatternCellStateType::NOT_STATE):
           {
-            CellState state = pattern_cell->states[0];
+            CellState state = pattern_cell->states_group.states[0];
             String state_name = get_state_name(&rule_config->named_states, state);
             append_string(&cell_string, new_string("!"));
             append_string(&cell_string, state_name);
           } break;
           case (PatternCellStateType::OR_STATE):
           {
-            CellState state = pattern_cell->states[0];
+            CellState state = pattern_cell->states_group.states[0];
             String state_name = get_state_name(&rule_config->named_states, state);
             append_string(&cell_string, new_string("("));
             append_string(&cell_string, state_name);

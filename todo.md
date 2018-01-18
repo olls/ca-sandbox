@@ -9,11 +9,11 @@
 - profiling tools
 
 # Functionality
-= fix rule ui
-= allow 'or' combinations of states in rule patterns
+= fix rule pattern parsing to allow cell state groups in all places handled by UI, and ensure the tree building also handles these cases.
 - figure out explanation of "or" cell patterns
-- rule pattern groups
+- rule pattern groups/sets/blocks
 - better cell editing tools:
   - selections: move, copy, paste
   - sub-modules
 - better parsing error messages (i.e: keep a line number counter?)
+- colour cells state buttons in rule patterns UI where only one state is used

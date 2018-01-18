@@ -72,10 +72,10 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
           b32 found_match_in_group = false;
 
           for (u32 group_state_n = 0;
-               group_state_n < pattern_input.group_states_used;
+               group_state_n < pattern_input.states_group.states_used;
                ++group_state_n)
           {
-            if (pattern_input.states[group_state_n] == in)
+            if (pattern_input.states_group.states[group_state_n] == in)
             {
               found_match_in_group = true;
               break;
@@ -91,9 +91,9 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
         case (PatternCellStateType::NOT_STATE):
         {
           // Only allowed one state in an NOT_STATE  (for now...)
-          assert(pattern_input.group_states_used == 1);
+          assert(pattern_input.states_group.states_used == 1);
 
-          if (pattern_input.states[0] == in)
+          if (pattern_input.states_group.states[0] == in)
           {
             matches = false;
             break;
@@ -105,9 +105,9 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
           or_matching_enabled_on_this_pattern = true;
 
           // Only allowed one state in an OR_STATE
-          assert(pattern_input.group_states_used == 1);
+          assert(pattern_input.states_group.states_used == 1);
 
-          if (pattern_input.states[0] == in)
+          if (pattern_input.states_group.states[0] == in)
           {
             number_of_neighbours_matching_or_states += 1;
           }
@@ -120,10 +120,10 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
             b32 this_state_in_count_matching_group = false;
 
             for (u32 count_matching_state_n = 0;
-                 count_matching_state_n < rule_pattern->count_matching.group_states_used;
+                 count_matching_state_n < rule_pattern->count_matching.states_group.states_used;
                  ++count_matching_state_n)
             {
-              if (in == rule_pattern->count_matching.states[count_matching_state_n])
+              if (in == rule_pattern->count_matching.states_group.states[count_matching_state_n])
               {
                 this_state_in_count_matching_group = true;
                 break;

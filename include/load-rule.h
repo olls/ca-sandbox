@@ -45,14 +45,24 @@ static const char *PATTERN_CELL_STATE_TYPE_NAMES[] = {
 };
 
 
-/// Maximum number of state values which can be grouped / or'd together in a pattern (using the [S1, S2] syntax)
+/// Maximum number of state values which can be grouped together in a CellStateGroup
 const u32 MAX_PATTERN_STATES_GROUP = 16;
+
+
+/// Fixed size group of CellStates, used for RulePattern.count_matching.states_group and
+///   PatternCellState.states_group
+///
+struct CellStateGroup
+{
+  CellState states[MAX_PATTERN_STATES_GROUP];
+  u32 states_used;
+};
+
 
 struct PatternCellState
 {
   PatternCellStateType type;
-  CellState states[MAX_PATTERN_STATES_GROUP];
-  u32 group_states_used;
+  CellStateGroup states_group;
 };
 
 
@@ -66,8 +76,7 @@ struct RulePattern
   struct
   {
     b32 enabled;
-    CellState states[MAX_PATTERN_STATES_GROUP];
-    u32 group_states_used;
+    CellStateGroup states_group;
     ComparisonOp comparison;
     u32 comparison_n;
   } count_matching;
