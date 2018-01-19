@@ -68,7 +68,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
       {
         case (PatternCellStateType::STATE):
         {
-          // Look for a matching state in the PatternCellState group
+          // Match if any states in the group match 'in'
           b32 found_match_in_group = false;
 
           for (u32 group_state_n = 0;
@@ -81,8 +81,11 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
               break;
             }
           }
-
-          if (!found_match_in_group)
+          if (found_match_in_group)
+          {
+            matches = true;
+          }
+          else
           {
             matches = false;
           }
@@ -90,26 +93,40 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 
         case (PatternCellStateType::NOT_STATE):
         {
-          // Only allowed one state in an NOT_STATE  (for now...)
-          assert(pattern_input.states_group.states_used == 1);
+          // Ensure 'in' is not equal to any of the group states
+          b32 found_match_in_group = false;
 
-          if (pattern_input.states_group.states[0] == in)
+          for (u32 group_state_n = 0;
+               group_state_n < pattern_input.states_group.states_used;
+               ++group_state_n)
+          {
+            if (pattern_input.states_group.states[group_state_n] == in)
+            {
+              found_match_in_group = true;
+              break;
+            }
+          }
+          if (found_match_in_group)
           {
             matches = false;
-            break;
           }
         } break;
 
         case (PatternCellStateType::OR_STATE):
         {
+          // If 'in' matches any of the states in the group for this OR, increment count.
           or_matching_enabled_on_this_pattern = true;
 
-          // Only allowed one state in an OR_STATE
-          assert(pattern_input.states_group.states_used == 1);
-
-          if (pattern_input.states_group.states[0] == in)
+          for (u32 group_state_n = 0;
+               group_state_n < pattern_input.states_group.states_used;
+               ++group_state_n)
           {
-            number_of_neighbours_matching_or_states += 1;
+            if (pattern_input.states_group.states[group_state_n] == in)
+            {
+              number_of_neighbours_matching_or_states += 1;
+              // Only need to find one matching state per OR cell state.
+              break;
+            }
           }
         } break;
 
@@ -138,6 +155,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
         } break;
       }
 
+      // This input does not match -> early out
       if (!matches)
       {
         break;
@@ -356,7 +374,7 @@ start_build_rule_tree_thread(RuleCreationThread *rule_creation_thread, Rule *res
   {
     rule_creation_thread->rule = result;
 
-// #define RULE_BUILDER_THREADING
+#define RULE_BUILDER_THREADING
 #ifdef RULE_BUILDER_THREADING
     s32 error = pthread_create(&rule_creation_thread->thread, NULL, build_rule_tree_thread, (void *)rule_creation_thread);
     if (error)

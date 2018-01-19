@@ -305,16 +305,14 @@ pattern_cell_state_button(PatternCellState *pattern_cell, NamedStates *named_sta
 
     case (PatternCellStateType::NOT_STATE):
     {
-      CellState state = pattern_cell->states_group.states[0];
-      String state_name = get_state_name(named_states, state);
-      button_label = new_string_fmt("!%.*s", string_length(state_name), state_name.start);
+      String group_string = cell_state_group_button_label(&pattern_cell->states_group, named_states);
+      button_label = new_string_fmt("!%.*s", string_length(group_string), group_string.start);
     } break;
 
     case (PatternCellStateType::OR_STATE):
     {
-      CellState state = pattern_cell->states_group.states[0];
-      String state_name = get_state_name(named_states, state);
-      button_label = new_string_fmt("(%.*s)", string_length(state_name), state_name.start);
+      String group_string = cell_state_group_button_label(&pattern_cell->states_group, named_states);
+      button_label = new_string_fmt("(%.*s)", string_length(group_string), group_string.start);
     } break;
   }
 

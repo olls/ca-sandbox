@@ -77,6 +77,61 @@ serialise_null_states(FILE *file_stream, RuleConfiguration *rule_config)
 
 
 void
+serialise_state_group(ExtendableArray<char> *string, CellStateGroup *group, NamedStates *named_states)
+{
+  if (group->states_used > 1)
+  {
+    append_string(string, new_string("["));
+  }
+  for (u32 state_n = 0;
+       state_n < group->states_used;
+       ++state_n)
+  {
+    CellState state = group->states[state_n];
+    String state_name = get_state_name(named_states, state);
+    append_string(string, state_name);
+
+    if (state_n != group->states_used-1)
+    {
+      append_string(string, new_string(", "));
+    }
+  }
+  if (group->states_used > 1)
+  {
+    append_string(string, new_string("]"));
+  }
+}
+
+
+void
+serialise_pattern_cell_state(ExtendableArray<char> *cell_string, PatternCellState *pattern_cell, NamedStates *named_states)
+{
+  switch (pattern_cell->type)
+  {
+    case (PatternCellStateType::WILDCARD):
+    {
+      append_string(cell_string, new_string("*"));
+    } break;
+    case (PatternCellStateType::STATE):
+    {
+      serialise_state_group(cell_string, &pattern_cell->states_group, named_states);
+    } break;
+    case (PatternCellStateType::NOT_STATE):
+    {
+      append_string(cell_string, new_string("!"));
+      serialise_state_group(cell_string, &pattern_cell->states_group, named_states);
+    } break;
+    case (PatternCellStateType::OR_STATE):
+    {
+      append_string(cell_string, new_string("("));
+      serialise_state_group(cell_string, &pattern_cell->states_group, named_states);
+      append_string(cell_string, new_string(")"));
+    } break;
+  }
+}
+
+
+void
 serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfiguration *rule_config)
 {
   fprintf(file_stream, "Pattern: %s\n", rule_pattern->comment);
@@ -84,12 +139,19 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
   String result_string = get_state_name(&rule_config->named_states, rule_pattern->result);
   fprintf(file_stream, "Result: %.*s\n", string_length(result_string), result_string.start);
 
-  // Extract all cells in rule pattern into a grid so we can print them in the correct positions
+  // First serialise each CellPatternState into a grid so we can print them in the correct positions
 
   s32vec2 neighbourhood_region_area = get_neighbourhood_region_coverage(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
   u32 n_cells_in_spacial_array = neighbourhood_region_area.x * neighbourhood_region_area.y;
-  PatternCellState *cell_spacial_array[n_cells_in_spacial_array];
-  memset(cell_spacial_array, 0, sizeof(PatternCellState *) * n_cells_in_spacial_array);
+
+  // Array of strings representing each cell
+  ExtendableArray<char> cell_strings[n_cells_in_spacial_array];
+  memset(cell_strings, 0, sizeof(WriteString) * n_cells_in_spacial_array);
+
+  // Need to find the length of the widest cell for each column in this pattern so we can line up
+  //   the columns correctly
+  u32 max_state_lengths[neighbourhood_region_area.x];
+  memset(max_state_lengths, 0, sizeof(u32) * neighbourhood_region_area.x);
 
   // The position of the central cell in the spacial array
   s32vec2 centre_cell_position = vec2_divide(neighbourhood_region_area, 2);
@@ -99,76 +161,27 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
        cell_n < n_cells;
        ++cell_n)
   {
+    PatternCellState *pattern_cell = rule_pattern->cell_states + cell_n;
     s32vec2 cell_delta = get_neighbourhood_region_cell_delta(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size, cell_n);
 
     // Add cell delta to the central position in the spacial array
     s32vec2 cell_position = vec2_add(centre_cell_position, cell_delta);
+    u32 spacial_array_position = (cell_position.y * neighbourhood_region_area.x) + cell_position.x;
+    ExtendableArray<char> *cell_string = cell_strings + spacial_array_position;
 
-    cell_spacial_array[(cell_position.y * neighbourhood_region_area.x) + cell_position.x] = &rule_pattern->cell_states[cell_n];
-  }
+    cell_string->allocate_array();
 
-  // Need to find the length of the widest cell for each column in this pattern so we can line up
-  //   the columns correctly.
-  u32 max_state_lengths[neighbourhood_region_area.x];
-  for (u32 column = 0;
-       column < neighbourhood_region_area.x;
-       ++column)
-  {
-    max_state_lengths[column] = 0;
-    for (u32 row = 0;
-         row < neighbourhood_region_area.y;
-         ++row)
+    if (pattern_cell != NULL)
     {
-      u32 this_cell_length = 0;
-
-      u32 cell_spacial_position = (row * neighbourhood_region_area.x) + column;
-      PatternCellState *pattern_cell = cell_spacial_array[cell_spacial_position];
-      if (pattern_cell != 0)
-      {
-        switch (pattern_cell->type)
-        {
-          case (PatternCellStateType::WILDCARD):
-          {
-            this_cell_length = 1;
-          } break;
-          case (PatternCellStateType::STATE):
-          {
-            if (pattern_cell->states_group.states_used > 1)
-            {
-              this_cell_length += 2;  // "[" ... "]"
-              this_cell_length += 2 * (pattern_cell->states_group.states_used-1);  // ", " between each state
-            }
-            for (u32 group_state_n = 0;
-                 group_state_n < pattern_cell->states_group.states_used;
-                 ++group_state_n)
-            {
-              CellState state = pattern_cell->states_group.states[group_state_n];
-              String state_name = get_state_name(&rule_config->named_states, state);
-              this_cell_length += string_length(state_name);
-            }
-          } break;
-          case (PatternCellStateType::NOT_STATE):
-          {
-            this_cell_length += 1;  // "!"
-            CellState state = pattern_cell->states_group.states[0];
-            String state_name = get_state_name(&rule_config->named_states, state);
-            this_cell_length += string_length(state_name);
-          } break;
-          case (PatternCellStateType::OR_STATE):
-          {
-            this_cell_length += 2;  // "(" ... ")"
-            CellState state = pattern_cell->states_group.states[0];
-            String state_name = get_state_name(&rule_config->named_states, state);
-            this_cell_length += string_length(state_name);
-          } break;
-        }
-      }
-
-      max_state_lengths[column] = max(max_state_lengths[column], this_cell_length);
+      serialise_pattern_cell_state(cell_string, pattern_cell, &rule_config->named_states);
     }
+
+    u32 cell_string_length = cell_string->n_elements;
+    max_state_lengths[cell_position.x] = max(max_state_lengths[cell_position.x], cell_string_length);
   }
 
-  // Iterate through the cell_spacial_array outputting each cell as a button
+
+  // Iterate through the cell_spacial_array outputting each cell text
   for (u32 row = 0;
        row < neighbourhood_region_area.y;
        ++row)
@@ -177,73 +190,12 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
          column < neighbourhood_region_area.x;
          ++column)
     {
-      u32 max_state_length = max_state_lengths[column];
-
       u32 cell_spacial_position = (row * neighbourhood_region_area.x) + column;
-      PatternCellState *pattern_cell = cell_spacial_array[cell_spacial_position];
+      ExtendableArray<char> cell_string = cell_strings[cell_spacial_position];
 
-      char buffer[max_state_length];
-      WriteString cell_string = {
-        .start = buffer,
-        .current_position = buffer,
-        .end = buffer + max_state_length
-      };
+      fprintf(file_stream, "%-*.*s  ", max_state_lengths[column], cell_string.n_elements, cell_string.elements);
 
-      if (pattern_cell != NULL)
-      {
-        switch (pattern_cell->type)
-        {
-          case (PatternCellStateType::WILDCARD):
-          {
-            append_string(&cell_string, new_string("*"));
-          } break;
-          case (PatternCellStateType::STATE):
-          {
-            if (pattern_cell->states_group.states_used > 1)
-            {
-              append_string(&cell_string, new_string("["));
-            }
-
-            for (u32 group_state_n = 0;
-                 group_state_n < pattern_cell->states_group.states_used;
-                 ++group_state_n)
-            {
-              CellState state = pattern_cell->states_group.states[group_state_n];
-              String state_name = get_state_name(&rule_config->named_states, state);
-              append_string(&cell_string, state_name);
-
-              if (group_state_n != pattern_cell->states_group.states_used-1)
-              {
-                append_string(&cell_string, new_string(", "));
-              }
-            }
-
-            if (pattern_cell->states_group.states_used > 1)
-            {
-              append_string(&cell_string, new_string("]"));
-            }
-          } break;
-          case (PatternCellStateType::NOT_STATE):
-          {
-            CellState state = pattern_cell->states_group.states[0];
-            String state_name = get_state_name(&rule_config->named_states, state);
-            append_string(&cell_string, new_string("!"));
-            append_string(&cell_string, state_name);
-          } break;
-          case (PatternCellStateType::OR_STATE):
-          {
-            CellState state = pattern_cell->states_group.states[0];
-            String state_name = get_state_name(&rule_config->named_states, state);
-            append_string(&cell_string, new_string("("));
-            append_string(&cell_string, state_name);
-            append_string(&cell_string, new_string(")"));
-          } break;
-        }
-      }
-
-      u32 buffer_length = cell_string.current_position - cell_string.start;
-      assert(buffer_length <= max_state_length);
-      fprintf(file_stream, "%-*.*s  ", max_state_length, buffer_length, cell_string.start);
+      cell_string.un_allocate_array();
     }
 
     fprintf(file_stream, "\n");

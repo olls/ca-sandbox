@@ -7,13 +7,16 @@
 = thread simulation
 - reduce tree building time
 - profiling tools
+- tom fosyth's initial ExtendableArray space
 
 # Functionality
-= fix rule pattern parsing to allow cell state groups in all places handled by UI, and ensure the tree building also handles these cases.
-- figure out explanation of "or" cell patterns
-- rule pattern groups/sets/blocks
-- better cell editing tools:
+= better cell editing tools:
   - selections: move, copy, paste
   - sub-modules
+- >= and <= in count matching
+- composite count matching comparison: (3 <= x <= 4) or (>= 3, <= 4)
+- figure out explanation of "or" cell patterns ("Match if one OR pattern cell matches")
+- rule pattern groups/sets/blocks
 - better parsing error messages (i.e: keep a line number counter?)
 - colour cells state buttons in rule patterns UI where only one state is used
+- file pickers should be modals

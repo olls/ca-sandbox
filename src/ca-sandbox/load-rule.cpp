@@ -17,89 +17,204 @@
 ///
 
 
+/// Parses a group of states from the string.  A group contains one or more named state; if it
+///   contains one state, the state can be listed naked (i.e: STATE_NAME ).  If the group contains
+///   more than one state, the list of states should be enclosed in square brackets, and separated
+///   with whitespace (i.e: [STATE_0 STATE_1 STATE_2] ).
+///
+b32
+read_states_group(NamedStates *named_states, String *string, CellStateGroup *group_states_result)
+{
+  b32 success = true;
+
+  consume_while(string, is_whitespace);
+
+  if (string->current_position[0] != '[')
+  {
+    // Just reading a single state into states[0]
+
+    success &= read_state_name(named_states, string, &group_states_result->states[0]);
+    group_states_result->states_used = 1;
+  }
+  else
+  {
+    String group_string = {
+      .start = string->current_position + 1,
+    };
+
+    // Find end of group
+    consume_until_char(string, ']');
+    group_string.end = string->current_position;
+
+    group_string.current_position = group_string.start;
+
+    if (group_string.end == string->end)
+    {
+      print("Error: Couldn't find cell state group end.\n");
+      success &= false;
+    }
+    else
+    {
+      // Use temporary ExtendableArray to read in the states
+      ExtendableArray<CellState> states;
+      states.allocate_array();
+      read_named_states_list(named_states, group_string, &states);
+
+      if (states.n_elements > MAX_PATTERN_STATES_GROUP)
+      {
+        success &= false;
+        print("Error: Too many states in count matching group.\n");
+      }
+      else
+      {
+        memcpy(group_states_result->states, states.elements, states.n_elements * states.element_size);
+        group_states_result->states_used = states.n_elements;
+      }
+
+      states.un_allocate_array();
+    }
+  }
+
+  return success;
+}
+
+
 b32
 read_count_matching_value(NamedStates *named_states, String *count_matching_string, RulePattern *rule_pattern_result)
 {
   b32 success = true;
   rule_pattern_result->count_matching.enabled = false;
 
-  // Read states group between []
-  consume_until_char(count_matching_string, '[');
-  String group_string;
-  group_string.start = count_matching_string->current_position + 1;
-  group_string.current_position = group_string.start;
+  b32 states_group_success = read_states_group(named_states, count_matching_string, &rule_pattern_result->count_matching.states_group);
 
-  // Find end of group
-  consume_until_char(count_matching_string, ']');
-  group_string.end = count_matching_string->current_position;
-
-  if (group_string.end == count_matching_string->end)
+  if (!states_group_success)
   {
-    print("Error: Couldn't find cell state group in count matching in pattern.\n");
     success &= false;
+    print("Error: Couldn't read states group in pattern count matching.\n");
   }
   else
   {
-    ExtendableArray<CellState> states;
-    states.allocate_array();
-    read_named_states_list(named_states, group_string, &states);
-    if (states.n_elements > MAX_PATTERN_STATES_GROUP)
+    consume_until_char(count_matching_string, ',');
+
+    if (count_matching_string->current_position == count_matching_string->end)
     {
-      states.un_allocate_array();
+      print("Error in count_matching rule matching state.\n");
       success &= false;
-      print("Error: Too many states in count matching group.\n");
     }
     else
     {
-      // Copy contents of the temporary Extendable array into count_matching.states_group
-      memcpy(&rule_pattern_result->count_matching.states_group.states, states.elements, states.n_elements*states.element_size);
-      rule_pattern_result->count_matching.states_group.states_used = states.n_elements;
-
-      states.un_allocate_array();
-
-      consume_until_char(count_matching_string, ',');
-
-      if (count_matching_string->current_position == count_matching_string->end)
+      consume_until(count_matching_string, is_comparison_op);
+      if (count_matching_string->current_position[0] == '>')
       {
-        print("Error in count_matching rule matching state.\n");
-        success &= false;
+        rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN;
+      }
+      else if (count_matching_string->current_position[0] == '<')
+      {
+        rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN;
+      }
+      else if (count_matching_string->current_position[0] == '=')
+      {
+        rule_pattern_result->count_matching.comparison = ComparisonOp::EQUALS;
       }
       else
       {
-        consume_until(count_matching_string, is_comparison_op);
-        if (count_matching_string->current_position[0] == '>')
+        print("Error in count_matching rule count comparison.\n");
+        success &= false;
+      }
+
+      if (success)
+      {
+        consume_until(count_matching_string, is_num);
+        if (count_matching_string->current_position == count_matching_string->end)
         {
-          rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN;
-        }
-        else if (count_matching_string->current_position[0] == '<')
-        {
-          rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN;
-        }
-        else if (count_matching_string->current_position[0] == '=')
-        {
-          rule_pattern_result->count_matching.comparison = ComparisonOp::EQUALS;
+          print("Error in count_matching rule comparison number.\n");
+          success &= false;
         }
         else
         {
-          print("Error in count_matching rule count comparison.\n");
-          success &= false;
-        }
-
-        if (success)
-        {
-          consume_until(count_matching_string, is_num);
-          if (count_matching_string->current_position == count_matching_string->end)
-          {
-            print("Error in count_matching rule comparison number.\n");
-            success &= false;
-          }
-          else
-          {
-            rule_pattern_result->count_matching.comparison_n = get_u32(count_matching_string);
-            rule_pattern_result->count_matching.enabled = true;
-          }
+          rule_pattern_result->count_matching.comparison_n = get_u32(count_matching_string);
+          rule_pattern_result->count_matching.enabled = true;
         }
       }
+    }
+  }
+
+  return success;
+}
+
+
+/// Read a single PatternCellState from pattern_block.
+///
+/// This could be one of:
+/// - '*'         Wildcard
+/// - '(states)'  OR: Match if one OR pattern cell matches
+/// - !states     All except this state
+/// - states      Match state
+/// Where 'states' is either a single state name, or a group of state names enclosed within '[]'
+///
+b32
+read_rule_pattern_cell(NamedStates *named_states, String *pattern_block, PatternCellState *this_cell_state_pattern)
+{
+  b32 success = true;
+
+  b32 read_following_states_group = false;
+  String states_group_bounds = {
+    .start = pattern_block->current_position,
+    .end = pattern_block->end
+  };
+
+  if (pattern_block->current_position[0] == '*')
+  {
+    this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
+    read_following_states_group = false;
+    ++pattern_block->current_position;
+    this_cell_state_pattern->states_group.states_used = 0;
+  }
+  else if (pattern_block->current_position[0] == '(')
+  {
+    // TODO: Need better name than OR_STATE
+
+    this_cell_state_pattern->type = PatternCellStateType::OR_STATE;
+    read_following_states_group = true;
+
+    states_group_bounds.start = pattern_block->current_position + 1;
+    states_group_bounds.current_position = states_group_bounds.start;
+
+    // Find end of group
+    consume_until_char(pattern_block, ')');
+    states_group_bounds.end = pattern_block->current_position;
+
+    if (states_group_bounds.end == pattern_block->end)
+    {
+      print("Error: Couldn't find end ')' of 'or' cell state in pattern.\n");
+      success &= false;
+    }
+  }
+  else if (pattern_block->current_position[0] == '!')
+  {
+    this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
+    read_following_states_group = true;
+    // Cannot constrain states_group_bounds for not pattern
+  }
+  else
+  {
+    this_cell_state_pattern->type = PatternCellStateType::STATE;
+    read_following_states_group = true;
+  }
+
+  if (read_following_states_group)
+  {
+    states_group_bounds.current_position = states_group_bounds.start;
+
+    b32 states_group_success = read_states_group(named_states, &states_group_bounds, &this_cell_state_pattern->states_group);
+    if (!states_group_success)
+    {
+      print("Error: Couldn't find end of cell state group in pattern.\n");
+      success &= false;
+    }
+    else
+    {
+      pattern_block->current_position = max(pattern_block->current_position, states_group_bounds.current_position);
     }
   }
 
@@ -115,6 +230,42 @@ is_pattern_cell_state_start_character(char character)
 }
 
 
+/// Reads n_inputs number of PatternCellStates sequentially from the pattern_block, storing them in
+/// rule_pattern_result.
+///
+b32
+read_rule_pattern_cells(NamedStates *named_states, String pattern_block, u32 n_inputs, RulePattern *rule_pattern_result)
+{
+  b32 success = true;
+
+  for (u32 cell_n = 0;
+       cell_n < n_inputs;
+       ++cell_n)
+  {
+    consume_until(&pattern_block, is_pattern_cell_state_start_character);
+
+    if (pattern_block.current_position == pattern_block.end)
+    {
+      success &= false;
+      break;
+    }
+    else
+    {
+      PatternCellState *this_cell_state_pattern = rule_pattern_result->cell_states + cell_n;
+      success &= read_rule_pattern_cell(named_states, &pattern_block, this_cell_state_pattern);
+      if (!success)
+      {
+        break;
+      }
+    }
+  }
+
+  return success;
+}
+
+
+/// Parses a single RulePattern struct from the current position in the file_string.
+///
 b32
 read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, RulePattern *rule_pattern_result)
 {
@@ -132,6 +283,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
     consume_while(&line, is_label_char);
     label.end = line.current_position;
 
+    // Pattern marks the start of a RulePattern definition
     if (string_equals(label, "Pattern:"))
     {
       found_pattern = true;
@@ -208,7 +360,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
         return success;
       }
 
-      // Bounds for the whole of this pattern rule
+      // Find bounds for the whole of this RulePattern
       String pattern_block = {
         .start = line.end,
         .current_position = line.end,
@@ -236,127 +388,7 @@ read_rule_pattern(NamedStates *named_states, String *file_string, u32 n_inputs, 
       file_string->current_position = pattern_block.end;
 
       // Get pattern of cells
-
-      for (u32 cell_n = 0;
-           cell_n < n_inputs;
-           ++cell_n)
-      {
-        consume_until(&pattern_block, is_pattern_cell_state_start_character);
-
-        if (pattern_block.current_position == pattern_block.end)
-        {
-          success &= false;
-          break;
-        }
-        else
-        {
-          PatternCellState *this_cell_state_pattern = rule_pattern_result->cell_states + cell_n;
-
-          if (pattern_block.current_position[0] == '[')
-          {
-            this_cell_state_pattern->type = PatternCellStateType::STATE;
-
-            String group_string;
-            group_string.start = pattern_block.current_position + 1;
-            group_string.current_position = group_string.start;
-
-            // Find end of group
-            consume_until_char(&pattern_block, ']');
-            group_string.end = pattern_block.current_position;
-
-            if (group_string.end == pattern_block.end)
-            {
-              print("Error: Couldn't find end of cell state group in pattern.\n");
-              success &= false;
-              break;
-            }
-            else
-            {
-              this_cell_state_pattern->states_group.states_used = 0;
-              b32 got_state = true;
-              while (got_state && this_cell_state_pattern->states_group.states_used < MAX_PATTERN_STATES_GROUP)
-              {
-                CellState *state_slot = this_cell_state_pattern->states_group.states + this_cell_state_pattern->states_group.states_used;
-                got_state &= read_state_name(named_states, &group_string, state_slot);
-
-                if (got_state)
-                {
-                  this_cell_state_pattern->states_group.states_used += 1;
-                }
-              }
-            }
-          }
-          else if (pattern_block.current_position[0] == '(')
-          {
-            // TODO: Allow state group in OR_STATE
-            // TODO: Need better name than OR_STATE
-
-            this_cell_state_pattern->type = PatternCellStateType::OR_STATE;
-
-            String or_state_string;
-            or_state_string.start = pattern_block.current_position + 1;
-            or_state_string.current_position = or_state_string.start;
-
-            // Find end of group
-            consume_until_char(&pattern_block, ')');
-            or_state_string.end = pattern_block.current_position;
-
-            if (or_state_string.end == pattern_block.end)
-            {
-              print("Error: Couldn't find end ')' of 'or' cell state in pattern.\n");
-              success &= false;
-              break;
-            }
-            else
-            {
-              b32 got_state = read_state_name(named_states, &or_state_string, &this_cell_state_pattern->states_group.states[0]);
-              if (!got_state)
-              {
-                print("Error: Couldn't read cell state in 'or' state in pattern.\n");
-                success &= false;
-                break;
-              }
-              else
-              {
-                this_cell_state_pattern->states_group.states_used = 1;
-              }
-            }
-          }
-          else if (pattern_block.current_position[0] == '*')
-          {
-            this_cell_state_pattern->type = PatternCellStateType::WILDCARD;
-            ++pattern_block.current_position;
-            this_cell_state_pattern->states_group.states_used = 0;
-          }
-          else if (pattern_block.current_position[0] == '!')
-          {
-            // TODO: Allow state group after not
-
-            this_cell_state_pattern->type = PatternCellStateType::NOT_STATE;
-
-            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states_group.states[0]);
-            this_cell_state_pattern->states_group.states_used = 1;
-
-            if (!success)
-            {
-              print("Error in rule pattern's pattern.\n");
-              break;
-            }
-          }
-          else
-          {
-            this_cell_state_pattern->type = PatternCellStateType::STATE;
-            success &= read_state_name(named_states, &pattern_block, &this_cell_state_pattern->states_group.states[0]);
-            this_cell_state_pattern->states_group.states_used = 1;
-
-            if (!success)
-            {
-              print("Error in rule pattern's pattern.\n");
-              break;
-            }
-          }
-        }
-      }
+      success &= read_rule_pattern_cells(named_states, pattern_block, n_inputs, rule_pattern_result);
 
       // Get any optional labels for this pattern
 
@@ -428,6 +460,128 @@ read_rule_neighbourhood_region_shape_value(String neighbourhood_region_shape_str
   }
 
   return success;
+}
+
+
+void
+debug_print_neighbourhood_region(RuleConfiguration *rule_config)
+{
+  print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
+  print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
+}
+
+
+void
+debug_print_null_states(RuleConfiguration *rule_config)
+{
+  print("n_null_states: %d\n", rule_config->null_states.n_elements);
+  print("null_states:");
+  for (u32 i = 0;
+       i < rule_config->null_states.n_elements;
+       ++i)
+  {
+    print(" %d", *rule_config->null_states.get(i));
+  }
+  print("\n");
+}
+
+
+void
+debug_print_rule_patterns(RuleConfiguration *rule_config)
+{
+  u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
+
+  print("n_rule_patterns: %d\n", rule_config->rule_patterns.n_elements);
+  for (u32 rule_pattern_n = 0;
+       rule_pattern_n < rule_config->rule_patterns.n_elements;
+       ++rule_pattern_n)
+  {
+    RulePattern *rule_pattern = rule_config->rule_patterns.get(rule_pattern_n);
+    print("Rule Pattern:\n");
+    print("  result: %d\n", rule_pattern->result);
+    print("  cells: ");
+    for (u32 cell_n = 0;
+         cell_n < n_inputs;
+         ++cell_n)
+    {
+      b32 print_group = false;
+      const char *prefix = "";
+      const char *postfix = "";
+
+      PatternCellState cell = rule_pattern->cell_states[cell_n];
+      if (cell.type == PatternCellStateType::WILDCARD)
+      {
+        print("* ");
+      }
+      else if (cell.type == PatternCellStateType::STATE)
+      {
+        print_group = true;
+      }
+      else if (cell.type == PatternCellStateType::NOT_STATE)
+      {
+        print_group = true;
+        prefix = "!";
+        postfix = "";
+      }
+      else if (cell.type == PatternCellStateType::OR_STATE)
+      {
+        print_group = true;
+        prefix = "(";
+        postfix = ")";
+      }
+
+      print("%s", prefix);
+      if (print_group)
+      {
+        if (cell.states_group.states_used > 1)
+        {
+          print("[");
+        }
+        for (u32 group_state_n = 0;
+             group_state_n < cell.states_group.states_used;
+             ++group_state_n)
+        {
+          String state_name = get_state_name(&rule_config->named_states, cell.states_group.states[group_state_n]);
+          print("%.*s ", string_length(state_name), state_name.start);
+        }
+        if (cell.states_group.states_used > 1)
+        {
+          print("]");
+        }
+      }
+      print("%s ", postfix);
+    }
+    print("\n");
+
+    if (rule_pattern->count_matching.enabled)
+    {
+      char comparison;
+      switch (rule_pattern->count_matching.comparison)
+      {
+        case (ComparisonOp::GREATER_THAN):
+        {
+          comparison = '>';
+        } break;
+        case (ComparisonOp::LESS_THAN):
+        {
+          comparison = '<';
+        } break;
+        case (ComparisonOp::EQUALS):
+        {
+          comparison = '=';
+        } break;
+      }
+
+      print("  count_matching: [");
+      for (u32 count_matching_state_n = 0;
+           count_matching_state_n < rule_pattern->count_matching.states_group.states_used;
+           ++count_matching_state_n)
+      {
+        print("%d", rule_pattern->count_matching.states_group.states[count_matching_state_n]);
+      }
+      print("], %c %d\n", comparison, rule_pattern->count_matching.comparison_n);
+    }
+  }
 }
 
 
@@ -509,18 +663,11 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     else
     {
       debug_print_named_states(&rule_config->named_states);
+      debug_print_neighbourhood_region(rule_config);
+      debug_print_null_states(rule_config);
 
-      print("neighbourhood_region_shape: %s\n", rule_config->neighbourhood_region_shape == NeighbourhoodRegionShape::VON_NEUMANN ? "VON_NEUMANN" : "MOORE");
-      print("neighbourhood_region_size: %d\n", rule_config->neighbourhood_region_size);
-      print("n_null_states: %d\n", rule_config->null_states.n_elements);
-      print("null_states:");
-      for (u32 i = 0;
-           i < rule_config->null_states.n_elements;
-           ++i)
-      {
-        print(" %d", *rule_config->null_states.get(i));
-      }
-      print("\n");
+      // Parse the RulePatterns
+      //
 
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
@@ -535,75 +682,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       }
       else
       {
-        print("n_rule_patterns: %d\n", rule_config->rule_patterns.n_elements);
-        for (u32 rule_pattern_n = 0;
-             rule_pattern_n < rule_config->rule_patterns.n_elements;
-             ++rule_pattern_n)
-        {
-          RulePattern *rule_pattern = rule_config->rule_patterns.get(rule_pattern_n);
-          print("Rule Pattern:\n");
-          print("  result: %d\n", rule_pattern->result);
-          print("  cells: ");
-          for (u32 cell_n = 0;
-               cell_n < n_inputs;
-               ++cell_n)
-          {
-            PatternCellState cell = rule_pattern->cell_states[cell_n];
-            if (cell.type == PatternCellStateType::WILDCARD)
-            {
-              print("* ");
-            }
-            else if (cell.type == PatternCellStateType::STATE)
-            {
-              if (cell.states_group.states_used > 1) print("[");
-              for (u32 group_state_n = 0;
-                   group_state_n < cell.states_group.states_used;
-                   ++group_state_n)
-              {
-                print("%d ", cell.states_group.states[group_state_n]);
-              }
-              if (cell.states_group.states_used > 1) print("] ");
-            }
-            else if (cell.type == PatternCellStateType::NOT_STATE)
-            {
-              print("!%d ", cell.states_group.states[0]);
-            }
-            else if (cell.type == PatternCellStateType::OR_STATE)
-            {
-              print("(%d) ", cell.states_group.states[0]);
-            }
-          }
-          print("\n");
-
-          if (rule_pattern->count_matching.enabled)
-          {
-            char comparison;
-            switch (rule_pattern->count_matching.comparison)
-            {
-              case (ComparisonOp::GREATER_THAN):
-              {
-                comparison = '>';
-              } break;
-              case (ComparisonOp::LESS_THAN):
-              {
-                comparison = '<';
-              } break;
-              case (ComparisonOp::EQUALS):
-              {
-                comparison = '=';
-              } break;
-            }
-
-            print("  count_matching: [");
-            for (u32 count_matching_state_n = 0;
-                 count_matching_state_n < rule_pattern->count_matching.states_group.states_used;
-                 ++count_matching_state_n)
-            {
-              print("%d", rule_pattern->count_matching.states_group.states[count_matching_state_n]);
-            }
-            print("], %c %d\n", comparison, rule_pattern->count_matching.comparison_n);
-          }
-        }
+        debug_print_rule_patterns(rule_config);
       }
     }
 

@@ -50,14 +50,14 @@ Result: O
 * B *
 * * *
 
-Pattern:
+Pattern: Survives
 Result: X
 * * *
 * X *
 * * *
 count_matching: [X], = 4
 
-Pattern:
+Pattern: Survives
 Result: X
 * * *
 * X *

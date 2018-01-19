@@ -35,6 +35,10 @@ new_string(const char *c_string)
 }
 
 
+/// Creates a String pointing to memory on the stack, using a format string + args
+///
+/// This is very prone to memory leaks (i.e: user not likely to call free(result.start) )
+///
 String
 new_string_fmt(const char *c_string_format, ...)
 {
@@ -98,6 +102,13 @@ append_string(WriteString *dest, String source)
   u32 copy_length = min(string_length(source), (u32)(dest->end - dest->current_position));
   copy_string(dest->current_position, source.start, copy_length);
   dest->current_position += copy_length;
+}
+
+
+void
+append_string(ExtendableArray<char> *extendable_string, String source)
+{
+  extendable_string->add(string_length(source), (char *)source.start);
 }
 
 

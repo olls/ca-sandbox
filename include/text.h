@@ -4,6 +4,7 @@
 #include "types.h"
 #include "vectors.h"
 #include "files.h"
+#include "extendable-array.h"
 
 /// @file
 /// @brief  Text utilities
@@ -52,6 +53,10 @@ copy_string(char *dest, const char *source, u32 size);
 
 void
 append_string(WriteString *dest, String source);
+
+
+void
+append_string(ExtendableArray<char> *extendable_string, String source);
 
 
 b32

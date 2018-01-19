@@ -187,11 +187,13 @@ get_state_name(NamedStates *named_states, CellState state)
 {
   String result = {};
 
+  // The state values do not correspond to the states positions in named_states
+
   for (u32 state_index = 0;
        state_index < named_states->states.n_elements;
        ++state_index)
   {
-    NamedState *named_state = named_states->states.get(state);
+    NamedState *named_state = named_states->states.get(state_index);
 
     if (named_state->value == state)
     {
