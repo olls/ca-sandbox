@@ -294,6 +294,9 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
     if (success)
     {
+      // Overwrite default initial states
+      cell_initialisation_options->set_of_initial_states.n_elements = 0;
+
       read_named_states_list(named_states, initial_states_string, &cell_initialisation_options->set_of_initial_states);
 
       if (cell_initialisation_options->set_of_initial_states.n_elements == 0)

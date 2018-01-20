@@ -334,7 +334,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     if (universe_ui->save_cells_file)
     {
       universe_ui->save_cells_file = false;
-      result.success &= save_universe_to_file(universe_ui->cells_file_picker.selected_file, universe, simulate_options, &loaded_rule->config.named_states);
+      result.success &= save_universe_to_file(universe_ui->cells_file_picker.selected_file, universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     }
 
     if (rule_ui->save_rule_file)

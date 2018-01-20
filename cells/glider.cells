@@ -1,4 +1,3 @@
-n_cell_blocks: 1
 cell_block_dim: 8
 
 border_type: INFINITE
@@ -7,13 +6,17 @@ border_min_cell: 0 0
 border_max_block: 10 10
 border_max_cell: 0 0
 
-CellBlock: 0, 0
-X X X O O X X X 
-X O O O O O O X 
-O X O O O O X O 
-O O O N N O O O 
-O O O N N O O O 
-O X O O O O X O 
-X O O O O O O X 
-X X X O O X X X 
+initialisation_type: RANDOM
+initial_states: O
 
+CellBlock: 0, 0
+X  X  X  O  O  X  X  X
+X  O  O  O  O  O  O  X
+O  X  O  O  O  O  X  O
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+O  X  O  O  O  O  X  O
+X  O  O  O  O  O  O  X
+X  X  X  O  O  X  X  X
+
+n_cell_blocks: 1

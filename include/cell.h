@@ -23,9 +23,14 @@ struct Cell
 };
 
 
-enum struct CellInitialisationType
+enum struct CellInitialisationType : u32
 {
   RANDOM
+};
+
+
+static const char *CELL_INITIALISATION_TYPE_STRINGS[] = {
+  "RANDOM"
 };
 
 

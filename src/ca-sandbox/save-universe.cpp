@@ -13,9 +13,6 @@
 /// @brief  Functions for saving a Universe object and all of its CellBlock%s to a .cells file
 ///
 
-// TODO: Update the file format
-// TODO: Fix long state names not working
-
 
 void
 serialise_simulate_options(FILE *file_stream, SimulateOptions *simulate_options)
@@ -44,8 +41,27 @@ serialise_simulate_options(FILE *file_stream, SimulateOptions *simulate_options)
 }
 
 
+void
+serialise_cell_initialisation_options(FILE *file_stream, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+{
+  const char *initialisation_type_string = CELL_INITIALISATION_TYPE_STRINGS[(u32)cell_initialisation_options->type];
+  fprintf(file_stream, "initialisation_type: %s\n", initialisation_type_string);
+
+  fprintf(file_stream, "initial_states: ");
+  for (u32 initial_state_n = 0;
+       initial_state_n < cell_initialisation_options->set_of_initial_states.n_elements;
+       ++initial_state_n)
+  {
+    CellState initial_state = *cell_initialisation_options->set_of_initial_states.get(initial_state_n);
+    String initial_state_name = get_state_name(named_states, initial_state);
+    fprintf(file_stream, "%.*s ", string_length(initial_state_name), initial_state_name.start);
+  }
+  fprintf(file_stream, "\n\n");
+}
+
+
 b32
-save_universe_to_file(const char *filename, Universe *universe, SimulateOptions *simulate_options, NamedStates *named_states)
+save_universe_to_file(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
 {
   b32 success = true;
 
@@ -59,6 +75,7 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
   {
     fprintf(file_stream, "cell_block_dim: %d\n\n", universe->cell_block_dim);
     serialise_simulate_options(file_stream, simulate_options);
+    serialise_cell_initialisation_options(file_stream, cell_initialisation_options, named_states);
 
     u32 max_state_length = get_longest_state_name_length(named_states);
 

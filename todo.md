@@ -13,6 +13,8 @@
 = better cell editing tools:
   - selections: move, copy, paste
   - sub-modules
+- cell initialisation options ui
+- ability to specify associated .rule file in .cells file
 - composite count matching comparison: (3 <= x <= 4) or (>= 3, <= 4)
 - figure out explanation of "or" cell patterns ("Match if one OR pattern cell matches")
 - rule pattern groups/sets/blocks

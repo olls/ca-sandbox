@@ -7,7 +7,7 @@
 
 
 b32
-save_universe_to_file(const char *filename, Universe *universe, SimulateOptions *simulate_options, NamedStates *named_states);
+save_universe_to_file(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
 
 
 #endif
