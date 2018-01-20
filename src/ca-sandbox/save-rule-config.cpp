@@ -104,6 +104,23 @@ serialise_state_group(ExtendableArray<char> *string, CellStateGroup *group, Name
 
 
 void
+serialise_count_matching(FILE *file_stream, CountMatching *count_matching, NamedStates *named_states)
+{
+  if (count_matching->enabled)
+  {
+    ExtendableArray<char> states_group_string;
+    states_group_string.allocate_array();
+    serialise_state_group(&states_group_string, &count_matching->states_group, named_states);
+
+    const char *comparison_string = COMPARISON_OPERATOR_STRINGS[(u32)count_matching->comparison];
+
+    fprintf(file_stream, "count_matching: %.*s, %s %d\n", states_group_string.n_elements, states_group_string.elements, comparison_string, count_matching->comparison_n);
+    states_group_string.un_allocate_array();
+  }
+}
+
+
+void
 serialise_pattern_cell_state(ExtendableArray<char> *cell_string, PatternCellState *pattern_cell, NamedStates *named_states)
 {
   switch (pattern_cell->type)
@@ -180,7 +197,6 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
     max_state_lengths[cell_position.x] = max(max_state_lengths[cell_position.x], cell_string_length);
   }
 
-
   // Iterate through the cell_spacial_array outputting each cell text
   for (u32 row = 0;
        row < neighbourhood_region_area.y;
@@ -200,6 +216,9 @@ serialise_rule_pattern(FILE *file_stream, RulePattern *rule_pattern, RuleConfigu
 
     fprintf(file_stream, "\n");
   }
+
+  serialise_count_matching(file_stream, &rule_pattern->count_matching, &rule_config->named_states);
+
   fprintf(file_stream, "\n\n");
 }
 

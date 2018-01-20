@@ -1,36 +1,42 @@
+neighbourhood_region_shape: MOORE
+neighbourhood_region_size: 1
+
 n_states: 2
 State: O
 State: X
 
 null_states: O
 
-neighbourhood_region_shape: MOORE
-neighbourhood_region_size: 1
 
 Pattern: Dies under-population
 Result: O
-* * *
-* X *
-* * *
-count_matching: [X, O], < 2
+*  *  *  
+*  X  *  
+*  *  *  
+count_matching: X, < 2
+
 
 Pattern: Survives
 Result: X
-* * *
-* X *
-* * *
-count_matching: [X], < 4
+*  *  *  
+*  X  *  
+*  *  *  
+count_matching: X, < 4
+
 
 Pattern: Dies overpopulation
 Result: O
-* * *
-* X *
-* * *
-count_matching: [X], > 3
+*  *  *  
+*  X  *  
+*  *  *  
+count_matching: X, > 3
+
 
 Pattern: Born
 Result: X
-* * *
-* O *
-* * *
-count_matching: [X], = 3
+*  *  *  
+*  O  *  
+*  *  *  
+count_matching: X, = 3
+
+

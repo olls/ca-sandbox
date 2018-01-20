@@ -66,6 +66,15 @@ struct PatternCellState
 };
 
 
+struct CountMatching
+{
+  b32 enabled;
+  CellStateGroup states_group;
+  ComparisonOp comparison;
+  u32 comparison_n;
+};
+
+
 const u32 MAX_COMMENT_LENGTH = 512;
 
 struct RulePattern
@@ -73,13 +82,7 @@ struct RulePattern
   char comment[MAX_COMMENT_LENGTH];
   CellState result;
 
-  struct
-  {
-    b32 enabled;
-    CellStateGroup states_group;
-    ComparisonOp comparison;
-    u32 comparison_n;
-  } count_matching;
+  CountMatching count_matching;
 
   /// Left-to-right, top-to-bottom list of cell states in pattern
   PatternCellState cell_states[];
