@@ -12,7 +12,7 @@ Result: O
 * * *
 * X *
 * * *
-count_matching: [X], < 2
+count_matching: [X, O], < 2
 
 Pattern: Survives
 Result: X

@@ -8,15 +8,19 @@
 enum struct ComparisonOp : u32
 {
   GREATER_THAN,
-  LESS_THAN,
-  EQUALS
+  GREATER_THAN_EQUAL,
+  EQUAL,
+  LESS_THAN_EQUAL,
+  LESS_THAN
 };
 
 
 static const char *COMPARISON_OPERATOR_STRINGS[] = {
   ">",
-  "<",
-  "="
+  ">=",
+  "=",
+  "<=",
+  "<"
 };
 
 

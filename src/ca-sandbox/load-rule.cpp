@@ -106,15 +106,29 @@ read_count_matching_value(NamedStates *named_states, String *count_matching_stri
       consume_until(count_matching_string, is_comparison_op);
       if (count_matching_string->current_position[0] == '>')
       {
-        rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN;
+        if (count_matching_string->current_position[1] == '=')
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN_EQUAL;
+        }
+        else
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::GREATER_THAN;
+        }
       }
       else if (count_matching_string->current_position[0] == '<')
       {
-        rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN;
+        if (count_matching_string->current_position[1] == '=')
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN_EQUAL;
+        }
+        else
+        {
+          rule_pattern_result->count_matching.comparison = ComparisonOp::LESS_THAN;
+        }
       }
       else if (count_matching_string->current_position[0] == '=')
       {
-        rule_pattern_result->count_matching.comparison = ComparisonOp::EQUALS;
+        rule_pattern_result->count_matching.comparison = ComparisonOp::EQUAL;
       }
       else
       {
@@ -555,22 +569,7 @@ debug_print_rule_patterns(RuleConfiguration *rule_config)
 
     if (rule_pattern->count_matching.enabled)
     {
-      char comparison;
-      switch (rule_pattern->count_matching.comparison)
-      {
-        case (ComparisonOp::GREATER_THAN):
-        {
-          comparison = '>';
-        } break;
-        case (ComparisonOp::LESS_THAN):
-        {
-          comparison = '<';
-        } break;
-        case (ComparisonOp::EQUALS):
-        {
-          comparison = '=';
-        } break;
-      }
+      const char *comparison = COMPARISON_OPERATOR_STRINGS[(u32)rule_pattern->count_matching.comparison];
 
       print("  count_matching: [");
       for (u32 count_matching_state_n = 0;
@@ -579,7 +578,7 @@ debug_print_rule_patterns(RuleConfiguration *rule_config)
       {
         print("%d", rule_pattern->count_matching.states_group.states[count_matching_state_n]);
       }
-      print("], %c %d\n", comparison, rule_pattern->count_matching.comparison_n);
+      print("], %s %d\n", comparison, rule_pattern->count_matching.comparison_n);
     }
   }
 }

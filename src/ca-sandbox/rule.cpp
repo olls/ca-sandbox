@@ -171,13 +171,22 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
         {
           matches = number_of_neighbours_matching_count_matching_states > rule_pattern->count_matching.comparison_n;
         }
+        else
+        if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN_EQUAL)
+        {
+          matches = number_of_neighbours_matching_count_matching_states >= rule_pattern->count_matching.comparison_n;
+        }
+        else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUAL)
+        {
+          matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
+        }
+        else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN_EQUAL)
+        {
+          matches = number_of_neighbours_matching_count_matching_states <= rule_pattern->count_matching.comparison_n;
+        }
         else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN)
         {
           matches = number_of_neighbours_matching_count_matching_states < rule_pattern->count_matching.comparison_n;
-        }
-        else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUALS)
-        {
-          matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
         }
       }
 
