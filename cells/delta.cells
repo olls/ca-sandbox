@@ -6,15 +6,18 @@ border_min_cell: 0 0
 border_max_block: 10 10
 border_max_cell: 0 0
 
+initialisation_type: RANDOM
+initial_states: O
+
 CellBlock: 0, 0
 O  O  O  O
 O  O  O  O
-O  O  O  X
-O  O  O  X
+O  B  A  X
+A  Z  O  X
 
 CellBlock: 1, 0
 O  O  O  O
-O  O  O  O
+O  O  O  B
 X  O  X  O
 Y  X  X  X
 
@@ -22,18 +25,18 @@ CellBlock: 0, 1
 X  Y  O  X
 X  X  O  Y
 X  X  O  X
-O  O  O  Y
+O  O  B  Y
 
 CellBlock: 2, 0
-O  Y  O  O
-O  X  X  X
-O  O  Y  X
+A  Y  O  O
+Z  X  X  X
+O  A  Y  X
 X  X  X  X
 
 CellBlock: 1, 1
 O  X  O  X
 O  X  O  X
-O  X  X  X
+Z  X  X  X
 X  O  X  O
 
 CellBlock: 3, 0
@@ -52,10 +55,10 @@ CellBlock: 2, 1
 O  X  O  O
 O  X  O  O
 X  X  X  X
-O  O  Y  X
+O  A  Y  X
 
 CellBlock: 1, 2
-O  O  O  O
+O  O  O  B
 O  O  O  O
 O  O  O  O
 O  O  O  O
@@ -67,8 +70,8 @@ O  O  O  O
 X  O  O  O
 
 CellBlock: 2, 2
-O  X  X  X
-O  Y  O  O
+Z  X  X  X
+A  Y  O  O
 O  O  O  O
 O  O  O  O
 
