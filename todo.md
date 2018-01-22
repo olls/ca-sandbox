@@ -6,8 +6,8 @@
 = save trees to save building large trees every time
 = thread simulation
 - reduce tree building time
+- tree build timer
 - profiling tools
-- tom fosyth's initial ExtendableArray space
 
 # Functionality
 = better cell editing tools:
@@ -21,3 +21,4 @@
 - better parsing error messages (i.e: keep a line number counter?)
 - colour cells state buttons in rule patterns UI where only one state is used
 - file pickers should be modals
+- reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)

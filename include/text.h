@@ -4,7 +4,7 @@
 #include "types.h"
 #include "vectors.h"
 #include "files.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 /// @file
 /// @brief  Text utilities
@@ -56,7 +56,7 @@ append_string(WriteString *dest, String source);
 
 
 void
-append_string(ExtendableArray<char> *extendable_string, String source);
+append_string(Array::Array<char>& dynamic_string, String source);
 
 
 b32

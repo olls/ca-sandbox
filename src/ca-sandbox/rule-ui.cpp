@@ -8,7 +8,7 @@
 #include "util.h"
 #include "file-picker.h"
 #include "comparison-operator.h"
-#include "extendable-array.h"
+#include "my-array.h"
 #include "colour.h"
 
 #include "neighbourhood-region.h"
@@ -36,7 +36,7 @@ multi_cell_state_selector(CellStateGroup *states_group, NamedStates *named_state
        state_n < named_states->states.n_elements;
        ++state_n)
   {
-    NamedState *named_state = named_states->states.get(state_n);
+    NamedState& named_state = named_states->states[state_n];
 
     bool state_was_selected = false;
     u32 previously_selected_state_position_in_group;
@@ -47,7 +47,7 @@ multi_cell_state_selector(CellStateGroup *states_group, NamedStates *named_state
          ++state_n)
     {
       CellState test_state = states_group->states[state_n];
-      if (test_state == named_state->value)
+      if (test_state == named_state.value)
       {
         state_was_selected = true;
         previously_selected_state_position_in_group = state_n;
@@ -56,7 +56,7 @@ multi_cell_state_selector(CellStateGroup *states_group, NamedStates *named_state
     }
 
     ImGui::PushID(state_n);
-    vec4 state_colour = get_state_colour(named_state->value);
+    vec4 state_colour = get_state_colour(named_state.value);
     ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
     ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
     ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
@@ -69,7 +69,7 @@ multi_cell_state_selector(CellStateGroup *states_group, NamedStates *named_state
     ImGui::SameLine();
 
     ImGui::PushItemWidth(-70);
-    ImGui::Text("%.*s", string_length(named_state->name), named_state->name.start);
+    ImGui::Text("%.*s", string_length(named_state.name), named_state.name.start);
 
     ImGui::PopID();
 
@@ -86,7 +86,7 @@ multi_cell_state_selector(CellStateGroup *states_group, NamedStates *named_state
       }
       else
       {
-        states_group->states[states_group->states_used] = named_state->value;
+        states_group->states[states_group->states_used] = named_state.value;
         states_group->states_used += 1;
       }
     }
@@ -206,22 +206,22 @@ cell_state_button(const char *id, CellState *state, NamedStates *named_states, v
          state_n < named_states->states.n_elements;
          ++state_n)
     {
-      NamedState *named_state = named_states->states.get(state_n);
+      NamedState& named_state = named_states->states[state_n];
 
       ImGui::PushID(state_n);
-      vec4 state_colour = get_state_colour(named_state->value);
+      vec4 state_colour = get_state_colour(named_state.value);
       ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
       ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
       ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
       ImGui::PushStyleColor(ImGuiCol_CheckMark, {0, 0, 0, 0.5});
 
-      b32 pressed = ImGui::RadioButton("###state name", state, named_state->value);
+      b32 pressed = ImGui::RadioButton("###state name", state, named_state.value);
 
       ImGui::PopStyleColor(4);
       ImGui::SameLine();
 
       ImGui::PushItemWidth(-70);
-      ImGui::Text("%.*s", string_length(named_state->name), named_state->name.start);
+      ImGui::Text("%.*s", string_length(named_state.name), named_state.name.start);
 
       ImGui::PopID();
     }
@@ -314,6 +314,8 @@ pattern_cell_state_button(PatternCellState *pattern_cell, NamedStates *named_sta
       String group_string = cell_state_group_button_label(&pattern_cell->states_group, named_states);
       button_label = new_string_fmt("(%.*s)", string_length(group_string), group_string.start);
     } break;
+
+    default: assert(false);
   }
 
   b32 button_pressed = cell_state_button(button_label, item_spacing, frame_padding);
@@ -516,7 +518,7 @@ to a wildcard match.""");
          rule_pattern_n < rule->config.rule_patterns.n_elements;
          ++rule_pattern_n)
     {
-      RulePattern *rule_pattern = rule->config.rule_patterns.get(rule_pattern_n);
+      RulePattern *rule_pattern = Array::get(rule->config.rule_patterns, rule_pattern_n);
 
       char label[64 + MAX_COMMENT_LENGTH];
       sprintf(label, "Pattern %d: %s###pattern_%d", rule_pattern_n, rule_pattern->comment, rule_pattern_n);
@@ -532,7 +534,7 @@ to a wildcard match.""");
 
     if (ImGui::Button("Add pattern"))
     {
-      RulePattern *new_rule_pattern = rule->config.rule_patterns.get_new_element();
+      RulePattern *new_rule_pattern = Array::add(rule->config.rule_patterns);
     }
   }
 

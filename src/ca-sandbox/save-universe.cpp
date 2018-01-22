@@ -52,7 +52,7 @@ serialise_cell_initialisation_options(FILE *file_stream, CellInitialisationOptio
        initial_state_n < cell_initialisation_options->set_of_initial_states.n_elements;
        ++initial_state_n)
   {
-    CellState initial_state = *cell_initialisation_options->set_of_initial_states.get(initial_state_n);
+    CellState initial_state = cell_initialisation_options->set_of_initial_states[initial_state_n];
     String initial_state_name = get_state_name(named_states, initial_state);
     fprintf(file_stream, "%.*s ", string_length(initial_state_name), initial_state_name.start);
   }

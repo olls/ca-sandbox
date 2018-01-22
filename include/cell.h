@@ -2,7 +2,7 @@
 #define CELL_H_DEF
 
 #include "vectors.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 /// @file
 /// @brief structs for cell storage, and configuration
@@ -38,7 +38,7 @@ struct CellInitialisationOptions
 {
   CellInitialisationType type;
 
-  ExtendableArray<CellState> set_of_initial_states;
+  Array::Array<CellState> set_of_initial_states;
 };
 
 

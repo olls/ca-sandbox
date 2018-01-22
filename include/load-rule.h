@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "comparison-operator.h"
+#include "my-array.h"
 
 #include "cell.h"
 #include "neighbourhood-region.h"
@@ -89,7 +90,7 @@ struct RulePattern
 };
 
 
-typedef ExtendableArray<RulePattern> RulePatterns;
+typedef Array::Array<RulePattern, true> RulePatterns;
 
 
 /// Holds the configuration of a rule, i.e: the parsed data from the rule file.
@@ -115,7 +116,7 @@ struct RuleConfiguration
   NamedStates named_states;
 
   /// Array of state values which are NULL states
-  ExtendableArray<CellState> null_states;
+  Array::Array<CellState> null_states;
 
   RulePatterns rule_patterns;
 };

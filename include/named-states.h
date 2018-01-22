@@ -3,7 +3,7 @@
 
 #include "types.h"
 #include "text.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 #include "cell.h"
 
@@ -21,7 +21,7 @@ struct NamedState
 
 struct NamedStates
 {
-  ExtendableArray<NamedState> states;
+  Array::Array<NamedState> states;
   CellState next_unused_state;
 };
 
@@ -43,7 +43,7 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states);
 
 
 void
-read_named_states_list(NamedStates *named_states, String states_list_string, ExtendableArray<CellState> *resulting_states);
+read_named_states_list(NamedStates *named_states, String states_list_string, Array::Array<CellState> *resulting_states);
 
 
 void

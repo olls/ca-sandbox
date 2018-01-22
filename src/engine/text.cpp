@@ -106,9 +106,9 @@ append_string(WriteString *dest, String source)
 
 
 void
-append_string(ExtendableArray<char> *extendable_string, String source)
+append_string(Array::Array<char>& dynamic_string, String source)
 {
-  extendable_string->add(string_length(source), (char *)source.start);
+  Array::add_n(dynamic_string, (char *)source.start, string_length(source));
 }
 
 

@@ -265,7 +265,7 @@ debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initiali
        i < cell_initialisation_options->set_of_initial_states.n_elements;
        ++i)
   {
-    CellState initial_state = *cell_initialisation_options->set_of_initial_states.get(i);
+    CellState initial_state = cell_initialisation_options->set_of_initial_states[i];
     String initial_state_name = get_state_name(named_states, initial_state);
     print(" %.*s", string_length(initial_state_name), initial_state_name.start);
   }

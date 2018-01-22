@@ -4,7 +4,7 @@
 #include "util.h"
 #include "allocate.h"
 #include "print.h"
-#include "extendable-array.h"
+#include "my-array.h"
 #include "colour.h"
 
 #include "rule.h"
@@ -33,8 +33,8 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
            state_n < named_states->states.n_elements;
            ++state_n)
       {
-        NamedState *named_state = named_states->states.get(state_n);
-        String *state_name = &named_state->name;
+        NamedState& named_state = named_states->states[state_n];
+        String *state_name = &named_state.name;
 
         u32 old_state_length = string_length(*state_name);
 
@@ -42,12 +42,12 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
         state_buffer[old_state_length] = '\0';
 
         ImGui::PushID(state_n);
-        vec4 state_colour = get_state_colour(named_state->value);
+        vec4 state_colour = get_state_colour(named_state.value);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, state_colour);
         ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, lighten_colour(state_colour));
         ImGui::PushStyleColor(ImGuiCol_FrameBgActive, darken_colour(state_colour));
         ImGui::PushStyleColor(ImGuiCol_CheckMark, {0, 0, 0, 0.5});
-        ImGui::RadioButton("##make state active", currently_active_state, named_state->value);
+        ImGui::RadioButton("##make state active", currently_active_state, named_state.value);
         ImGui::PopStyleColor(4);
         ImGui::SameLine();
 
@@ -63,7 +63,7 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
           state_name->end = state_name->start + new_state_length-1;
         }
 
-        b32 was_null_state = is_null_state(rule_config, named_state->value);
+        b32 was_null_state = is_null_state(rule_config, named_state.value);
         b32 is_now_null_state = was_null_state;
         ImGui::SameLine();
         ImGui::Text("Null:");
@@ -73,12 +73,16 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
           if (is_now_null_state && !was_null_state)
           {
             // Add to null states
-            rule_config->null_states.add(named_state->value);
+            Array::add(rule_config->null_states, named_state.value);
           }
           else if (was_null_state && !is_now_null_state)
           {
             // Remove from null states
-            rule_config->null_states.remove(named_state->value);
+            s32 null_state_index = Array::get_element_index(rule_config->null_states, named_state.value);
+            if (null_state_index > 0)
+            {
+              Array::remove(rule_config->null_states, null_state_index);
+            }
           }
         }
 
@@ -104,7 +108,7 @@ do_named_states_ui(RuleConfiguration *rule_config, CellState *currently_active_s
           .value = get_next_unused_state_value(named_states)
         };
 
-        named_states->states.add(new_state);
+        Array::new_element(named_states->states) = new_state;
       }
     }
 

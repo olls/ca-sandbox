@@ -4,7 +4,7 @@
 #include "assert.h"
 #include "print.h"
 #include "maths.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 #include "load-rule.h"
 #include "simulate.h"
@@ -28,7 +28,7 @@ is_null_state(RuleConfiguration *rule_configuration, CellState state)
        null_state_index < rule_configuration->null_states.n_elements;
        ++null_state_index)
   {
-    CellState null_state = *rule_configuration->null_states.get(null_state_index);
+    CellState null_state = rule_configuration->null_states[null_state_index];
     result |= state == null_state;
   }
 
@@ -49,7 +49,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
        pattern_n < config->rule_patterns.n_elements;
        ++pattern_n)
   {
-    RulePattern *rule_pattern = config->rule_patterns.get(pattern_n);
+    RulePattern& rule_pattern = config->rule_patterns[pattern_n];
 
     b32 matches = true;
     u32 number_of_neighbours_matching_count_matching_states = 0;
@@ -62,7 +62,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
          ++input_n)
     {
       CellState in = inputs[input_n];
-      PatternCellState pattern_input = rule_pattern->cell_states[input_n];
+      PatternCellState pattern_input = rule_pattern.cell_states[input_n];
 
       switch (pattern_input.type)
       {
@@ -132,15 +132,15 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
 
         case (PatternCellStateType::WILDCARD):
         {
-          if (rule_pattern->count_matching.enabled)
+          if (rule_pattern.count_matching.enabled)
           {
             b32 this_state_in_count_matching_group = false;
 
             for (u32 count_matching_state_n = 0;
-                 count_matching_state_n < rule_pattern->count_matching.states_group.states_used;
+                 count_matching_state_n < rule_pattern.count_matching.states_group.states_used;
                  ++count_matching_state_n)
             {
-              if (in == rule_pattern->count_matching.states_group.states[count_matching_state_n])
+              if (in == rule_pattern.count_matching.states_group.states[count_matching_state_n])
               {
                 this_state_in_count_matching_group = true;
                 break;
@@ -165,28 +165,28 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
     if (matches)
     {
       // Now test the wildcard constraints
-      if (rule_pattern->count_matching.enabled)
+      if (rule_pattern.count_matching.enabled)
       {
-        if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN)
+        if (rule_pattern.count_matching.comparison == ComparisonOp::GREATER_THAN)
         {
-          matches = number_of_neighbours_matching_count_matching_states > rule_pattern->count_matching.comparison_n;
+          matches = number_of_neighbours_matching_count_matching_states > rule_pattern.count_matching.comparison_n;
         }
         else
-        if (rule_pattern->count_matching.comparison == ComparisonOp::GREATER_THAN_EQUAL)
+        if (rule_pattern.count_matching.comparison == ComparisonOp::GREATER_THAN_EQUAL)
         {
-          matches = number_of_neighbours_matching_count_matching_states >= rule_pattern->count_matching.comparison_n;
+          matches = number_of_neighbours_matching_count_matching_states >= rule_pattern.count_matching.comparison_n;
         }
-        else if (rule_pattern->count_matching.comparison == ComparisonOp::EQUAL)
+        else if (rule_pattern.count_matching.comparison == ComparisonOp::EQUAL)
         {
-          matches = number_of_neighbours_matching_count_matching_states == rule_pattern->count_matching.comparison_n;
+          matches = number_of_neighbours_matching_count_matching_states == rule_pattern.count_matching.comparison_n;
         }
-        else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN_EQUAL)
+        else if (rule_pattern.count_matching.comparison == ComparisonOp::LESS_THAN_EQUAL)
         {
-          matches = number_of_neighbours_matching_count_matching_states <= rule_pattern->count_matching.comparison_n;
+          matches = number_of_neighbours_matching_count_matching_states <= rule_pattern.count_matching.comparison_n;
         }
-        else if (rule_pattern->count_matching.comparison == ComparisonOp::LESS_THAN)
+        else if (rule_pattern.count_matching.comparison == ComparisonOp::LESS_THAN)
         {
-          matches = number_of_neighbours_matching_count_matching_states < rule_pattern->count_matching.comparison_n;
+          matches = number_of_neighbours_matching_count_matching_states < rule_pattern.count_matching.comparison_n;
         }
       }
 
@@ -204,7 +204,7 @@ use_rule_patterns_to_get_result(RuleConfiguration *config, u32 n_inputs, CellSta
         // We match this pattern
 
         found_match = true;
-        result = rule_pattern->result;
+        result = rule_pattern.result;
         break;
       }
     }
@@ -235,7 +235,7 @@ find_node(Rule *rule, RuleNode *node)
        node_n < rule->rule_nodes_table.n_elements;
        ++node_n)
   {
-    RuleNode *test_node = rule->rule_nodes_table.get(node_n);
+    RuleNode *test_node = Array::get(rule->rule_nodes_table, node_n);
 
     if (node->is_leaf && test_node->is_leaf &&
         node->leaf_value == test_node->leaf_value)
@@ -277,6 +277,8 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *pr
   u32 node_position;
 
   // Temporary storage for the node
+  // TODO: Allocate a list of these (one for each layer of the tree) before we start recursing, to
+  //       remove the constant allocations?
   RuleNode *node = (RuleNode *)allocate_size(rule->rule_nodes_table.element_size, 1);
 
   if (depth == rule->n_inputs)
@@ -324,7 +326,8 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *pr
   else
   {
     // Create new node
-    node_position = rule->rule_nodes_table.add(node);
+    node_position = Array::new_position(rule->rule_nodes_table);
+    Array::set(rule->rule_nodes_table, node_position, node);
   }
 
   un_allocate(node);
@@ -341,13 +344,9 @@ build_rule_tree(RuleCreationThread *rule_creation_thread)
 
   rule->rule_tree_built = false;
 
-  // Re allocate the rule tree every time, this could be optimised... but is it worth it?
-  if (rule->rule_nodes_table.elements == 0)
-  {
-    rule->rule_nodes_table.un_allocate_array();
-    u32 n_states = rule->config.named_states.states.n_elements;
-    rule->rule_nodes_table.allocate_array(sizeof(RuleNode) + (n_states * sizeof(u32)));
-  }
+  u32 n_states = rule->config.named_states.states.n_elements;
+  rule->rule_nodes_table.element_size = sizeof(RuleNode) + (n_states * sizeof(u32));
+  Array::free_array(rule->rule_nodes_table);
 
   rule->n_inputs = get_neighbourhood_region_n_cells(rule->config.neighbourhood_region_shape, rule->config.neighbourhood_region_size);
 
@@ -407,7 +406,7 @@ void
 destroy_rule_tree(Rule *rule)
 {
   rule->rule_tree_built = false;
-  rule->rule_nodes_table.un_allocate_array();
+  Array::free_array(rule->rule_nodes_table);
 }
 
 
@@ -416,11 +415,11 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
 {
   print("\n%*sposition(%d): ", 2*depth, "", node_position);
 
-  RuleNode *rule_node = rule->rule_nodes_table.get(node_position);
+  RuleNode& rule_node = rule->rule_nodes_table[node_position];
 
-  if (rule_node->is_leaf)
+  if (rule_node.is_leaf)
   {
-    print("Leaf(%d) <- ", rule_node->leaf_value);
+    print("Leaf(%d) <- ", rule_node.leaf_value);
 
     // Print inputs (path to node)
     for (u32 input_n = 0;
@@ -438,7 +437,7 @@ print_node(Rule *rule, u32 node_position, u32 depth, CellState inputs[])
          ++child_n)
     {
       inputs[depth] = child_n;
-      print_node(rule, rule_node->children[child_n], depth+1, inputs);
+      print_node(rule, rule_node.children[child_n], depth+1, inputs);
     }
   }
 }
@@ -473,7 +472,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
   CellState result;
 
-  RuleNode *node = rule->rule_nodes_table.get(rule->root_node);
+  RuleNode *node = Array::get(rule->rule_nodes_table, rule->root_node);
 
   u32 input_n = 0;
   b32 reached_result = false;
@@ -495,7 +494,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
       //   create_any_new_cell_blocks_needed will create all the cell blocks.
       if (rule->config.null_states.n_elements > 0)
       {
-        current_state = *rule->config.null_states.get(0);
+        current_state = rule->config.null_states[0];
       }
 
       b32 simulate_cell = get_neighbouring_cell_state(border, universe, current_input_delta, cell_block_position, cell_position, &current_state);
@@ -509,7 +508,7 @@ execute_transition_function(Border *border, Universe *universe, Rule *rule, s32v
 
       // Select the next node based on this input's state
       u32 next_node_position = node->children[current_state];
-      node = rule->rule_nodes_table.get(next_node_position);
+      node = Array::get(rule->rule_nodes_table, next_node_position);
       ++input_n;
     }
   }

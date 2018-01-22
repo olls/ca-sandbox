@@ -7,7 +7,7 @@
 #include "files.h"
 #include "parsing.h"
 #include "allocate.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 #include "rule.h"
 #include "named-states.h"
@@ -55,9 +55,8 @@ read_states_group(NamedStates *named_states, String *string, CellStateGroup *gro
     }
     else
     {
-      // Use temporary ExtendableArray to read in the states
-      ExtendableArray<CellState> states;
-      states.allocate_array();
+      // Use temporary Array to read in the states
+      Array::Array<CellState> states = {};
       read_named_states_list(named_states, group_string, &states);
 
       if (states.n_elements > MAX_PATTERN_STATES_GROUP)
@@ -67,11 +66,11 @@ read_states_group(NamedStates *named_states, String *string, CellStateGroup *gro
       }
       else
       {
-        memcpy(group_states_result->states, states.elements, states.n_elements * states.element_size);
+        memcpy(group_states_result->states, states.elements, states.n_elements * sizeof(CellState));
         group_states_result->states_used = states.n_elements;
       }
 
-      states.un_allocate_array();
+      Array::free_array(states);
     }
   }
 
@@ -437,7 +436,7 @@ read_rule_patterns(NamedStates *named_states, String file_string, u32 n_inputs, 
     b32 found_pattern = read_rule_pattern(named_states, &file_string, n_inputs, rule_pattern);
     if (found_pattern)
     {
-      rule_patterns->add(rule_pattern);
+      Array::add(*rule_patterns, rule_pattern);
     }
     else
     {
@@ -494,7 +493,7 @@ debug_print_null_states(RuleConfiguration *rule_config)
        i < rule_config->null_states.n_elements;
        ++i)
   {
-    print(" %d", *rule_config->null_states.get(i));
+    print(" %d", rule_config->null_states[i]);
   }
   print("\n");
 }
@@ -510,7 +509,7 @@ debug_print_rule_patterns(RuleConfiguration *rule_config)
        rule_pattern_n < rule_config->rule_patterns.n_elements;
        ++rule_pattern_n)
   {
-    RulePattern *rule_pattern = rule_config->rule_patterns.get(rule_pattern_n);
+    RulePattern *rule_pattern = Array::get(rule_config->rule_patterns, rule_pattern_n);
     print("Rule Pattern:\n");
     print("  result: %d\n", rule_pattern->result);
     print("  cells: ");
@@ -605,11 +604,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
 
     if (states_success)
     {
-      if (rule_config->named_states.states.elements == 0)
-      {
-        rule_config->named_states.states.allocate_array();
-      }
-      rule_config->named_states.states.clear_array();
+      Array::clear(rule_config->named_states.states);
       rule_config->named_states.next_unused_state = 0;
       states_success &= find_state_names(file_string, &rule_config->named_states, n_states);
     }
@@ -635,11 +630,7 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
     b32 null_states_found = find_label_value(file_string, "null_states", &null_states_string);
     if (null_states_found && states_success)
     {
-      if (rule_config->null_states.elements == 0)
-      {
-        rule_config->null_states.allocate_array();
-      }
-      rule_config->null_states.clear_array();
+      Array::clear(rule_config->null_states);
 
       read_named_states_list(&rule_config->named_states, null_states_string, &rule_config->null_states);
       if (rule_config->null_states.n_elements == 0)
@@ -671,8 +662,8 @@ load_rule_file(const char *filename, RuleConfiguration *rule_config)
       u32 n_inputs = get_neighbourhood_region_n_cells(rule_config->neighbourhood_region_shape, rule_config->neighbourhood_region_size);
 
       // Need to reallocate, as the size of RulePattern (dependant on n_inputs) might have changed
-      rule_config->rule_patterns.un_allocate_array();
-      rule_config->rule_patterns.allocate_array(sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs));
+      free_array(rule_config->rule_patterns);
+      rule_config->rule_patterns.element_size = sizeof(RulePattern) + (sizeof(PatternCellState) * n_inputs);
 
       success &= read_rule_patterns(&rule_config->named_states, file_string, n_inputs, &rule_config->rule_patterns);
       if (!success)

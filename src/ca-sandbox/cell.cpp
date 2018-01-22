@@ -17,7 +17,7 @@ initialise_cell_state(CellInitialisationOptions *cell_initialisation_options, s3
   if (cell_initialisation_options->type == CellInitialisationType::RANDOM)
   {
     u32 initial_state_index = random_u32(0, cell_initialisation_options->set_of_initial_states.n_elements);
-    result = *cell_initialisation_options->set_of_initial_states.get(initial_state_index);
+    result = cell_initialisation_options->set_of_initial_states[initial_state_index];
   }
 
   return result;
@@ -29,8 +29,8 @@ default_cell_initialisation_options(CellInitialisationOptions *result)
 {
   result->type = CellInitialisationType::RANDOM;
 
+  Array::clear(result->set_of_initial_states);
+
   CellState zero_state = 0;
-  result->set_of_initial_states.un_allocate_array();
-  result->set_of_initial_states.allocate_array();
-  result->set_of_initial_states.add(zero_state);
+  Array::add(result->set_of_initial_states, zero_state);
 }

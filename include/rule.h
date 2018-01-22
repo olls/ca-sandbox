@@ -1,7 +1,7 @@
 #ifndef RULE_H_DEF
 #define RULE_H_DEF
 
-#include "extendable-array.h"
+#include "my-array.h"
 #include "text.h"
 
 #include "cell.h"
@@ -57,7 +57,7 @@ struct Rule
   u32 n_inputs;
 
   /// Array of all RuleNodes making up this rule.
-  ExtendableArray<RuleNode> rule_nodes_table;
+  Array::Array<RuleNode, true> rule_nodes_table;
 
   /// Position of the rule tree's root node within the rule_nodes_table.
   u32 root_node;

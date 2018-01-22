@@ -7,7 +7,7 @@
 #include "allocate.h"
 #include "maths.h"
 #include "parsing.h"
-#include "extendable-array.h"
+#include "my-array.h"
 
 #include "cell.h"
 
@@ -38,10 +38,10 @@ state_value_from_name(NamedStates *named_states, String state_name, CellState *r
        test_state_index < named_states->states.n_elements;
        ++test_state_index)
   {
-    NamedState *test_state_name = named_states->states.get(test_state_index);
-    if (strings_equal(&state_name, &test_state_name->name))
+    NamedState& test_state_name = named_states->states[test_state_index];
+    if (strings_equal(&state_name, &test_state_name.name))
     {
-      *resulting_state = test_state_name->value;
+      *resulting_state = test_state_name.value;
       result = true;
       break;
     }
@@ -103,8 +103,8 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
            test_state_index < named_states->states.n_elements;
            ++test_state_index)
       {
-        NamedState *test_state_name = named_states->states.get(test_state_index);
-        if (strings_equal(&test_state_name->name, &state_name))
+        NamedState& test_state_name = named_states->states[test_state_index];
+        if (strings_equal(&test_state_name.name, &state_name))
         {
           name_unique = false;
           break;
@@ -131,7 +131,7 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
           .value = get_next_unused_state_value(named_states)
         };
 
-        named_states->states.add(new_named_state);
+        Array::new_element(named_states->states) = new_named_state;
       }
     }
     else
@@ -151,7 +151,7 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
 
 
 void
-read_named_states_list(NamedStates *named_states, String states_list_string, ExtendableArray<CellState> *resulting_states)
+read_named_states_list(NamedStates *named_states, String states_list_string, Array::Array<CellState> *resulting_states)
 {
   while (states_list_string.current_position < states_list_string.end)
   {
@@ -160,7 +160,7 @@ read_named_states_list(NamedStates *named_states, String states_list_string, Ext
 
     if (valid_state)
     {
-      resulting_states->add(named_state_value);
+      Array::add(*resulting_states, named_state_value);
     }
   }
 }
@@ -175,8 +175,8 @@ debug_print_named_states(NamedStates *named_states)
        i < named_states->states.n_elements;
        ++i)
   {
-    NamedState *state_name = named_states->states.get(i);
-    print(" %.*s", string_length(state_name->name), state_name->name.start);
+    NamedState& state_name = named_states->states[i];
+    print(" %.*s", string_length(state_name.name), state_name.name.start);
   }
   print("\n");
 }
@@ -193,11 +193,11 @@ get_state_name(NamedStates *named_states, CellState state)
        state_index < named_states->states.n_elements;
        ++state_index)
   {
-    NamedState *named_state = named_states->states.get(state_index);
+    NamedState& named_state = named_states->states[state_index];
 
-    if (named_state->value == state)
+    if (named_state.value == state)
     {
-      result = named_state->name;
+      result = named_state.name;
       break;
     }
   }
@@ -274,8 +274,8 @@ get_longest_state_name_length(NamedStates *named_states)
        state_n < named_states->states.n_elements;
        ++state_n)
   {
-    NamedState *named_state = named_states->states.get(state_n);
-    result = max(result, string_length(named_state->name));
+    NamedState& named_state = named_states->states[state_n];
+    result = max(result, string_length(named_state.name));
   }
 
   return result;

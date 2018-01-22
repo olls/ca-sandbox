@@ -89,60 +89,6 @@ init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_draw
 }
 
 
-static const CA_SandboxState CA_SANDBOX_INITIALISER = {
-  .init = true,
-  .imgui_context = 0,
-
-  .frame_timing = {},
-
-  .general_universe_shader_program = 0,
-  .general_universe_vao = 0,
-  .general_universe_vbo = {},
-  .general_universe_ibo = {},
-  .general_universe_mat4_projection_matrix_uniform = 0,
-
-  .general_vertex_buffer = {},
-  .general_index_buffer = {},
-
-  .cell_instance_drawing_shader_program = 0,
-  .cell_instance_drawing_vao = 0,
-  .cell_instancing = {},
-  .cell_instance_drawing_mat4_projection_matrix_uniform = 0,
-  .cell_instance_drawing_cell_block_dim_uniform = 0,
-  .cell_instance_drawing_cell_width_uniform = 0,
-
-  .screen_shader_program = 0,
-  .screen_vao = 0,
-
-  .universe = {},
-  .simulate_options = {},
-  .cell_initialisation_options = {},
-  .cells_file_loaded = false,
-
-  .loaded_rule = {},
-  .rule_file_loaded = false,
-  .rule_creation_thread = {},
-
-  .simulation_ui = {
-    .sim_frequency = INITIAL_SIM_FREQUENCY,
-    .simulating = false,
-    .step_simulation = false,
-    .simulation_step = 0,
-    .last_sim_time = get_us(),
-    .last_simulation_delta = 0
-  },
-  .universe_ui = {},
-  .rule_ui = {},
-  .cells_editor = {},
-
-  .view_panning = {
-    .scale = 0.3,
-    .offset = {0,0}
-  },
-  .screen_mouse_pos = {}
-};
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -160,7 +106,56 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   {
     *state_ptr = allocate(CA_SandboxState, 1);
 
-    memcpy(*state_ptr, &CA_SANDBOX_INITIALISER, sizeof(CA_SandboxState));
+    CA_SandboxState *state = *state_ptr;
+    memset(state, 0, sizeof(CA_SandboxState));
+
+    state->init = true;
+    state->imgui_context = 0;
+
+    // state->frame_timing = {};
+
+    state->general_universe_shader_program = 0;
+    state->general_universe_vao = 0;
+    // state->general_universe_vbo = {};
+    // state->general_universe_ibo = {};
+    state->general_universe_mat4_projection_matrix_uniform = 0;
+
+    // state->general_vertex_buffer = {};
+    // state->general_index_buffer = {};
+
+    state->cell_instance_drawing_shader_program = 0;
+    state->cell_instance_drawing_vao = 0;
+    // state->cell_instancing = {};
+    state->cell_instance_drawing_mat4_projection_matrix_uniform = 0;
+    state->cell_instance_drawing_cell_block_dim_uniform = 0;
+    state->cell_instance_drawing_cell_width_uniform = 0;
+
+    state->screen_shader_program = 0;
+    state->screen_vao = 0;
+
+    // state->universe = {};
+    // state->simulate_options = {};
+    // state->cell_initialisation_options = {};
+    state->cells_file_loaded = false;
+
+    // state->loaded_rule = {};
+    state->rule_file_loaded = false;
+    // state->rule_creation_thread = {};
+
+    state->simulation_ui.sim_frequency = INITIAL_SIM_FREQUENCY;
+    state->simulation_ui.simulating = false;
+    state->simulation_ui.step_simulation = false;
+    state->simulation_ui.simulation_step = 0;
+    state->simulation_ui.last_sim_time = get_us();
+    state->simulation_ui.last_simulation_delta = 0;
+    // state->universe_ui = {};
+    // state->rule_ui = {};
+    // state->cells_editor = {};
+
+    state->view_panning.scale = 0.3;
+    state->view_panning.offset = {0,0};
+
+    // state->screen_mouse_pos = {};
   }
 
   CA_SandboxState *state = *state_ptr;
@@ -368,10 +363,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       state->cells_file_loaded = true;
 
       *simulate_options = default_simulation_options();
-      if (cell_initialisation_options->set_of_initial_states.elements == 0)
-      {
-        cell_initialisation_options->set_of_initial_states.allocate_array();
-      }
+      Array::clear(cell_initialisation_options->set_of_initial_states);
       default_cell_initialisation_options(cell_initialisation_options);
 
       result.success &= load_universe(universe_ui->cells_file_picker.selected_file, universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
