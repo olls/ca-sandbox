@@ -7,9 +7,7 @@
 #include "imgui.h"
 #include "ccVector.h"
 
-// TODO: This is in OpenGL -1 -> 1 screen coordinates, it should really be based on pixel
-//         coordinates to be relate to the mouse correctly
-const r32 DRAG_THRESHOLD = 0.001;
+const s32 PANNING_MOUSE_BUTTON = 2;
 
 /// @file
 ///
@@ -65,17 +63,15 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
   vec2 d_mouse = vec2_subtract(screen_mouse_pos, view_panning->last_mouse_pos);
   view_panning->last_mouse_pos = screen_mouse_pos;
 
-  if (io.KeyCtrl &&
-      !io.WantCaptureMouse &&
-      ImGui::IsMouseClicked(0))
+  if (!io.WantCaptureMouse &&
+      ImGui::IsMouseClicked(PANNING_MOUSE_BUTTON))
   {
     view_panning->currently_panning = true;
   }
 
   if (view_panning->currently_panning &&
-      io.KeyCtrl &&
       !io.WantCaptureMouse &&
-      ImGui::IsMouseDown(0))
+      ImGui::IsMouseDown(PANNING_MOUSE_BUTTON))
   {
     vec2 scaled_mouse_pos = vec2_divide(d_mouse, view_panning->scale);
     view_panning->offset = vec2_add(view_panning->offset, scaled_mouse_pos);
