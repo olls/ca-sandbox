@@ -78,6 +78,8 @@ struct RuleCreationThread
   b32 currently_running;
   pthread_t thread;
 
+  u32 last_build_total_time;
+
   Progress progress;
 };
 

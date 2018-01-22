@@ -41,7 +41,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *sim
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Reload cells file"))
+    if (ImGui::Button("Load cells file"))
     {
       universe_ui->reload_cells_file = true;
     }

@@ -351,7 +351,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       result.success &= load_rule_file(rule_ui->file_picker.selected_file, &loaded_rule->config);
       print("\n");
 
-      // start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
+      start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
     }
 
     if (universe_ui->reload_cells_file && state->rule_file_loaded)

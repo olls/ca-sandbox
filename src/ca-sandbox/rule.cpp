@@ -5,6 +5,7 @@
 #include "print.h"
 #include "maths.h"
 #include "my-array.h"
+#include "timing.h"
 
 #include "load-rule.h"
 #include "simulate.h"
@@ -354,10 +355,14 @@ build_rule_tree(RuleCreationThread *rule_creation_thread)
   rule_creation_thread->progress.done = 0;
   print("Building rule tree: %lu\n", rule_creation_thread->progress.total);
 
+  u64 build_start_time = get_us();
+
   // The tree_path is used to store the route taken through the tree to reach a leaf node.
   CellState *tree_path = allocate(CellState, rule->n_inputs);
   rule->root_node = add_node_to_rule_tree(rule, 0, tree_path, &rule_creation_thread->progress);
   un_allocate(tree_path);
+
+  rule_creation_thread->last_build_total_time = get_us() - build_start_time;
 
   rule->rule_tree_built = true;
   rule_creation_thread->currently_running = false;

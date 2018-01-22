@@ -10,6 +10,7 @@
 #include "comparison-operator.h"
 #include "my-array.h"
 #include "colour.h"
+#include "human-time.h"
 
 #include "neighbourhood-region.h"
 #include "named-states.h"
@@ -275,7 +276,6 @@ cell_state_group_button(CellStateGroup *cell_state_group, NamedStates *named_sta
   if (ImGui::BeginPopup("cell state group menu"))
   {
     multi_cell_state_selector(cell_state_group, named_states);
-    // pattern_cell_state_menu(pattern_cell, named_states);
     ImGui::EndPopup();
   }
 }
@@ -486,7 +486,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
     }
 
     ImGui::SameLine();
-    if (ImGui::Button("Reload rule file"))
+    if (ImGui::Button("Load rule file"))
     {
       rule_ui->reload_rule_file = true;
     }
@@ -501,6 +501,14 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
       if (ImGui::Button("Build rule tree from patterns"))
       {
         start_build_rule_tree_thread(rule_creation_thread, rule);
+      }
+      if (rule_creation_thread->last_build_total_time != 0)
+      {
+        const char *unit;
+        r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
+        ImGui::SameLine();
+        ImGui::Text("Build took %.2f %s", last_build_time, unit);
+        ImGui::Spacing();
       }
     }
     else

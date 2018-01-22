@@ -6,7 +6,6 @@
 = save trees to save building large trees every time
 = thread simulation
 - reduce tree building time
-- tree build timer
 - profiling tools
 
 # Functionality
