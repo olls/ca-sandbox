@@ -271,16 +271,14 @@ find_node(Rule *rule, RuleNode *node)
 
 
 u32
-add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *progress)
+add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Array::Array<RuleNode, true>& current_node_path, Progress *progress)
 {
   static u64 n_nodes_traced = 0;
 
   u32 node_position;
 
   // Temporary storage for the node
-  // TODO: Allocate a list of these (one for each layer of the tree) before we start recursing, to
-  //       remove the constant allocations?
-  RuleNode *node = (RuleNode *)allocate_size(rule->rule_nodes_table.element_size, 1);
+  RuleNode *node = Array::get(current_node_path, depth);
 
   if (depth == rule->n_inputs)
   {
@@ -311,7 +309,7 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *pr
       // This is the list of inputs for the current child
       tree_path[depth] = child_n;
 
-      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path, progress);
+      u32 child_position = add_node_to_rule_tree(rule, depth + 1, tree_path, current_node_path, progress);
       node->children[child_n] = child_position;
     }
   }
@@ -330,8 +328,6 @@ add_node_to_rule_tree(Rule *rule, u32 depth, CellState tree_path[], Progress *pr
     node_position = Array::new_position(rule->rule_nodes_table);
     Array::set(rule->rule_nodes_table, node_position, node);
   }
-
-  un_allocate(node);
 
   return node_position;
 }
@@ -359,7 +355,21 @@ build_rule_tree(RuleCreationThread *rule_creation_thread)
 
   // The tree_path is used to store the route taken through the tree to reach a leaf node.
   CellState *tree_path = allocate(CellState, rule->n_inputs);
-  rule->root_node = add_node_to_rule_tree(rule, 0, tree_path, &rule_creation_thread->progress);
+
+  // One node per depth of the tree used to store the currently being built nodes to get to the
+  //   current position in the tree.  One a node is finished, it is added to the
+  //   rule->rule_nodes_table, and the next sibling in the tree is able to use the current_node_path
+  //   node it was occupying.  Need n_inputs+1 for leaf "result node".
+  //
+  // Using an Array to make dealing with variable sized structs easy, need to pre-allocate all the
+  //   elements in the array
+  Array::Array<RuleNode, true> current_node_path = {};
+  current_node_path.element_size = rule->rule_nodes_table.element_size;
+  Array::new_position_for_n(current_node_path, rule->n_inputs + 1);
+
+  rule->root_node = add_node_to_rule_tree(rule, 0, tree_path, current_node_path, &rule_creation_thread->progress);
+
+  Array::free_array(current_node_path);
   un_allocate(tree_path);
 
   rule_creation_thread->last_build_total_time = get_us() - build_start_time;
