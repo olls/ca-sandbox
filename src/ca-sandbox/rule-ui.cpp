@@ -472,18 +472,16 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
     u32 filename_length = strlen(rule_ui->file_picker.selected_file);
     ImGui::Text("Rule file: %.*s", filename_length, rule_ui->file_picker.selected_file);
 
+    const char *rule_file_picker_name = "Rule file picker";
     if (ImGui::Button("Change rule file"))
     {
-      rule_ui->file_picker.active = true;
+      ImGui::OpenPopup(rule_file_picker_name);
       rule_ui->file_picker.current_item = 0;
       rule_ui->file_picker.root_directory = ".";
       copy_string(rule_ui->file_picker.current_path, "rules", 6);
     }
 
-    if (rule_ui->file_picker.active)
-    {
-      file_picker("Rule file picker", &rule_ui->file_picker);
-    }
+    file_picker(rule_file_picker_name, &rule_ui->file_picker);
 
     ImGui::SameLine();
     if (ImGui::Button("Load rule file"))

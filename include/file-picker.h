@@ -16,9 +16,6 @@
 ///
 struct FilePicker
 {
-  /// Is the picker currently open?  Switches to false when the user selects a file.
-  b32 active;
-
   /// The directory to open the file picker in
   const char *root_directory;
 

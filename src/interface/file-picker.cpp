@@ -47,7 +47,7 @@ get_filename_from_tinydir_file(void *void_tinydir_package, int idx, const char *
 void
 file_picker(const char *picker_name, FilePicker *picker)
 {
-  if (ImGui::Begin(picker_name))
+  if (ImGui::BeginPopupModal(picker_name))
   {
     TinydirPackage tinydir_package = {};
 
@@ -79,7 +79,7 @@ file_picker(const char *picker_name, FilePicker *picker)
 
     tinydir_open_sorted(&tinydir_package.dir, current_dirrctory.start);
 
-    ImGui::PushItemWidth(-1);
+    ImGui::PushItemWidth(350);
     ImGui::ListBox("##file-picker", &picker->current_item, &get_filename_from_tinydir_file, &tinydir_package, tinydir_package.dir.n_files, 8);
     ImGui::PopItemWidth();
 
@@ -162,18 +162,18 @@ file_picker(const char *picker_name, FilePicker *picker)
 
         print("Selected file: %.*s\n", string_length(selected_file), selected_file.start);
 
-        picker->active = false;
+        ImGui::CloseCurrentPopup();
       }
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Cancel"))
     {
-      picker->active = false;
+      ImGui::CloseCurrentPopup();
     }
 
     tinydir_close(&tinydir_package.dir);
-  }
 
-  ImGui::End();
+    ImGui::EndPopup();
+  }
 }
