@@ -1,9 +1,10 @@
 #ifndef BORDER_H_DEF
 #define BORDER_H_DEF
 
-#include "types.h"
-#include "vectors.h"
-#include "universe.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
+
+#include "ca-sandbox/universe.h"
 
 /// @file
 /// @brief  structs for storing the border configuration

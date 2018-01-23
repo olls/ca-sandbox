@@ -1,8 +1,8 @@
-#include "parsing.h"
+#include "engine/parsing.h"
 
-#include "types.h"
-#include "allocate.h"
-#include "text.h"
+#include "engine/types.h"
+#include "engine/allocate.h"
+#include "engine/text.h"
 
 #include <string.h>
 #include <stdlib.h>

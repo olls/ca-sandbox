@@ -1,12 +1,10 @@
 #ifndef VIEW_PANNING
 #define VIEW_PANNING
 
-#include "types.h"
-#include "vectors.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
 
-#include "cell-block-coordinate-system.h"
-
-#include "ccVector.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
 
 /// @file
 ///

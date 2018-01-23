@@ -1,19 +1,20 @@
-#include "rule.h"
+#include "ca-sandbox/rule.h"
 
-#include "allocate.h"
-#include "assert.h"
-#include "print.h"
-#include "maths.h"
-#include "my-array.h"
-#include "timing.h"
+#include "engine/allocate.h"
+#include "engine/assert.h"
+#include "engine/print.h"
+#include "engine/maths.h"
+#include "engine/my-array.h"
+#include "engine/timing.h"
 
-#include "load-rule.h"
-#include "simulate.h"
-#include "neighbourhood-region.h"
+#include "ca-sandbox/load-rule.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/neighbourhood-region.h"
+
+#include "imgui/imgui.h"
 
 #include <string.h>
 #include <pthread.h>
-#include "imgui.h"
 
 /// @file
 /// @brief  Functions for building a rule tree, and accessing it.

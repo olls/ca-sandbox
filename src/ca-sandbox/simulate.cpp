@@ -1,13 +1,14 @@
-#include "simulate.h"
+#include "ca-sandbox/simulate.h"
 
-#include "print.h"
-#include "types.h"
-#include "assert.h"
-#include "allocate.h"
-#include "universe.h"
-#include "cell-block-coordinate-system.h"
-#include "rule.h"
-#include "border.h"
+#include "engine/print.h"
+#include "engine/types.h"
+#include "engine/assert.h"
+#include "engine/allocate.h"
+
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
+#include "ca-sandbox/rule.h"
+#include "ca-sandbox/border.h"
 
 /// @file
 /// @brief Contains functions for running the CA simulation on the CellBlock%s.

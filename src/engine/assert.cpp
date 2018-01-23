@@ -1,7 +1,7 @@
-#include "assert.h"
+#include "engine/assert.h"
 
-#include "types.h"
-#include "print.h"
+#include "engine/types.h"
+#include "engine/print.h"
 
 #include <stdlib.h>
 

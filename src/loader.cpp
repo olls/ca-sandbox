@@ -1,8 +1,8 @@
 #include "loader.h"
 
-#include "engine.h"
+#include "engine/engine.h"
 
-#include "ca-sandbox.h"
+#include "ca-sandbox/ca-sandbox.h"
 
 #include <stdio.h>
 #include <dlfcn.h>

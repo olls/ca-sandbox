@@ -1,11 +1,11 @@
-#include "save-universe.h"
+#include "ca-sandbox/save-universe.h"
 
-#include "print.h"
-#include "text.h"
+#include "engine/print.h"
+#include "engine/text.h"
 
-#include "universe.h"
-#include "simulate.h"
-#include "named-states.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/named-states.h"
 
 #include <stdio.h>
 

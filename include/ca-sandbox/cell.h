@@ -1,8 +1,8 @@
 #ifndef CELL_H_DEF
 #define CELL_H_DEF
 
-#include "vectors.h"
-#include "my-array.h"
+#include "engine/vectors.h"
+#include "engine/my-array.h"
 
 /// @file
 /// @brief structs for cell storage, and configuration

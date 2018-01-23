@@ -1,10 +1,10 @@
 #ifndef CELL_DRAWING_H_DEF
 #define CELL_DRAWING_H_DEF
 
-#include "opengl-buffer.h"
+#include "engine/opengl-buffer.h"
 
-#include "universe.h"
-#include "cells-editor.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cells-editor.h"
 
 /// @file
 /// @brief Data structures for drawing the Cell%s with OpenGL

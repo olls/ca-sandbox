@@ -1,12 +1,11 @@
 #ifndef CELLS_EDITOR_H_DEF
 #define CELLS_EDITOR_H_DEF
 
-#include "vectors.h"
-#include "view-panning.h"
+#include "engine/vectors.h"
 
-#include "universe.h"
-#include "cell-block-coordinate-system.h"
-#include "named-states.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
+#include "ca-sandbox/named-states.h"
 
 
 struct CellsEditor

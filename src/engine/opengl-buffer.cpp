@@ -1,10 +1,10 @@
-#include "opengl-buffer.h"
+#include "engine/opengl-buffer.h"
 
-#include "types.h"
-#include "print.h"
-#include "maths.h"
-#include "assert.h"
-#include "opengl-util.h"
+#include "engine/types.h"
+#include "engine/print.h"
+#include "engine/maths.h"
+#include "engine/assert.h"
+#include "engine/opengl-util.h"
 
 #include <GL/glew.h>
 

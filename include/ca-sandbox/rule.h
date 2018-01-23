@@ -1,12 +1,12 @@
 #ifndef RULE_H_DEF
 #define RULE_H_DEF
 
-#include "my-array.h"
-#include "text.h"
+#include "engine/my-array.h"
+#include "engine/text.h"
 
-#include "cell.h"
-#include "border.h"
-#include "load-rule.h"
+#include "ca-sandbox/cell.h"
+#include "ca-sandbox/border.h"
+#include "ca-sandbox/load-rule.h"
 
 #include <pthread.h>
 

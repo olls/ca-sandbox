@@ -1,17 +1,17 @@
-#include "named-states-ui.h"
+#include "ca-sandbox/named-states-ui.h"
 
-#include "text.h"
-#include "util.h"
-#include "allocate.h"
-#include "print.h"
-#include "my-array.h"
-#include "colour.h"
+#include "engine/text.h"
+#include "engine/util.h"
+#include "engine/allocate.h"
+#include "engine/print.h"
+#include "engine/my-array.h"
+#include "engine/colour.h"
 
-#include "rule.h"
-#include "named-states.h"
+#include "ca-sandbox/rule.h"
+#include "ca-sandbox/named-states.h"
 
-#include "imgui.h"
-#include "imgui_user.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_user.h"
 #include <stdio.h>
 
 

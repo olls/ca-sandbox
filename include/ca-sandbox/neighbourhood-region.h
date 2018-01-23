@@ -1,8 +1,8 @@
 #ifndef NEIGHBOURHOOD_REGION_H_DEF
 #define NEIGHBOURHOOD_REGION_H_DEF
 
-#include "types.h"
-#include "vectors.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
 
 /// @file
 ///

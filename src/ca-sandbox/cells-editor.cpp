@@ -1,15 +1,13 @@
-#include "cells-editor.h"
+#include "ca-sandbox/cells-editor.h"
 
-#include "vectors.h"
-#include "view-panning.h"
-#include "print.h"
+#include "engine/vectors.h"
+#include "engine/print.h"
 
-#include "universe.h"
-#include "named-states.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/named-states.h"
+#include "ca-sandbox/view-panning.h"
 
-#include "imgui.h"
-
-const u32 CLICK_DEBOUNCE = 100000; // 1/10th second
+#include "imgui/imgui.h"
 
 
 void

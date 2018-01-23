@@ -1,24 +1,26 @@
-#include "rule-ui.h"
+#include "ca-sandbox/rule-ui.h"
 
-#include "types.h"
-#include "vectors.h"
-#include "allocate.h"
-#include "print.h"
-#include "maths.h"
-#include "util.h"
-#include "file-picker.h"
-#include "comparison-operator.h"
-#include "my-array.h"
-#include "colour.h"
-#include "human-time.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
+#include "engine/allocate.h"
+#include "engine/print.h"
+#include "engine/maths.h"
+#include "engine/util.h"
+#include "engine/comparison-operator.h"
+#include "engine/my-array.h"
+#include "engine/colour.h"
+#include "engine/human-time.h"
 
-#include "neighbourhood-region.h"
-#include "named-states.h"
-#include "rule.h"
-#include "load-rule.h"
+#include "ca-sandbox/neighbourhood-region.h"
+#include "ca-sandbox/named-states.h"
+#include "ca-sandbox/rule.h"
+#include "ca-sandbox/load-rule.h"
+
+#include "interface/file-picker.h"
+
+#include "imgui/imgui.h"
 
 #include <stdio.h>
-#include "imgui.h"
 
 /// @file
 /// @brief  Provides GUI elements to modify the currently loaded Rule

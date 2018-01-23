@@ -7,14 +7,14 @@
 ///
 
 
-#include "allocate.h"
-#include "assert.h"
+#include "engine/allocate.h"
+#include "engine/assert.h"
 
 #define _ARRAY_ALLOCATE_FUNC(size) (allocate_size((size), 1))
 #define _ARRAY_FREE_FUNC(p) (un_allocate(p))
 #define _ARRAY_ASSERT_FUNC assert
 
-#include "array.h"
+#include "header-libs/array.h"
 
 
 #endif

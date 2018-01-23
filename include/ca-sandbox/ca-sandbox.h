@@ -3,17 +3,18 @@
 
 #include "loader.h"
 
-#include "engine.h"
-#include "opengl-buffer.h"
+#include "engine/engine.h"
+#include "engine/opengl-buffer.h"
 
-#include "cell-drawing.h"
-#include "simulate-options-ui.h"
-#include "simulation-ui.h"
-#include "universe-ui.h"
-#include "rule-ui.h"
+#include "ca-sandbox/cell-drawing.h"
+#include "ca-sandbox/simulate-options-ui.h"
+#include "ca-sandbox/simulation-ui.h"
+#include "ca-sandbox/universe-ui.h"
+#include "ca-sandbox/rule-ui.h"
+#include "ca-sandbox/view-panning.h"
 
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #include <GL/glew.h>
 

@@ -1,12 +1,12 @@
-#include "border.h"
+#include "ca-sandbox/border.h"
 
-#include "types.h"
-#include "vectors.h"
-#include "print.h"
-#include "assert.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
+#include "engine/print.h"
+#include "engine/assert.h"
 
-#include "simulate.h"
-#include "rule.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/rule.h"
 
 
 /// Checks the cell position against the border, if the border is infinite, the check always returns

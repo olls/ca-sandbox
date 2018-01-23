@@ -1,11 +1,11 @@
 #ifndef NAMED_STATES_H_DEF
 #define NAMED_STATES_H_DEF
 
-#include "types.h"
-#include "text.h"
-#include "my-array.h"
+#include "engine/types.h"
+#include "engine/text.h"
+#include "engine/my-array.h"
 
-#include "cell.h"
+#include "ca-sandbox/cell.h"
 
 /// @file
 /// @brief  Managing named states

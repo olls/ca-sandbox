@@ -1,8 +1,8 @@
-#include "simulate-options-ui.h"
+#include "ca-sandbox/simulate-options-ui.h"
 
-#include "simulate.h"
+#include "ca-sandbox/simulate.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 /// @file
 /// @brief  GUI elements for managing the SimulationOptions struct

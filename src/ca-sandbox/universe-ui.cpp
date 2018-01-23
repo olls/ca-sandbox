@@ -1,16 +1,16 @@
-#include "universe-ui.h"
+#include "ca-sandbox/universe-ui.h"
 
-#include "files.h"
-#include "text.h"
-#include "print.h"
+#include "engine/files.h"
+#include "engine/text.h"
+#include "engine/print.h"
 
-#include "load-universe.h"
-#include "named-states.h"
-#include "universe.h"
-#include "simulate.h"
-#include "cell.h"
+#include "ca-sandbox/load-universe.h"
+#include "ca-sandbox/named-states.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/cell.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 /// @file
 /// @brief  GUI for managing the Universe object

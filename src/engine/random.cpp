@@ -1,7 +1,7 @@
-#include "random.h"
+#include "engine/random.h"
 
-#include "types.h"
-#include "assert.h"
+#include "engine/types.h"
+#include "engine/assert.h"
 
 #include <stdlib.h>
 

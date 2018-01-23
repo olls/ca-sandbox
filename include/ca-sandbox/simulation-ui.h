@@ -1,8 +1,8 @@
 #ifndef SIMULATION_UI_H_DEF
 #define SIMULATION_UI_H_DEF
 
-#include "types.h"
-#include "text.h"
+#include "engine/types.h"
+#include "engine/text.h"
 
 /// @file
 ///

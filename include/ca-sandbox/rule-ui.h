@@ -1,9 +1,9 @@
 #ifndef RULE_UI_H_DEF
 #define RULE_UI_H_DEF
 
-#include "file-picker.h"
+#include "interface/file-picker.h"
 
-#include "rule.h"
+#include "ca-sandbox/rule.h"
 
 /// @file
 ///

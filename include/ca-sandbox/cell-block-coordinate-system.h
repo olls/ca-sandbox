@@ -1,9 +1,10 @@
 #ifndef CELL_BLOCK_COORDINATE_SYSTEM_H_DEF
 #define CELL_BLOCK_COORDINATE_SYSTEM_H_DEF
 
-#include "types.h"
-#include "vectors.h"
-#include "universe.h"
+#include "engine/types.h"
+#include "engine/vectors.h"
+
+#include "ca-sandbox/universe.h"
 
 
 struct UniversePosition

@@ -1,9 +1,9 @@
 #ifndef SAVE_RULE_CONFIG_H_DEF
 #define SAVE_RULE_CONFIG_H_DEF
 
-#include "types.h"
+#include "engine/types.h"
 
-#include "load-rule.h"
+#include "ca-sandbox/load-rule.h"
 
 
 b32

@@ -1,9 +1,9 @@
 #ifndef VECTORS_H_DEF
 #define VECTORS_H_DEF
 
-#include "types.h"
+#include "engine/types.h"
 
-#include "ccVector.h"
+#include "header-libs/ccVector.h"
 
 /// @file
 /// @brief Vector structs and templates for operating on them

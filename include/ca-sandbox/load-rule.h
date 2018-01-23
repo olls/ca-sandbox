@@ -1,13 +1,13 @@
 #ifndef LOAD_RULE_H_DEF
 #define LOAD_RULE_H_DEF
 
-#include "types.h"
-#include "comparison-operator.h"
-#include "my-array.h"
+#include "engine/types.h"
+#include "engine/comparison-operator.h"
+#include "engine/my-array.h"
 
-#include "cell.h"
-#include "neighbourhood-region.h"
-#include "named-states.h"
+#include "ca-sandbox/cell.h"
+#include "ca-sandbox/neighbourhood-region.h"
+#include "ca-sandbox/named-states.h"
 
 /// @file
 /// @brief  structs for loading a .rule file into a Rule struct

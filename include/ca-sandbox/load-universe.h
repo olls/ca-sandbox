@@ -1,12 +1,12 @@
 #ifndef LOAD_UNIVERSE_H_DEF
 #define LOAD_UNIVERSE_H_DEF
 
-#include "types.h"
-#include "text.h"
+#include "engine/types.h"
+#include "engine/text.h"
 
-#include "universe.h"
-#include "simulate.h"
-#include "rule.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/rule.h"
 
 /// @file
 /// @brief  Functions for parsing and loading `.cells` files

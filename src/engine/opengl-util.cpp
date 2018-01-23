@@ -1,6 +1,6 @@
-#include "types.h"
-#include "print.h"
-#include "opengl-util.h"
+#include "engine/types.h"
+#include "engine/print.h"
+#include "engine/opengl-util.h"
 
 #include <GL/glew.h>
 

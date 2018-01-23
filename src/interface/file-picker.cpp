@@ -1,14 +1,14 @@
-#include "file-picker.h"
+#include "interface/file-picker.h"
 
-#include "types.h"
-#include "print.h"
-#include "text.h"
-#include "util.h"
-#include "assert.h"
+#include "engine/types.h"
+#include "engine/print.h"
+#include "engine/text.h"
+#include "engine/util.h"
+#include "engine/assert.h"
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 
-#include "tinydir.h"
+#include "header-libs/tinydir.h"
 
 /// @file
 /// @brief  Provides a very simple file browser/picker using ImGui

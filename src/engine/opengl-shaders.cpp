@@ -1,9 +1,9 @@
-#include "opengl-shaders.h"
+#include "engine/opengl-shaders.h"
 
-#include "types.h"
-#include "print.h"
-#include "files.h"
-#include "allocate.h"
+#include "engine/types.h"
+#include "engine/print.h"
+#include "engine/files.h"
+#include "engine/allocate.h"
 
 #include <GL/glew.h>
 #include <stdlib.h>

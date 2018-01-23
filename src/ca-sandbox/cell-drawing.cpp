@@ -1,16 +1,16 @@
-#include "cell-drawing.h"
+#include "ca-sandbox/cell-drawing.h"
 
-#include "util.h"
-#include "print.h"
-#include "colour.h"
-#include "opengl-util.h"
-#include "opengl-buffer.h"
-#include "opengl-general-buffers.h"
+#include "engine/util.h"
+#include "engine/print.h"
+#include "engine/colour.h"
+#include "engine/opengl-util.h"
+#include "engine/opengl-buffer.h"
+#include "engine/opengl-general-buffers.h"
 
-#include "universe.h"
-#include "cell-block-coordinate-system.h"
-#include "cells-editor.h"
-#include "named-states.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
+#include "ca-sandbox/cells-editor.h"
+#include "ca-sandbox/named-states.h"
 
 #include <GL/glew.h>
 

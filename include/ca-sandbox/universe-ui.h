@@ -1,11 +1,12 @@
 #ifndef UNIVERSE_UI_H_DEF
 #define UNIVERSE_UI_H_DEF
 
-#include "types.h"
+#include "engine/types.h"
 
-#include "universe.h"
-#include "simulate.h"
-#include "file-picker.h"
+#include "ca-sandbox/universe.h"
+#include "ca-sandbox/simulate.h"
+
+#include "interface/file-picker.h"
 
 /// @file
 ///

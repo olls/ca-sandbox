@@ -1,11 +1,11 @@
-#include "view-panning.h"
+#include "ca-sandbox/view-panning.h"
 
-#include "maths.h"
+#include "engine/maths.h"
+#include "engine/vectors.h"
 
-#include "cell-block-coordinate-system.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
 
-#include "imgui.h"
-#include "ccVector.h"
+#include "imgui/imgui.h"
 
 const s32 PANNING_MOUSE_BUTTON = 2;
 
