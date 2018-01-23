@@ -55,13 +55,36 @@ destroy_cell_hashmap(Universe *universe)
 }
 
 
+u32
+cell_block_states_array_size(Universe *universe)
+{
+  u32 result = sizeof(CellState) * universe->cell_block_dim * universe->cell_block_dim;
+  return result;
+}
+
+
+u32
+cell_block_size(Universe *universe)
+{
+  // CellBlocks have 2 arrays of CellStates (cell_states, cell_previous_states) allocated beyond the
+  //   struct
+  u32 result = sizeof(CellBlock) + (2*cell_block_states_array_size(universe));
+  return result;
+}
+
+
 CellBlock *
 allocate_cell_block(Universe *universe, s32vec2 position)
 {
-  u32 size = sizeof(CellBlock) + (sizeof(Cell) * universe->cell_block_dim * universe->cell_block_dim);
+  u32 size = cell_block_size(universe);
 
   CellBlock *result = (CellBlock *)allocate_size(size, 1);
   memset(result, 0, size);
+
+  // Calculate cell_states and cell_previous_states offsets
+  result->cell_states = (CellState *)((u8*)result + sizeof(CellBlock) + cell_block_states_array_size(universe) * 0);
+  result->cell_previous_states = (CellState *)((u8*)result + sizeof(CellBlock) + cell_block_states_array_size(universe) * 1);
+  assert((u8 *)result->cell_previous_states + cell_block_states_array_size(universe) == (u8 *)result + size);
 
   result->block_position = position;
   result->slot_in_use = true;
@@ -90,10 +113,12 @@ init_cells(Universe *universe, CellInitialisationOptions *cell_initialisation_op
          cell_x < universe->cell_block_dim;
          ++cell_x)
     {
-      Cell *cell = cell_block->cells + (cell_y * universe->cell_block_dim) + cell_x;
+      u32 cell_pos = (cell_y * universe->cell_block_dim) + cell_x;
+      CellState *cell_state = cell_block->cell_states + cell_pos;
+      CellState *cell_previous_state = cell_block->cell_previous_states + cell_pos;
 
-      cell->state = initialise_cell_state(cell_initialisation_options, position);
-      cell->previous_state = cell->state;
+      *cell_state = initialise_cell_state(cell_initialisation_options, position);
+      *cell_previous_state = *cell_state;
     }
   }
 }
@@ -255,18 +280,19 @@ delete_cell_block(Universe *universe, s32vec2 search_cell_block_position)
 }
 
 
-/// Get a Cell from a position within the CellBlock
-Cell *
-get_cell_from_block(Universe *universe, CellBlock *cell_block, s32vec2 cell_coord)
+/// Returns the offset of a given cell_coord into a block given the universe.
+///
+/// Offset can be used to index into CellBlock.previous_cell_states and CellBlock.cell_states
+///
+u32
+get_cell_index_in_block(Universe *universe, s32vec2 cell_coord)
 {
-  Cell *result = 0;
-
   assert(cell_coord.x >= 0);
   assert(cell_coord.y >= 0);
   assert(cell_coord.x < universe->cell_block_dim);
   assert(cell_coord.y < universe->cell_block_dim);
 
-  result = cell_block->cells + (cell_coord.y * universe->cell_block_dim) + cell_coord.x;
+  u32 result = (cell_coord.y * universe->cell_block_dim) + cell_coord.x;
 
   return result;
 }

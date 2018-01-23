@@ -101,10 +101,11 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
                  cell_x < universe->cell_block_dim;
                  ++cell_x)
             {
-              Cell *cell = get_cell_from_block(universe, cell_block, (s32vec2){(s32)cell_x, (s32)cell_y});
+              u32 cell_index = get_cell_index_in_block(universe, (s32vec2){(s32)cell_x, (s32)cell_y});
+              CellState cell_state = cell_block->cell_states[cell_index];
 
-              String cell_state = get_state_name(named_states, cell->state);
-              fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state), cell_state.start);
+              String cell_state_string = get_state_name(named_states, cell_state);
+              fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state_string), cell_state_string.start);
             }
 
             fprintf(file_stream, "\n");

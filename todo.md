@@ -22,3 +22,5 @@
 - colour cells state buttons in rule patterns UI where only one state is used
 - file pickers should be modals
 - reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)
+- resize universe hashmap, if saturated
+- procedure for resizing a cells file's cell_block_dim

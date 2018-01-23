@@ -159,9 +159,9 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, Cells
               .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
             };
 
-            Cell *cell = cell_block->cells + (cell_position.y * universe->cell_block_dim) + cell_position.x;
+            CellState cell_state = cell_block->cell_states[(cell_position.y * universe->cell_block_dim) + cell_position.x];
 
-            vec4 colour = get_state_colour(cell->state);
+            vec4 colour = get_state_colour(cell_state);
 
             if (cells_editor->cell_highlighted &&
                 cell_position_equal_to(cells_editor->highlighted_cell, current_cell))

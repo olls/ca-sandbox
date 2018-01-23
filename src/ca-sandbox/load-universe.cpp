@@ -86,9 +86,9 @@ read_cell_block(String *file_string, Universe *universe, NamedStates *named_stat
          cell_index < universe->cell_block_dim * universe->cell_block_dim;
          ++cell_index)
     {
-      Cell *cell = cell_block->cells + cell_index;
+      CellState *cell_state = cell_block->cell_states + cell_index;
 
-      b32 state_read = read_state_name(named_states, file_string, &cell->state);
+      b32 state_read = read_state_name(named_states, file_string, cell_state);
       if (!state_read)
       {
         print("Invalid state name in cell block.\n");

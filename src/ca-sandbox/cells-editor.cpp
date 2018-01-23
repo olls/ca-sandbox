@@ -64,11 +64,12 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
       {
         cells_editor->currently_dragging_state = true;
 
-        Cell *cell = get_cell_from_block(universe, hovered_cell_block, cell_position);
+        u32 cell_index = get_cell_index_in_block(universe, cell_position);
+        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
 
         // Choose which state we are dragging
 
-        if (cell->state != cells_editor->active_state)
+        if (*cell_state != cells_editor->active_state)
         {
           cells_editor->drag_state = cells_editor->active_state;
         }
@@ -76,7 +77,7 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
         {
           cells_editor->drag_state = 0;
         }
-        cell->state = cells_editor->drag_state;
+        *cell_state = cells_editor->drag_state;
       }
       else if (!currently_panning &&
                cells_editor->currently_dragging_state &&
@@ -84,15 +85,17 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
       {
         cells_editor->currently_dragging_state = true;
 
-        Cell *cell = get_cell_from_block(universe, hovered_cell_block, cell_position);
-        cell->state = cells_editor->drag_state;
+        u32 cell_index = get_cell_index_in_block(universe, cell_position);
+        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
+        *cell_state = cells_editor->drag_state;
       }
       else if (ImGui::IsMouseClicked(1))
       {
         cells_editor->current_context_menu_cell_block = universe_mouse_position.cell_block_position;
 
-        Cell *cell = get_cell_from_block(universe, hovered_cell_block, cell_position);
-        cells_editor->current_contex_menu_cell_state = get_state_name(named_states, cell->state);;
+        u32 cell_index = get_cell_index_in_block(universe, cell_position);
+        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
+        cells_editor->current_contex_menu_cell_state = get_state_name(named_states, *cell_state);;
 
         ImGui::OpenPopup("cell block context menu");
       }

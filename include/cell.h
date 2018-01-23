@@ -12,17 +12,6 @@
 typedef u32 CellState;
 
 
-/// An individual cell in a CA, stored in CellBlock%s.
-struct Cell
-{
-  CellState state;
-
-  /// Stores the previous state, so during a simulation frame, the state value can be updated
-  ///   leaving the previous state for neighbouring Cell%s to use.
-  u32 previous_state;
-};
-
-
 enum struct CellInitialisationType : u32
 {
   RANDOM

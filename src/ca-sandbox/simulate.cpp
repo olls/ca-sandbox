@@ -46,8 +46,9 @@ simulate_cell_block(SimulateOptions *simulate_options, CellInitialisationOptions
     {
       if (check_border(simulate_options->border, cell_block->block_position, cell_position))
       {
-        Cell *subject_cell = get_cell_from_block(universe, cell_block, cell_position);
-        subject_cell->state = execute_transition_function(&simulate_options->border, universe, rule, cell_block->block_position, cell_position);
+        u32 subject_cell_index = get_cell_index_in_block(universe, cell_position);
+        CellState *subject_cell_state = cell_block->cell_states + subject_cell_index;
+        *subject_cell_state = execute_transition_function(&simulate_options->border, universe, rule, cell_block->block_position, cell_position);
       }
     }
   }
@@ -74,10 +75,10 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
          cell_position.x < universe->cell_block_dim;
          ++cell_position.x)
     {
-      Cell *cell = get_cell_from_block(universe, subject_cell_block, cell_position);
-      cell->previous_state = cell->state;
+      u32 cell_index = get_cell_index_in_block(universe, cell_position);
+      CellState cell_state = subject_cell_block->cell_states[cell_index];
 
-      if (!is_null_state(rule_configuration, cell->state) &&
+      if (!is_null_state(rule_configuration, cell_state) &&
           check_border(simulate_options->border, subject_cell_block->block_position, cell_position))
       {
         // If within the neighbourhood region of any neighbouring CellBlocks:
@@ -233,12 +234,10 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
 /// @param[in] universe
 /// @param[in] current_frame  a unique id for the current simulation step.
 ///
-/// First we iterate over every Cell in the Universe, copying its state into `Cell.previous_state`.
-///   Next we iterate over every CellBlock and simulate it using simulate_cell_block() if it has not
-///   yet been simulated on this frame. We continue to iterate over all the CellBlock%s until they
-///   have all been simulated on this frame; this is to allow for new CellBlock%s to be created
-///   during the simulation of a CellBlock, and the new CellBlock will still be simulated within the
-///   same frame.
+/// First we iterate over all the CellBlock%s, copying the cell_states to cell_previous_states and
+///   creating any new CellBlocks needed at the edges of the simulation.
+/// Then we do a second iteration over all the CellBlock%s, simulating each one.
+///
 void
 simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, Rule *rule, Universe *universe, u64 current_frame)
 {
@@ -261,6 +260,9 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
         // Follow the hashmap collision chain
         do
         {
+          // Copy cell_states to cell_previous_states
+          memcpy(cell_block->cell_previous_states, cell_block->cell_states, cell_block_states_array_size(universe));
+
           created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, &rule->config, universe, cell_block);
 
           cell_block = cell_block->next_block;
@@ -270,42 +272,31 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
     }
   }
 
-  // Loop through all CellBlock%s, simulating them until they are all flagged as being
-  //  simulated on this frame. This is so that new CellBlock%s - which have been created
-  //  when the simulation reaches the edge of an existing CellBlock - are simulated in
-  //  the same frame.
+  // Simulate all CellBlock%s
 
-  b32 simulated_any_blocks = true;
-  while (simulated_any_blocks)
+  for (u32 hash_slot = 0;
+       hash_slot < universe->hashmap_size;
+       ++hash_slot)
   {
-    simulated_any_blocks = false;
-    // print("Hashmap loop\n");
+    CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    for (u32 hash_slot = 0;
-         hash_slot < universe->hashmap_size;
-         ++hash_slot)
+    if (cell_block != 0 &&
+        cell_block->slot_in_use)
     {
-      CellBlock *cell_block = universe->hashmap[hash_slot];
-
-      if (cell_block != 0 &&
-          cell_block->slot_in_use)
+      do
       {
-        do
+        if (cell_block->slot_in_use &&
+            cell_block->last_simulated_on_frame != current_frame)
         {
-          if (cell_block->slot_in_use &&
-              cell_block->last_simulated_on_frame != current_frame)
-          {
-            cell_block->last_simulated_on_frame = current_frame;
-            simulated_any_blocks = true;
+          cell_block->last_simulated_on_frame = current_frame;
 
-            simulate_cell_block(simulate_options, cell_initialisation_options, rule, universe, cell_block);
-          }
-
-          // Follow any hashmap collision chains
-          cell_block = cell_block->next_block;
+          simulate_cell_block(simulate_options, cell_initialisation_options, rule, universe, cell_block);
         }
-        while (cell_block != 0);
+
+        // Follow any hashmap collision chains
+        cell_block = cell_block->next_block;
       }
+      while (cell_block != 0);
     }
   }
 }

@@ -43,8 +43,11 @@ struct CellBlock
   ///   CellBlock in this slot.
   CellBlock *next_block;
 
-  /// Array of cells within the block. length of universe->cell_block_dim ^2
-  Cell cells[];
+  /// Array of current-frame CellState%s for the block. length of universe->cell_block_dim ^2
+  CellState *cell_states;
+
+  /// Array of previous-frame CellState%s for the block. length of universe->cell_block_dim ^2
+  CellState *cell_previous_states;
 };
 
 
@@ -79,6 +82,10 @@ void
 destroy_cell_hashmap(Universe *universe);
 
 
+u32
+cell_block_states_array_size(Universe *universe);
+
+
 CellBlock *
 create_cell_block(Universe *universe, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
 
@@ -99,8 +106,8 @@ void
 delete_cell_block(Universe *universe, s32vec2 search_cell_block_position);
 
 
-Cell *
-get_cell_from_block(Universe *universe, CellBlock *cell_block, s32vec2 cell_coord);
+u32
+get_cell_index_in_block(Universe *universe, s32vec2 cell_coord);
 
 
 #endif

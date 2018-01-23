@@ -142,10 +142,11 @@ get_neighbouring_cell_state(Border *border, Universe *universe, s32vec2 neighbou
 
     if (cell_block != 0)
     {
-      Cell *cell = get_cell_from_block(universe, cell_block, cell_coord);
-      if (cell->previous_state != DEBUG_STATE)
+      u32 cell_index = get_cell_index_in_block(universe, cell_coord);
+      CellState previous_cell_state = cell_block->cell_previous_states[cell_index];
+      if (previous_cell_state != DEBUG_STATE)
       {
-        *resulting_state = cell->previous_state;
+        *resulting_state = previous_cell_state;
       }
     }
   }
