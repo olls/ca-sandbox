@@ -3,6 +3,7 @@
 #include "types.h"
 #include "print.h"
 #include "timing.h"
+#include "human-time.h"
 
 #include "imgui.h"
 
@@ -68,6 +69,10 @@ do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_bui
 
         ImGui::Text("Simulation Time: %.3fms", simulation_ui->last_simulation_delta * 0.001);
         ImGui::Text("Simulation Step: %lu", simulation_ui->simulation_step);
+
+        const char *unit;
+        r32 human_cumulative_sim_time = human_time(simulation_ui->simulation_delta_cumulative_average, &unit);
+        ImGui::Text("Cumulative Moving Average Simulation Time: %.2f %s", human_cumulative_sim_time, unit);
       }
 
       if (ImGui::Button("End simulation"))

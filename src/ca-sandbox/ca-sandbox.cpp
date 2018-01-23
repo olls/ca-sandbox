@@ -414,6 +414,12 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         simulation_ui->last_sim_time = end_sim_time;
 
         simulation_ui->last_simulation_delta = (u32)(end_sim_time - start_sim_time) * (1.0/n_simulation_steps);
+
+        simulation_ui->simulation_delta_cumulative_average = (((u32)(end_sim_time - start_sim_time) +
+                                                               (simulation_ui->simulation_delta_cumulative_average_n *
+                                                                simulation_ui->simulation_delta_cumulative_average)) /
+                                                              (simulation_ui->simulation_delta_cumulative_average_n + n_simulation_steps));
+        simulation_ui->simulation_delta_cumulative_average_n += n_simulation_steps;
       }
     }
     else if (simulation_ui->mode == Mode::EDITOR)

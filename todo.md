@@ -5,6 +5,7 @@
 # Performance
 = save trees to save building large trees every time
 = thread simulation
+- reduce simulation time
 - reduce tree building time
 - profiling tools
 

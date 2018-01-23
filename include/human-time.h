@@ -1,5 +1,5 @@
-#ifndef HUMAN_TIME
-#define HUMAN_TIME
+#ifndef HUMAN_TIME_H_DEF
+#define HUMAN_TIME_H_DEF
 
 const u32 ONE_US   = 1;
 const u32 ONE_MS   = ONE_US * 1000;
@@ -8,7 +8,7 @@ const u32 ONE_MIN  = ONE_S * 60;;
 const u32 ONE_HOUR = ONE_MIN * 60;
 
 
-r32
+inline r32
 human_time(u32 us, const char **unit_result)
 {
   r32 result = us;
