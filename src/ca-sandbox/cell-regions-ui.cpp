@@ -6,6 +6,7 @@
 #include "ca-sandbox/cell-drawing.h"
 
 #include "engine/opengl-buffer.h"
+#include "engine/vectors.h"
 
 #include "imgui/imgui.h"
 
@@ -13,11 +14,8 @@
 void
 do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Universe *universe, UniversePosition mouse_universe_pos, b32 *mouse_click_consumed)
 {
-  // TODO: Mouse UI for selecting cells
-
   if (ImGui::Begin("Cell Regions"))
   {
-
     if (universe != 0)
     {
       if (ImGui::Button("Make selection"))
@@ -37,14 +35,15 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
         {
           *mouse_click_consumed = true;
 
+          b32 update_end_position = false;
           if (ImGui::IsMouseClicked(0))
           {
             cell_regions_ui->making_selection_dragging = true;
 
             cell_regions_ui->start_selection_block = mouse_universe_pos.cell_block_position;
             cell_regions_ui->start_selection_cell = vec2_to_s32vec2(vec2_multiply(mouse_universe_pos.cell_position, universe->cell_block_dim));
-            cell_regions_ui->end_selection_block = mouse_universe_pos.cell_block_position;
-            cell_regions_ui->end_selection_cell = vec2_to_s32vec2(vec2_multiply(mouse_universe_pos.cell_position, universe->cell_block_dim));
+
+            update_end_position = true;
           }
 
           if (cell_regions_ui->making_selection_dragging &&
@@ -53,8 +52,25 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
             ImGui::SameLine();
             ImGui::Text("Dragging");
 
+            update_end_position = true;
+          }
+
+          if (update_end_position)
+          {
             cell_regions_ui->end_selection_block = mouse_universe_pos.cell_block_position;
             cell_regions_ui->end_selection_cell = vec2_to_s32vec2(vec2_multiply(mouse_universe_pos.cell_position, universe->cell_block_dim));
+
+            // Find direction of selection, so we can position end one past the mouse position in
+            //   all directions
+
+            s32vec2 block_delta = vec2_subtract(cell_regions_ui->end_selection_block, cell_regions_ui->start_selection_block);
+            s32vec2 cell_delta = vec2_subtract(cell_regions_ui->end_selection_cell, cell_regions_ui->start_selection_cell);
+            normalise_cell_coord(universe, &block_delta, &cell_delta);  // Moves all of the sign into the block coordinate
+
+            s32vec2 zero_offset = vec2_max(vec2_sign(block_delta), {0, 0});
+
+            cell_regions_ui->end_selection_cell = vec2_add(cell_regions_ui->end_selection_cell, zero_offset);
+            normalise_cell_coord(universe, &cell_regions_ui->end_selection_block, &cell_regions_ui->end_selection_cell);
           }
         }
 

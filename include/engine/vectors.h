@@ -2,6 +2,7 @@
 #define VECTORS_H_DEF
 
 #include "engine/types.h"
+#include "engine/maths.h"
 
 #include "header-libs/ccVector.h"
 
@@ -173,6 +174,39 @@ vec2_eq(vec a, vec b)
 {
   b32 result = a.x == b.x &&
                a.y == b.y;
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec2_sign(vec a)
+{
+  vec result = {
+    .x = a.x >= 0 ? 1 : -1,
+    .y = a.y >= 0 ? 1 : -1
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec2_max(vec a, vec b)
+{
+  vec result = {
+    .x = max(a.x, b.x),
+    .y = max(a.y, b.y)
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec2_min(vec a, vec b)
+{
+  vec result = {
+    .x = min(a.x, b.x),
+    .y = min(a.y, b.y)
+  };
   return result;
 }
 
@@ -350,6 +384,42 @@ vec3_eq(vec a, vec b)
   b32 result = a.x == b.x &&
                a.y == b.y &&
                a.z == b.z;
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec3_sign(vec a)
+{
+  vec result = {
+    .x = a.x >= 0 ? 1 : -1,
+    .y = a.y >= 0 ? 1 : -1,
+    .z = a.z >= 0 ? 1 : -1
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec3_max(vec a, vec b)
+{
+  vec result = {
+    .x = max(a.x, b.x),
+    .y = max(a.y, b.y),
+    .z = max(a.z, b.z)
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec3_min(vec a, vec b)
+{
+  vec result = {
+    .x = min(a.x, b.x),
+    .y = min(a.y, b.y),
+    .z = min(a.z, b.z)
+  };
   return result;
 }
 
@@ -539,6 +609,45 @@ vec4_eq(vec a, vec b)
                a.y == b.y &&
                a.z == b.z &&
                a.w == b.w;
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec4_sign(vec a)
+{
+  vec result = {
+    .x = a.x >= 0 ? 1 : -1,
+    .y = a.y >= 0 ? 1 : -1,
+    .z = a.z >= 0 ? 1 : -1,
+    .w = a.w >= 0 ? 1 : -1
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec4_max(vec a, vec b)
+{
+  vec result = {
+    .x = max(a.x, b.x),
+    .y = max(a.y, b.y),
+    .z = max(a.z, b.z),
+    .w = max(a.w, b.w)
+  };
+  return result;
+}
+
+template <typename vec>
+inline vec
+vec4_min(vec a, vec b)
+{
+  vec result = {
+    .x = min(a.x, b.x),
+    .y = min(a.y, b.y),
+    .z = min(a.z, b.z),
+    .w = min(a.w, b.w)
+  };
   return result;
 }
 
