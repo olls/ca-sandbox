@@ -30,7 +30,7 @@ struct CellsEditor
 
 
 void
-do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, UniversePosition mouse_universe_position, b32 currently_panning);
+do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, UniversePosition mouse_universe_position, b32 *mouse_click_consumed);
 
 
 #endif

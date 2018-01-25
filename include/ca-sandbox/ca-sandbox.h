@@ -12,6 +12,8 @@
 #include "ca-sandbox/universe-ui.h"
 #include "ca-sandbox/rule-ui.h"
 #include "ca-sandbox/view-panning.h"
+#include "ca-sandbox/cell-regions.h"
+#include "ca-sandbox/cell-regions-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -65,6 +67,9 @@ struct CA_SandboxState
   UniverseUI universe_ui;
   RuleUI rule_ui;
   CellsEditor cells_editor;
+
+  CellRegions cell_regions;
+  CellRegionsUI cell_regions_ui;
 
   ViewPanning view_panning;
   vec2 screen_mouse_pos;

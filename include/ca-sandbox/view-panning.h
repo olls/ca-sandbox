@@ -32,7 +32,7 @@ update_view_projection_matrix(ViewPanning *view_panning, s32vec2 window_size);
 
 
 void
-update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos);
+update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos, b32 *mouse_click_consumed);
 
 
 UniversePosition

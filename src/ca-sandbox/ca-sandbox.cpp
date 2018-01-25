@@ -29,6 +29,7 @@
 #include "ca-sandbox/save-universe.h"
 #include "ca-sandbox/named-states-ui.h"
 #include "ca-sandbox/save-rule-config.h"
+#include "ca-sandbox/cell-regions-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
@@ -38,6 +39,7 @@
 // #define DEBUG_CELL_BLOCK_DRAWING
 // #define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
 // #define DEBUG_SCREEN_DRAWING
+#define DEBUG_CELL_REGION_SELECTION_DRAWING
 
 /// @file
 /// @brief Program root file.
@@ -152,6 +154,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // state->universe_ui = {};
     // state->rule_ui = {};
     // state->cells_editor = {};
+    // state->cell_regions_ui = {};
 
     state->view_panning.scale = 0.3;
     state->view_panning.offset = {0,0};
@@ -177,6 +180,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   UniverseUI *universe_ui = &state->universe_ui;
   RuleUI *rule_ui = &state->rule_ui;
   CellsEditor *cells_editor = &state->cells_editor;
+  CellRegions *cell_regions = &state->cell_regions;
+  CellRegionsUI *cell_regions_ui = &state->cell_regions_ui;
   RuleCreationThread *rule_creation_thread = &state->rule_creation_thread;
   ViewPanning *view_panning = &state->view_panning;
 
@@ -303,9 +308,11 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       state->screen_mouse_pos.y *= -1;
     }
 
+    b32 mouse_click_consumed = io.WantCaptureMouse;
+
     s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
 
-    update_view_panning(view_panning, state->screen_mouse_pos);
+    update_view_panning(view_panning, state->screen_mouse_pos, &mouse_click_consumed);
     update_view_projection_matrix(view_panning, window_size);
 
     UniversePosition mouse_universe_pos = screen_position_to_universe_position(view_panning, state->screen_mouse_pos);
@@ -321,6 +328,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_simulate_options_ui(simulate_options, state->universe);
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
+    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, mouse_universe_pos, &mouse_click_consumed);
 
     //
     // Save
@@ -451,7 +459,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     {
       if (state->cells_file_loaded)
       {
-        do_cells_editor(cells_editor, state->universe, cell_initialisation_options, &loaded_rule->config.named_states, mouse_universe_pos, view_panning->currently_panning);
+        do_cells_editor(cells_editor, state->universe, cell_initialisation_options, &loaded_rule->config.named_states, mouse_universe_pos, &mouse_click_consumed);
       }
     }
 
@@ -569,6 +577,13 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     opengl_buffer_new_element(general_universe_ibo, &mouse_index);
 
     debug_universe_lines_ibo.n_elements += 2;
+#endif
+
+#ifdef DEBUG_CELL_REGION_SELECTION_DRAWING
+    if (state->universe != 0)
+    {
+      debug_universe_lines_ibo.n_elements += debug_cell_region_selection_drawing_upload(cell_regions_ui, state->universe, general_universe_vbo, general_universe_ibo);
+    }
 #endif
 
     // Get attribute locations

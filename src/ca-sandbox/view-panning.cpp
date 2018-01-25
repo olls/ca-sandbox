@@ -8,6 +8,7 @@
 #include "imgui/imgui.h"
 
 const s32 PANNING_MOUSE_BUTTON = 2;
+const s32 PANNING_MOUSE_CTRL_BUTTON = 0;
 
 /// @file
 ///
@@ -51,10 +52,8 @@ update_view_scaling(ViewPanning *view_panning, vec2 screen_mouse_pos)
 
 
 void
-update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
+update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos, b32 *mouse_click_consumed)
 {
-  ImGuiIO& io = ImGui::GetIO();
-
   update_view_scaling(view_panning, screen_mouse_pos);
 
   view_panning->panning_last_frame = view_panning->currently_panning;
@@ -63,16 +62,22 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos)
   vec2 d_mouse = vec2_subtract(screen_mouse_pos, view_panning->last_mouse_pos);
   view_panning->last_mouse_pos = screen_mouse_pos;
 
-  if (!io.WantCaptureMouse &&
-      ImGui::IsMouseClicked(PANNING_MOUSE_BUTTON))
+  ImGuiIO& io = ImGui::GetIO();
+
+  if (!*mouse_click_consumed &&
+      (ImGui::IsMouseClicked(PANNING_MOUSE_BUTTON) ||
+       (io.KeyCtrl && ImGui::IsMouseClicked(PANNING_MOUSE_CTRL_BUTTON))))
   {
     view_panning->currently_panning = true;
   }
 
   if (view_panning->currently_panning &&
-      !io.WantCaptureMouse &&
-      ImGui::IsMouseDown(PANNING_MOUSE_BUTTON))
+      !*mouse_click_consumed &&
+      (ImGui::IsMouseDown(PANNING_MOUSE_BUTTON) ||
+       (io.KeyCtrl && ImGui::IsMouseDown(PANNING_MOUSE_CTRL_BUTTON))))
   {
+    *mouse_click_consumed = true;
+
     vec2 scaled_mouse_pos = vec2_divide(d_mouse, view_panning->scale);
     view_panning->offset = vec2_add(view_panning->offset, scaled_mouse_pos);
 
