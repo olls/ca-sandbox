@@ -4,7 +4,7 @@
 #include "engine/types.h"
 #include "engine/text.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
 #include "ca-sandbox/rule.h"
 
@@ -36,8 +36,8 @@ b32
 load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options, NamedStates *named_states);
 
 
-b32
-load_universe(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
+Universe *
+load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
 
 
 void

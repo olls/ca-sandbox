@@ -44,9 +44,11 @@ get_filename_from_tinydir_file(void *void_tinydir_package, int idx, const char *
 }
 
 
-void
+b32
 file_picker(const char *picker_name, FilePicker *picker)
 {
+  b32 file_chosen = false;
+
   if (ImGui::BeginPopupModal(picker_name))
   {
     TinydirPackage tinydir_package = {};
@@ -163,6 +165,7 @@ file_picker(const char *picker_name, FilePicker *picker)
         print("Selected file: %.*s\n", string_length(selected_file), selected_file.start);
 
         ImGui::CloseCurrentPopup();
+        file_chosen = true;
       }
     }
 
@@ -176,4 +179,6 @@ file_picker(const char *picker_name, FilePicker *picker)
 
     ImGui::EndPopup();
   }
+
+  return file_chosen;
 }

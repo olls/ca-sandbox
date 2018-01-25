@@ -3,7 +3,7 @@
 #include "engine/vectors.h"
 #include "engine/print.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/named-states.h"
 #include "ca-sandbox/view-panning.h"
 

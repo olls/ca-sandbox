@@ -3,7 +3,7 @@
 
 #include "engine/opengl-buffer.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cells-editor.h"
 
 /// @file
@@ -84,12 +84,12 @@ void
 init_general_universe_attributes(OpenGL_Buffer *general_universe_vbo, GLuint general_universe_shader_program);
 
 
-BufferDrawingLocation
+u32
 debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *cell_drawing_vbo, OpenGL_Buffer *cell_drawing_ibo);
 
 
 void
-debug_cell_block_outline_draw(OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo, BufferDrawingLocation ibo_elements);
+debug_lines_draw(OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo, BufferDrawingLocation ibo_elements);
 
 
 #endif

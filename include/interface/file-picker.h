@@ -8,6 +8,8 @@
 #define _TINYDIR_FREE(_ptr) un_allocate((_ptr))
 #include "header-libs/tinydir.h"
 
+#define FILE_NAME_LIMIT _TINYDIR_FILENAME_MAX
+
 /// @file
 ///
 
@@ -20,17 +22,17 @@ struct FilePicker
   const char *root_directory;
 
   /// The current path which the picker is in, relative to the root directory
-  char current_path[_TINYDIR_FILENAME_MAX];
+  char current_path[FILE_NAME_LIMIT];
 
   /// The currently selected item in the current folder
   s32 current_item;
 
   /// The currently selected file by the used, only updated as .active switches to false.
-  char selected_file[_TINYDIR_FILENAME_MAX];
+  char selected_file[FILE_NAME_LIMIT];
 };
 
 
-void
+b32
 file_picker(const char *picker_name, FilePicker *picker);
 
 

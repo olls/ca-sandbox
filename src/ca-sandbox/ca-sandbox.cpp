@@ -14,7 +14,7 @@
 #include "engine/opengl-buffer.h"
 #include "engine/opengl-general-buffers.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/load-universe.h"
 #include "ca-sandbox/cell-drawing.h"
 #include "ca-sandbox/rule.h"
@@ -134,7 +134,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     state->screen_shader_program = 0;
     state->screen_vao = 0;
 
-    // state->universe = {};
+    state->universe = 0;
     // state->simulate_options = {};
     // state->cell_initialisation_options = {};
     state->cells_file_loaded = false;
@@ -170,7 +170,6 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
   CellInstancing *cell_instancing = &state->cell_instancing;
 
-  Universe *universe = &state->universe;
   SimulateOptions *simulate_options = &state->simulate_options;
   CellInitialisationOptions *cell_initialisation_options = &state->cell_initialisation_options;
   Rule *loaded_rule = &state->loaded_rule;
@@ -319,18 +318,18 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     do_simulation_ui(simulation_ui, frame_timing->frame_start, loaded_rule->rule_tree_built, &universe_ui->reload_cells_file, &universe_ui->save_cells_file);
     do_rule_ui(rule_ui, loaded_rule, rule_creation_thread);
-    do_simulate_options_ui(simulate_options, universe);
-    do_universe_ui(universe_ui, universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
+    do_simulate_options_ui(simulate_options, state->universe);
+    do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
 
     //
     // Save
     //
 
-    if (universe_ui->save_cells_file)
+    if (universe_ui->save_cells_file && state->universe != 0)
     {
       universe_ui->save_cells_file = false;
-      result.success &= save_universe_to_file(universe_ui->cells_file_picker.selected_file, universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
+      result.success &= save_universe_to_file(universe_ui->loaded_file_name, state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     }
 
     if (rule_ui->save_rule_file)
@@ -367,12 +366,28 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       Array::clear(cell_initialisation_options->set_of_initial_states);
       default_cell_initialisation_options(cell_initialisation_options);
 
-      result.success &= load_universe(universe_ui->cells_file_picker.selected_file, universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
+      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
 
-      if (loaded_rule->config.neighbourhood_region_size >= universe->cell_block_dim)
+      if (new_universe != 0)
       {
-        print("cell_block_dim is too small for the current neighbourhood_region_size.\n");
-        result.success &= false;
+        if (loaded_rule->config.neighbourhood_region_size >= new_universe->cell_block_dim)
+        {
+          universe_ui->loading_error = true;
+          universe_ui->loading_error_message = new_string("cell_block_dim is too small for the current neighbourhood_region_size.\n");
+        }
+        else
+        {
+          // Successfully loaded new_universe!
+          state->universe = new_universe;
+          copy_string(universe_ui->loaded_file_name,
+                      universe_ui->cells_file_picker.selected_file,
+                      strlen(universe_ui->cells_file_picker.selected_file)+1);
+        }
+      }
+      else
+      {
+        universe_ui->loading_error_message = new_string("other error...");
+        universe_ui->loading_error = true;
       }
     }
 
@@ -408,7 +423,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
              simulation_step < n_simulation_steps;
              ++simulation_step)
         {
-          simulate_cells(simulate_options, cell_initialisation_options, loaded_rule, universe, ++simulation_ui->simulation_step);
+          simulate_cells(simulate_options, cell_initialisation_options, loaded_rule, state->universe, ++simulation_ui->simulation_step);
         }
 
         u64 end_sim_time = get_us();
@@ -427,7 +442,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     {
       if (state->cells_file_loaded)
       {
-        do_cells_editor(cells_editor, universe, cell_initialisation_options, &loaded_rule->config.named_states, mouse_universe_pos, view_panning->currently_panning);
+        do_cells_editor(cells_editor, state->universe, cell_initialisation_options, &loaded_rule->config.named_states, mouse_universe_pos, view_panning->currently_panning);
       }
     }
 
@@ -445,14 +460,19 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Cell instance drawing
     //
 
-    upload_cell_instances(universe, cell_instancing, cells_editor);
-
     glBindVertexArray(state->cell_instance_drawing_vao);
     glUseProgram(state->cell_instance_drawing_shader_program);
     glUniformMatrix4fv(state->cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
 
-    glUniform1i(state->cell_instance_drawing_cell_block_dim_uniform, universe->cell_block_dim);
-    glUniform1f(state->cell_instance_drawing_cell_width_uniform, cell_width);
+    cell_instancing->buffer.elements_used = 0;
+
+    if (state->universe != 0)
+    {
+      upload_cell_instances(state->universe, cell_instancing, cells_editor);
+
+      glUniform1i(state->cell_instance_drawing_cell_block_dim_uniform, state->universe->cell_block_dim);
+      glUniform1f(state->cell_instance_drawing_cell_width_uniform, cell_width);
+    }
 
     // Re-initialise attributes in case instance buffer has been reallocated
     init_cell_instances_buffer_attributes(&cell_instancing->buffer, general_vertex_buffer, state->cell_instance_drawing_shader_program);
@@ -466,11 +486,18 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // General universe triangles drawing
     //
 
+    glBindVertexArray(state->general_universe_vao);
+    glUseProgram(state->general_universe_shader_program);
+    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
+
+    general_universe_vbo->elements_used = 0;
+    general_universe_ibo->elements_used = 0;
+
+    BufferDrawingLocation general_universe_triangles_ibo = {};
+    general_universe_triangles_ibo.start_position = general_universe_ibo->elements_used;
+
     if (cells_editor->cell_block_highlighted)
     {
-      general_universe_vbo->elements_used = 0;
-      general_universe_ibo->elements_used = 0;
-
       vec4 potential_cell_block_colour = {0.8, 0.8, 0.8, 1};
 
       GeneralUnvierseVertex cell_block_vertices[] = {
@@ -492,29 +519,37 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
       GLuint last_index = opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
 
-      glBindVertexArray(state->general_universe_vao);
-      glUseProgram(state->general_universe_shader_program);
-      glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
-
-      // Get attribute locations
-      init_general_universe_attributes(general_universe_vbo, state->general_universe_shader_program);
-
       void *general_universe_ibo_offset = (void *)(intptr_t)(first_index * sizeof(GLushort));
-      glDrawElements(GL_TRIANGLES, (last_index - first_index) + 1, GL_UNSIGNED_SHORT, general_universe_ibo_offset);
 
-      opengl_print_errors();
-      glBindVertexArray(0);
+      general_universe_triangles_ibo.n_elements += (last_index - first_index) + 1;
     }
 
-#ifdef DEBUG_CELL_BLOCK_DRAWING
+    // Get attribute locations
+    init_general_universe_attributes(general_universe_vbo, state->general_universe_shader_program);
+
+    glDrawElements(GL_TRIANGLES, general_universe_triangles_ibo.n_elements, GL_UNSIGNED_SHORT, (void *)(intptr_t)general_universe_triangles_ibo.start_position);
+
+    opengl_print_errors();
+    glBindVertexArray(0);
+
     //
-    // Debug cell blocks drawing
+    // Debug universe lines drawing
     //
+
+    glBindVertexArray(state->general_universe_vao);
+    glUseProgram(state->general_universe_shader_program);
+    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
 
     general_universe_vbo->elements_used = 0;
     general_universe_ibo->elements_used = 0;
+    BufferDrawingLocation debug_universe_lines_ibo = {};
 
-    BufferDrawingLocation ibo_outlines = debug_cell_block_outline_drawing_upload(universe, general_universe_vbo, general_universe_ibo);
+#ifdef DEBUG_CELL_BLOCK_DRAWING
+    if (state->universe != 0)
+    {
+      debug_universe_lines_ibo.n_elements += debug_cell_block_outline_drawing_upload(state->universe, general_universe_vbo, general_universe_ibo);
+    }
+#endif
 
 #ifdef DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
     GeneralUnvierseVertex origin_vertex = {{}, {1, 0, 0, 1}};
@@ -524,27 +559,22 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     opengl_buffer_new_element(general_universe_ibo, &origin_index);
     opengl_buffer_new_element(general_universe_ibo, &mouse_index);
 
-    ibo_outlines.n_elements += 2;
+    debug_universe_lines_ibo.n_elements += 2;
 #endif
-
-    glBindVertexArray(state->general_universe_vao);
-    glUseProgram(state->general_universe_shader_program);
-    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
 
     // Get attribute locations
     init_general_universe_attributes(general_universe_vbo, state->general_universe_shader_program);
 
-    debug_cell_block_outline_draw(general_universe_vbo, general_universe_ibo, ibo_outlines);
+    debug_lines_draw(general_universe_vbo, general_universe_ibo, debug_universe_lines_ibo);
 
     opengl_print_errors();
     glBindVertexArray(0);
-#endif
 
-#ifdef DEBUG_SCREEN_DRAWING
     //
     // Debug screen rendering
     //
 
+#ifdef DEBUG_SCREEN_DRAWING
     glBindVertexArray(state->screen_vao);
     glUseProgram(state->screen_shader_program);
     glBindBuffer(general_vertex_buffer->binding_target, general_vertex_buffer->id);

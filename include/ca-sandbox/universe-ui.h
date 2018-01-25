@@ -3,7 +3,7 @@
 
 #include "engine/types.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
 
 #include "interface/file-picker.h"
@@ -14,14 +14,22 @@
 
 struct UniverseUI
 {
+  b32 file_loaded;
+
   FilePicker cells_file_picker;
+  char loaded_file_name[FILE_NAME_LIMIT];
   b32 reload_cells_file;
   b32 save_cells_file;
+
+  u32 edited_cell_block_dim;
+
+  b32 loading_error;
+  String loading_error_message;
 };
 
 
 void
-do_universe_ui(UniverseUI *universe_ui, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
+do_universe_ui(UniverseUI *universe_ui, Universe **universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
 
 
 #endif

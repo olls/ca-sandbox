@@ -5,7 +5,7 @@
 #include "engine/assert.h"
 #include "engine/allocate.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/rule.h"
 #include "ca-sandbox/border.h"
@@ -256,19 +256,14 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
     {
       CellBlock *cell_block = universe->hashmap[hash_slot];
 
-      if (cell_block != 0 && cell_block->slot_in_use)
+      while (cell_block != 0)
       {
-        // Follow the hashmap collision chain
-        do
-        {
-          // Copy cell_states to cell_previous_states
-          memcpy(cell_block->cell_previous_states, cell_block->cell_states, cell_block_states_array_size(universe));
+        // Copy cell_states to cell_previous_states
+        memcpy(cell_block->cell_previous_states, cell_block->cell_states, cell_block_states_array_size(universe));
 
-          created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, &rule->config, universe, cell_block);
+        created_new_blocks |= create_any_new_cell_blocks_needed(simulate_options, cell_initialisation_options, &rule->config, universe, cell_block);
 
-          cell_block = cell_block->next_block;
-        }
-        while (cell_block != 0);
+        cell_block = cell_block->next_block;
       }
     }
   }
@@ -281,23 +276,17 @@ simulate_cells(SimulateOptions *simulate_options, CellInitialisationOptions *cel
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    if (cell_block != 0 &&
-        cell_block->slot_in_use)
+    while (cell_block != 0)
     {
-      do
+      if (cell_block->last_simulated_on_frame != current_frame)
       {
-        if (cell_block->slot_in_use &&
-            cell_block->last_simulated_on_frame != current_frame)
-        {
-          cell_block->last_simulated_on_frame = current_frame;
+        cell_block->last_simulated_on_frame = current_frame;
 
-          simulate_cell_block(simulate_options, cell_initialisation_options, rule, universe, cell_block);
-        }
-
-        // Follow any hashmap collision chains
-        cell_block = cell_block->next_block;
+        simulate_cell_block(simulate_options, cell_initialisation_options, rule, universe, cell_block);
       }
-      while (cell_block != 0);
+
+      // Follow any hashmap collision chains
+      cell_block = cell_block->next_block;
     }
   }
 }

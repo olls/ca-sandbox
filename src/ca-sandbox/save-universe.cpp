@@ -3,7 +3,7 @@
 #include "engine/print.h"
 #include "engine/text.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
 #include "ca-sandbox/named-states.h"
 
@@ -86,38 +86,33 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
     {
       CellBlock *cell_block = universe->hashmap[hash_slot];
 
-      if (cell_block != 0 &&
-          cell_block->slot_in_use)
+      while (cell_block != 0)
       {
-        do
+        fprintf(file_stream, "CellBlock: %d, %d\n", cell_block->block_position.x, cell_block->block_position.y);
+
+        for (u32 cell_y = 0;
+             cell_y < universe->cell_block_dim;
+             ++cell_y)
         {
-          fprintf(file_stream, "CellBlock: %d, %d\n", cell_block->block_position.x, cell_block->block_position.y);
-
-          for (u32 cell_y = 0;
-               cell_y < universe->cell_block_dim;
-               ++cell_y)
+          for (u32 cell_x = 0;
+               cell_x < universe->cell_block_dim;
+               ++cell_x)
           {
-            for (u32 cell_x = 0;
-                 cell_x < universe->cell_block_dim;
-                 ++cell_x)
-            {
-              u32 cell_index = get_cell_index_in_block(universe, (s32vec2){(s32)cell_x, (s32)cell_y});
-              CellState cell_state = cell_block->cell_states[cell_index];
+            u32 cell_index = get_cell_index_in_block(universe, (s32vec2){(s32)cell_x, (s32)cell_y});
+            CellState cell_state = cell_block->cell_states[cell_index];
 
-              String cell_state_string = get_state_name(named_states, cell_state);
-              fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state_string), cell_state_string.start);
-            }
-
-            fprintf(file_stream, "\n");
+            String cell_state_string = get_state_name(named_states, cell_state);
+            fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state_string), cell_state_string.start);
           }
+
           fprintf(file_stream, "\n");
-
-          ++cell_block_n;
-
-          // Follow any hashmap collision chains
-          cell_block = cell_block->next_block;
         }
-        while (cell_block != 0);
+        fprintf(file_stream, "\n");
+
+        ++cell_block_n;
+
+        // Follow any hashmap collision chains
+        cell_block = cell_block->next_block;
       }
     }
 

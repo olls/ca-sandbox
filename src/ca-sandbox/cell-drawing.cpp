@@ -7,7 +7,7 @@
 #include "engine/opengl-buffer.h"
 #include "engine/opengl-general-buffers.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/cells-editor.h"
 #include "ca-sandbox/named-states.h"
@@ -130,59 +130,52 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 void
 upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, CellsEditor *cells_editor)
 {
-  // Zero the buffer
-  cell_instancing->buffer.elements_used = 0;
-
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
        ++hash_slot)
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    if (cell_block != 0 && cell_block->slot_in_use)
+    while (cell_block != 0)
     {
-      do
+      s32vec2 cell_position;
+      for (cell_position.y = 0;
+           cell_position.y < universe->cell_block_dim;
+           ++cell_position.y)
       {
-        s32vec2 cell_position;
-        for (cell_position.y = 0;
-             cell_position.y < universe->cell_block_dim;
-             ++cell_position.y)
+        for (cell_position.x = 0;
+             cell_position.x < universe->cell_block_dim;
+             ++cell_position.x)
         {
-          for (cell_position.x = 0;
-               cell_position.x < universe->cell_block_dim;
-               ++cell_position.x)
+          // TODO: Check if block is visible on screen?
+
+          UniversePosition current_cell = {
+            .cell_block_position = cell_block->block_position,
+            .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
+          };
+
+          CellState cell_state = cell_block->cell_states[(cell_position.y * universe->cell_block_dim) + cell_position.x];
+
+          vec4 colour = get_state_colour(cell_state);
+
+          if (cells_editor->cell_highlighted &&
+              cell_position_equal_to(cells_editor->highlighted_cell, current_cell))
           {
-            // TODO: Check if block is visible on screen?
-
-            UniversePosition current_cell = {
-              .cell_block_position = cell_block->block_position,
-              .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
-            };
-
-            CellState cell_state = cell_block->cell_states[(cell_position.y * universe->cell_block_dim) + cell_position.x];
-
-            vec4 colour = get_state_colour(cell_state);
-
-            if (cells_editor->cell_highlighted &&
-                cell_position_equal_to(cells_editor->highlighted_cell, current_cell))
-            {
-              colour = lighten_colour(colour);
-            }
-
-            CellInstance cell_instance = {
-              .block_position = current_cell.cell_block_position,
-              .cell_position = current_cell.cell_position,
-              .colour = colour
-            };
-
-            opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+            colour = lighten_colour(colour);
           }
-        }
 
-        // Follow any hashmap collision chains
-        cell_block = cell_block->next_block;
+          CellInstance cell_instance = {
+            .block_position = current_cell.cell_block_position,
+            .cell_position = current_cell.cell_position,
+            .colour = colour
+          };
+
+          opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+        }
       }
-      while (cell_block != 0);
+
+      // Follow any hashmap collision chains
+      cell_block = cell_block->next_block;
     }
   }
 }
@@ -224,13 +217,10 @@ init_general_universe_attributes(OpenGL_Buffer *general_universe_vbo, GLuint gen
 }
 
 
-BufferDrawingLocation
+u32
 debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo)
 {
-  BufferDrawingLocation ibo_items = {
-    .start_position = general_universe_ibo->elements_used,
-    .n_elements = 0
-  };
+  u32 index_elements_used = 0;
 
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
@@ -238,48 +228,44 @@ debug_cell_block_outline_drawing_upload(Universe *universe, OpenGL_Buffer *gener
   {
     CellBlock *cell_block = universe->hashmap[hash_slot];
 
-    if (cell_block != 0 && cell_block->slot_in_use)
+    while (cell_block != 0)
     {
-      do
-      {
-        vec4 red = {1, 0, 0, 1};
-        GeneralUnvierseVertex square_vertices[] = {
-          {{cell_block->block_position, {0.05, 0.05}}, red},
-          {{cell_block->block_position, {0.95, 0.05}}, red},
-          {{cell_block->block_position, {0.95, 0.95}}, red},
-          {{cell_block->block_position, {0.05, 0.95}}, red}
-        };
+      vec4 red = {1, 0, 0, 1};
+      GeneralUnvierseVertex square_vertices[] = {
+        {{cell_block->block_position, {0.05, 0.05}}, red},
+        {{cell_block->block_position, {0.95, 0.05}}, red},
+        {{cell_block->block_position, {0.95, 0.95}}, red},
+        {{cell_block->block_position, {0.05, 0.95}}, red}
+      };
 
-        GLushort vbo_index_a = opengl_buffer_new_element(general_universe_vbo, square_vertices + 0);
-        GLushort vbo_index_b = opengl_buffer_new_element(general_universe_vbo, square_vertices + 1);
-        GLushort vbo_index_c = opengl_buffer_new_element(general_universe_vbo, square_vertices + 2);
-        GLushort vbo_index_d = opengl_buffer_new_element(general_universe_vbo, square_vertices + 3);
+      GLushort vbo_index_a = opengl_buffer_new_element(general_universe_vbo, square_vertices + 0);
+      GLushort vbo_index_b = opengl_buffer_new_element(general_universe_vbo, square_vertices + 1);
+      GLushort vbo_index_c = opengl_buffer_new_element(general_universe_vbo, square_vertices + 2);
+      GLushort vbo_index_d = opengl_buffer_new_element(general_universe_vbo, square_vertices + 3);
 
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
-        opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
+      opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
 
-        ibo_items.n_elements += 8;
+      index_elements_used += 8;
 
-        // Follow any hashmap collision chains
-        cell_block = cell_block->next_block;
-      }
-      while (cell_block != 0);
+      // Follow any hashmap collision chains
+      cell_block = cell_block->next_block;
     }
   }
   opengl_print_errors();
 
-  return ibo_items;
+  return index_elements_used;
 }
 
 
 void
-debug_cell_block_outline_draw(OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo, BufferDrawingLocation ibo_outline_elements)
+debug_lines_draw(OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo, BufferDrawingLocation ibo_outline_elements)
 {
   glBindBuffer(general_universe_vbo->binding_target, general_universe_vbo->id);
   glBindBuffer(general_universe_ibo->binding_target, general_universe_ibo->id);

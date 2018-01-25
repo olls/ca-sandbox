@@ -7,7 +7,7 @@
 #include "engine/files.h"
 #include "engine/allocate.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
 #include "ca-sandbox/named-states.h"
 
@@ -326,26 +326,25 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 /// UniverseUI holds the .cell file state
 /// NamedStates is needed to read the states in the .cells file
 ///
-/// TODO: Why is this in here?
-b32
-load_universe(const char *filename, Universe *universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+Universe *
+load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
 {
+  Universe *result = allocate(Universe, 1);
   b32 success = true;
 
   print("\nLoading universe file: %s\n", filename);
 
-  destroy_cell_hashmap(universe);
-  init_cell_hashmap(universe);
+  init_cell_hashmap(result);
 
   File universe_file;
   String universe_file_string = get_file_string(filename, &universe_file);
   if (universe_file_string.start == 0)
   {
-    success &= false;
+    success = false;
   }
   else
   {
-    success &= load_universe_from_file(universe_file_string, universe, named_states);
+    success &= load_universe_from_file(universe_file_string, result, named_states);
     success &= load_simulate_options(universe_file_string, simulate_options);
     success &= load_cell_initialisation_options(universe_file_string, cell_initialisation_options, named_states);
 
@@ -354,7 +353,13 @@ load_universe(const char *filename, Universe *universe, SimulateOptions *simulat
 
   print("\n");
 
-  return success;
+  if (!success)
+  {
+    un_allocate(result);
+    result = 0;
+  }
+
+  return result;
 }
 
 

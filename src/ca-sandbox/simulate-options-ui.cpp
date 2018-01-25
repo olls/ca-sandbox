@@ -15,14 +15,17 @@ do_simulate_options_ui(SimulateOptions *simulate_options, Universe *universe)
 {
   if (ImGui::Begin("Simulate Options"))
   {
-    ImGui::Combo("Border type", (s32*)(&simulate_options->border.type), "Fixed\0Infinite\0Torus\0\0");
-
-    if (simulate_options->border.type != BorderType::INFINITE)
+    if (universe != 0)
     {
-      ImGui::DragInt2("Min corner block", &simulate_options->border.min_corner_block.es[0]);
-      ImGui::DragInt2("Min corner cell", &simulate_options->border.min_corner_cell.es[0], 1, 0, universe->cell_block_dim);
-      ImGui::DragInt2("Max corner block", &simulate_options->border.max_corner_block.es[0]);
-      ImGui::DragInt2("Max corner cell", &simulate_options->border.max_corner_cell.es[0], 1, 0, universe->cell_block_dim);
+      ImGui::Combo("Border type", (s32*)(&simulate_options->border.type), "Fixed\0Infinite\0Torus\0\0");
+
+      if (simulate_options->border.type != BorderType::INFINITE)
+      {
+        ImGui::DragInt2("Min corner block", &simulate_options->border.min_corner_block.es[0]);
+        ImGui::DragInt2("Min corner cell", &simulate_options->border.min_corner_cell.es[0], 1, 0, universe->cell_block_dim);
+        ImGui::DragInt2("Max corner block", &simulate_options->border.max_corner_block.es[0]);
+        ImGui::DragInt2("Max corner cell", &simulate_options->border.max_corner_cell.es[0], 1, 0, universe->cell_block_dim);
+      }
     }
   }
 

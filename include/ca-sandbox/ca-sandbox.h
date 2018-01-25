@@ -52,7 +52,7 @@ struct CA_SandboxState
   GLuint screen_shader_program;
   GLuint screen_vao;
 
-  Universe universe;
+  Universe *universe;
   SimulateOptions simulate_options;
   CellInitialisationOptions cell_initialisation_options;
   b32 cells_file_loaded;

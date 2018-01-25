@@ -6,6 +6,7 @@
 = save trees to save building large trees every time
 = thread simulation
 - reduce simulation time
+  - rewrite create-new loop to only loop through the cells it actually needs to check
 - reduce tree building time
 - profiling tools
 

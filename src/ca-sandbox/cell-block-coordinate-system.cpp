@@ -1,6 +1,6 @@
 #include "ca-sandbox/cell-block-coordinate-system.h"
 
-#include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-blocks.h"
 
 /// @file
 /// @brief  Functions for managing CellBlock and Cell coordinates

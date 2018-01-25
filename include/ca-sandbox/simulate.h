@@ -1,10 +1,10 @@
 #ifndef SIMULATE_H_DEF
 #define SIMULATE_H_DEF
 
-#include "universe.h"
-#include "cell-block-coordinate-system.h"
-#include "rule.h"
-#include "border.h"
+#include "ca-sandbox/cell-blocks.h"
+#include "ca-sandbox/cell-block-coordinate-system.h"
+#include "ca-sandbox/rule.h"
+#include "ca-sandbox/border.h"
 
 #define DEBUG_STATE 9999
 

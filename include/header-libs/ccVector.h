@@ -23,7 +23,7 @@
 #include <string.h>
 
 #ifdef _DEBUG
-#include "assert.h"
+#include "engine/assert.h"
 #endif
 
 #ifndef inline

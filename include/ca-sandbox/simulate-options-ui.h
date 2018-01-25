@@ -1,8 +1,8 @@
 #ifndef SIMULATE_OPTIONS_UI_H_DEF
 #define SIMULATE_OPTIONS_UI_H_DEF
 
-#include "simulate.h"
-#include "universe.h"
+#include "ca-sandbox/simulate.h"
+#include "ca-sandbox/cell-blocks.h"
 
 /// @file
 ///
