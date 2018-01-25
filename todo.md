@@ -20,7 +20,6 @@
 - figure out explanation of "or" cell patterns ("Match if one OR pattern cell matches")
 - rule pattern groups/sets/blocks
 - better parsing error messages (i.e: keep a line number counter?)
-- trim trailing whitespace when saving
 - auto centre/scale universe
 - colour cells state buttons in rule patterns UI where only one state is used
 - reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)

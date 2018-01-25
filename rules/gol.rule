@@ -10,33 +10,33 @@ null_states: O
 
 Pattern: Dies under-population
 Result: O
-*  *  *  
-*  X  *  
-*  *  *  
+*  *  *
+*  X  *
+*  *  *
 count_matching: X, < 2
 
 
 Pattern: Survives
 Result: X
-*  *  *  
-*  X  *  
-*  *  *  
+*  *  *
+*  X  *
+*  *  *
 count_matching: X, < 4
 
 
 Pattern: Dies overpopulation
 Result: O
-*  *  *  
-*  X  *  
-*  *  *  
+*  *  *
+*  X  *
+*  *  *
 count_matching: X, > 3
 
 
 Pattern: Born
 Result: X
-*  *  *  
-*  O  *  
-*  *  *  
+*  *  *
+*  O  *
+*  *  *
 count_matching: X, = 3
 
 

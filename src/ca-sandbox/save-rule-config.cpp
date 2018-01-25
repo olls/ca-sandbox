@@ -171,6 +171,11 @@ serialise_rule_pattern(FILE *file_stream, RulePattern& rule_pattern, RuleConfigu
   u32 max_state_lengths[neighbourhood_region_area.x];
   memset(max_state_lengths, 0, sizeof(u32) * neighbourhood_region_area.x);
 
+  // Need to find the last column containing anything (for each row), so we don't leave trailing
+  //   whitespace
+  u32 last_column_used[neighbourhood_region_area.y];
+  memset(last_column_used, 0, sizeof(u32) * neighbourhood_region_area.y);
+
   // The position of the central cell in the spacial array
   s32vec2 centre_cell_position = vec2_divide(neighbourhood_region_area, 2);
 
@@ -194,6 +199,8 @@ serialise_rule_pattern(FILE *file_stream, RulePattern& rule_pattern, RuleConfigu
 
     u32 cell_string_length = cell_string.n_elements;
     max_state_lengths[cell_position.x] = max(max_state_lengths[cell_position.x], cell_string_length);
+
+    last_column_used[cell_position.y] = max(last_column_used[cell_position.y], (u32)cell_position.x);
   }
 
   // Iterate through the cell_spacial_array outputting each cell text
@@ -208,7 +215,13 @@ serialise_rule_pattern(FILE *file_stream, RulePattern& rule_pattern, RuleConfigu
       u32 cell_spacial_position = (row * neighbourhood_region_area.x) + column;
       Array::Array<char>& cell_string = cell_strings[cell_spacial_position];
 
-      fprintf(file_stream, "%-*.*s  ", max_state_lengths[column], cell_string.n_elements, cell_string.elements);
+      u32 padding = 0;
+      if (column < last_column_used[row])
+      {
+        padding = max_state_lengths[column] + 2;
+      }
+
+      fprintf(file_stream, "%-*.*s", padding, cell_string.n_elements, cell_string.elements);
 
       Array::free_array(cell_string);
     }

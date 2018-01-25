@@ -52,9 +52,10 @@ serialise_cell_initialisation_options(FILE *file_stream, CellInitialisationOptio
        initial_state_n < cell_initialisation_options->set_of_initial_states.n_elements;
        ++initial_state_n)
   {
+    b32 last_state = initial_state_n == cell_initialisation_options->set_of_initial_states.n_elements - 1;
     CellState initial_state = cell_initialisation_options->set_of_initial_states[initial_state_n];
     String initial_state_name = get_state_name(named_states, initial_state);
-    fprintf(file_stream, "%.*s ", string_length(initial_state_name), initial_state_name.start);
+    fprintf(file_stream, "%.*s%s", string_length(initial_state_name), initial_state_name.start, last_state ? "" : " ");
   }
   fprintf(file_stream, "\n\n");
 }
@@ -101,8 +102,14 @@ save_universe_to_file(const char *filename, Universe *universe, SimulateOptions 
             u32 cell_index = get_cell_index_in_block(universe, (s32vec2){(s32)cell_x, (s32)cell_y});
             CellState cell_state = cell_block->cell_states[cell_index];
 
+            u32 padding = 0;
+            if (cell_x != universe->cell_block_dim - 1)
+            {
+              padding = max_state_length + 2;
+            }
+
             String cell_state_string = get_state_name(named_states, cell_state);
-            fprintf(file_stream, "%-*.*s  ", max_state_length, string_length(cell_state_string), cell_state_string.start);
+            fprintf(file_stream, "%-*.*s", padding, string_length(cell_state_string), cell_state_string.start);
           }
 
           fprintf(file_stream, "\n");
