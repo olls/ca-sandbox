@@ -275,7 +275,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       ImGui_ImplSdlGL3_ProcessEvent(&event);
       if (event.type == SDL_QUIT)
       {
-          running = false;
+        running = false;
       }
     }
 
@@ -301,10 +301,10 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     if (ImGui::IsMousePosValid())
     {
+      vec2 half_screen = vec2_multiply(vec2(io.DisplaySize), 0.5);
       state->screen_mouse_pos = ImGui::GetMousePos();
-      state->screen_mouse_pos = vec2_divide(state->screen_mouse_pos, vec2(io.DisplaySize));
-      state->screen_mouse_pos = vec2_multiply(state->screen_mouse_pos, 2);
-      state->screen_mouse_pos = vec2_subtract(state->screen_mouse_pos, 1);
+      state->screen_mouse_pos = vec2_subtract(state->screen_mouse_pos, half_screen);
+      state->screen_mouse_pos = vec2_divide(state->screen_mouse_pos, half_screen);
       state->screen_mouse_pos.y *= -1;
     }
 
@@ -312,8 +312,12 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     s32vec2 window_size = vec2_to_s32vec2(io.DisplaySize);
 
-    update_view_panning(view_panning, state->screen_mouse_pos, &mouse_click_consumed);
-    update_view_projection_matrix(view_panning, window_size);
+    mat4x4 aspect_ratio;
+    mat4x4Identity(aspect_ratio);
+    aspect_ratio[0][0] = (r32)window_size.y / window_size.x;
+
+    update_view_panning(view_panning, state->screen_mouse_pos, aspect_ratio, &mouse_click_consumed);
+    update_view_projection_matrix(view_panning, aspect_ratio);
 
     UniversePosition mouse_universe_pos = screen_position_to_universe_position(view_panning, state->screen_mouse_pos);
 
@@ -471,33 +475,66 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    r32 cell_width = 1;
-
     //
     // Cell instance drawing
     //
 
-    glBindVertexArray(state->cell_instance_drawing_vao);
-    glUseProgram(state->cell_instance_drawing_shader_program);
-    glUniformMatrix4fv(state->cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
-
-    cell_instancing->buffer.elements_used = 0;
-
     if (state->universe != 0)
     {
-      upload_cell_instances(state->universe, cell_instancing, cells_editor);
+      UniversePosition *highlighted_cells = 0;
+      u32 n_highlighted_cells = 0;
+      if (cells_editor->cell_highlighted)
+      {
+        n_highlighted_cells = 1;
+        highlighted_cells = &cells_editor->highlighted_cell;
+      }
 
-      glUniform1i(state->cell_instance_drawing_cell_block_dim_uniform, state->universe->cell_block_dim);
-      glUniform1f(state->cell_instance_drawing_cell_width_uniform, cell_width);
+      draw_cell_blocks(state->universe,
+                       cell_instancing,
+                       state->cell_instance_drawing_vao,
+                       state->cell_instance_drawing_shader_program,
+                       state->cell_instance_drawing_mat4_projection_matrix_uniform,
+                       state->cell_instance_drawing_cell_block_dim_uniform,
+                       state->cell_instance_drawing_cell_width_uniform,
+                       general_vertex_buffer,
+                       view_panning->projection_matrix,
+                       n_highlighted_cells, highlighted_cells);
+
+      // Mini map
+
+      mat4x4 mini_map_projection_matrix;
+      mat4x4Identity(mini_map_projection_matrix);
+
+      s32vec2 dim = get_cell_blocks_dimentions(state->universe);
+      dim = vec2_add(dim, 1);
+
+      vec2 centre = vec2_multiply(s32vec2_to_vec2(dim), -0.5);
+      vec3 offset = {};
+      offset.xy = centre;
+      mat4x4Translate(mini_map_projection_matrix, offset);
+
+      ImGui::Value("centre", centre);
+
+      mat4x4 mini_map_projection_matrix_aspect;
+      mat4x4MultiplyMatrix(mini_map_projection_matrix_aspect, mini_map_projection_matrix, aspect_ratio);
+
+      s32 largest_dim = max(dim.x, dim.y);
+      r32 scale = 0.5 * (1.0 / largest_dim);
+      mat4x4Scale(mini_map_projection_matrix_aspect, scale);
+
+      mat4x4Translate(mini_map_projection_matrix_aspect, {0.75, -0.75});
+
+      draw_cell_blocks(state->universe,
+                       cell_instancing,
+                       state->cell_instance_drawing_vao,
+                       state->cell_instance_drawing_shader_program,
+                       state->cell_instance_drawing_mat4_projection_matrix_uniform,
+                       state->cell_instance_drawing_cell_block_dim_uniform,
+                       state->cell_instance_drawing_cell_width_uniform,
+                       general_vertex_buffer,
+                       mini_map_projection_matrix_aspect,
+                       0, 0);
     }
-
-    // Re-initialise attributes in case instance buffer has been reallocated
-    init_cell_instances_buffer_attributes(&cell_instancing->buffer, general_vertex_buffer, state->cell_instance_drawing_shader_program);
-
-    draw_cell_instances(cell_instancing);
-
-    opengl_print_errors();
-    glBindVertexArray(0);
 
     //
     // General universe triangles drawing
@@ -505,7 +542,9 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     glBindVertexArray(state->general_universe_vao);
     glUseProgram(state->general_universe_shader_program);
-    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
+    mat4x4 projection_matrix_t;
+    mat4x4Transpose(projection_matrix_t, view_panning->projection_matrix);
+    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix_t[0][0]);
 
     general_universe_vbo->elements_used = 0;
     general_universe_ibo->elements_used = 0;
@@ -560,7 +599,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     glBindVertexArray(state->general_universe_vao);
     glUseProgram(state->general_universe_shader_program);
-    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &view_panning->projection_matrix[0][0]);
+    glUniformMatrix4fv(state->general_universe_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix_t[0][0]);
 
     general_universe_vbo->elements_used = 0;
     general_universe_ibo->elements_used = 0;

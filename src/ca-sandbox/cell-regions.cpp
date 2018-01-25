@@ -67,3 +67,57 @@ make_new_region(CellRegions *cell_regions, Universe *universe, const char *name,
 
   Array::add(cell_regions->regions, new_region);
 }
+
+
+s32vec2
+get_cell_blocks_dimentions(CellBlocks *cell_blocks)
+{
+  s32vec2 result;
+
+  s32vec2 lowest_coords = {};
+  s32vec2 highest_coords = {};
+
+  b32 first_block_found = false;
+  for (u32 cell_block_slot = 0;
+       cell_block_slot < cell_blocks->hashmap_size;
+       ++cell_block_slot)
+  {
+    CellBlock *cell_block = cell_blocks->hashmap[cell_block_slot];
+
+    while (cell_block != 0)
+    {
+      if (!first_block_found)
+      {
+        first_block_found = true;
+        lowest_coords = cell_block->block_position;
+        highest_coords = cell_block->block_position;
+      }
+      else
+      {
+        if (cell_block->block_position.x < lowest_coords.x)
+        {
+          lowest_coords.x = cell_block->block_position.x;
+        }
+        else if (cell_block->block_position.x > highest_coords.x)
+        {
+          highest_coords.x = cell_block->block_position.x;
+        }
+
+        if (cell_block->block_position.y < lowest_coords.y)
+        {
+          lowest_coords.y = cell_block->block_position.y;
+        }
+        else if (cell_block->block_position.y > highest_coords.y)
+        {
+          highest_coords.y = cell_block->block_position.y;
+        }
+      }
+
+      cell_block = cell_block->next_block;
+    }
+  }
+
+  result = vec2_subtract(highest_coords, lowest_coords);
+
+  return result;
+}

@@ -28,11 +28,11 @@ struct ViewPanning
 
 
 void
-update_view_projection_matrix(ViewPanning *view_panning, s32vec2 window_size);
+update_view_projection_matrix(ViewPanning *view_panning, mat4x4 aspect_ratio);
 
 
 void
-update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos, b32 *mouse_click_consumed);
+update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos, mat4x4 aspect_ratio, b32 *mouse_click_consumed);
 
 
 UniversePosition

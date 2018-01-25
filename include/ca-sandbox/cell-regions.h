@@ -33,4 +33,8 @@ void
 make_new_region(CellRegions *cell_regions, Universe *universe, const char *name, s32vec2 start_selection_block, s32vec2 start_selection_cell, s32vec2 end_selection_block, s32vec2 end_selection_cell);
 
 
+s32vec2
+get_cell_blocks_dimentions(CellBlocks *cell_blocks);
+
+
 #endif

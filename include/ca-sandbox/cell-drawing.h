@@ -1,6 +1,7 @@
 #ifndef CELL_DRAWING_H_DEF
 #define CELL_DRAWING_H_DEF
 
+#include "engine/vectors.h"
 #include "engine/opengl-buffer.h"
 
 #include "ca-sandbox/cell-blocks.h"
@@ -78,6 +79,19 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, Cells
 
 void
 draw_cell_instances(CellInstancing *cell_instancing);
+
+
+void
+draw_cell_blocks(CellBlocks *cell_blocks,
+                 CellInstancing *cell_instancing,
+                 GLuint cell_instance_drawing_vao,
+                 GLuint cell_instance_drawing_shader_program,
+                 GLuint cell_instance_drawing_mat4_projection_matrix_uniform,
+                 GLuint cell_instance_drawing_cell_block_dim_uniform,
+                 GLuint cell_instance_drawing_cell_width_uniform,
+                 OpenGL_Buffer *general_vertex_buffer,
+                 mat4x4 projection_matrix,
+                 u32 n_highlighted_cells, UniversePosition highlighted_cells[]);
 
 
 void

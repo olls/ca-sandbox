@@ -3,6 +3,7 @@
 #include "engine/util.h"
 #include "engine/print.h"
 #include "engine/colour.h"
+#include "engine/vectors.h"
 #include "engine/opengl-util.h"
 #include "engine/opengl-buffer.h"
 #include "engine/opengl-general-buffers.h"
@@ -13,6 +14,8 @@
 #include "ca-sandbox/named-states.h"
 
 #include <GL/glew.h>
+
+const r32 CELLS_WIDTH = 1;
 
 /// @file
 /// @brief Functions for drawing the Universe to the screen using OpenGL instancing.
@@ -128,7 +131,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 ///   frame is fast enough.
 ///
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, CellsEditor *cells_editor)
+upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, u32 n_highlighted_cells, UniversePosition highlighted_cells[])
 {
   for (u32 hash_slot = 0;
        hash_slot < universe->hashmap_size;
@@ -158,10 +161,16 @@ upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, Cells
 
           vec4 colour = get_state_colour(cell_state);
 
-          if (cells_editor->cell_highlighted &&
-              cell_position_equal_to(cells_editor->highlighted_cell, current_cell))
+          for (u32 highlighted_cell_index = 0;
+               highlighted_cell_index < n_highlighted_cells;
+               ++highlighted_cell_index)
           {
-            colour = lighten_colour(colour);
+            UniversePosition highlighted_cell = highlighted_cells[highlighted_cell_index];
+            if (cell_position_equal_to(highlighted_cell, current_cell))
+            {
+              colour = lighten_colour(colour);
+              break;
+            }
           }
 
           CellInstance cell_instance = {
@@ -191,6 +200,41 @@ draw_cell_instances(CellInstancing *cell_instancing)
   glDrawElementsInstanced(GL_TRIANGLES, cell_instancing->cell_n_indices, GL_UNSIGNED_SHORT, indices_buffer_offset, cell_instancing->buffer.elements_used);
 
   opengl_print_errors();
+}
+
+
+void
+draw_cell_blocks(CellBlocks *cell_blocks,
+                 CellInstancing *cell_instancing,
+                 GLuint cell_instance_drawing_vao,
+                 GLuint cell_instance_drawing_shader_program,
+                 GLuint cell_instance_drawing_mat4_projection_matrix_uniform,
+                 GLuint cell_instance_drawing_cell_block_dim_uniform,
+                 GLuint cell_instance_drawing_cell_width_uniform,
+                 OpenGL_Buffer *general_vertex_buffer,
+                 mat4x4 projection_matrix,
+                 u32 n_highlighted_cells, UniversePosition highlighted_cells[])
+{
+  cell_instancing->buffer.elements_used = 0;
+  upload_cell_instances(cell_blocks, cell_instancing, n_highlighted_cells, highlighted_cells);
+
+  glBindVertexArray(cell_instance_drawing_vao);
+  glUseProgram(cell_instance_drawing_shader_program);
+
+  mat4x4 projection_matrix_t;
+  mat4x4Transpose(projection_matrix_t, projection_matrix);
+  glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix_t[0][0]);
+
+  glUniform1i(cell_instance_drawing_cell_block_dim_uniform, cell_blocks->cell_block_dim);
+  glUniform1f(cell_instance_drawing_cell_width_uniform, CELLS_WIDTH);
+
+  // Re-initialise attributes in case instance buffer has been reallocated
+  init_cell_instances_buffer_attributes(&cell_instancing->buffer, general_vertex_buffer, cell_instance_drawing_shader_program);
+
+  draw_cell_instances(cell_instancing);
+
+  opengl_print_errors();
+  glBindVertexArray(0);
 }
 
 
