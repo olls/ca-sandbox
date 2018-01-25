@@ -9,6 +9,7 @@
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
 #include "ca-sandbox/cell.h"
+#include "ca-sandbox/re-blockify-cell-blocks.h"
 
 #include "imgui/imgui.h"
 
@@ -49,6 +50,22 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
       if (ImGui::Button("Save cells file"))
       {
         universe_ui->save_cells_file = true;
+      }
+
+      ImGui::DragInt("Cell Block Dimensions", (s32 *)&universe_ui->edited_cell_block_dim, 1.0f, 1, 0, "%0.0f");
+      if (ImGui::Button("Reblockify cells file"))
+      {
+        Universe *old_universe = *universe_ptr;
+        Universe *new_universe = allocate(Universe, 1);
+        init_cell_hashmap(new_universe);
+        new_universe->cell_block_dim = universe_ui->edited_cell_block_dim;
+
+        re_blockify_cell_blocks(old_universe, new_universe);
+
+        destroy_cell_hashmap(old_universe);
+        un_allocate(old_universe);
+
+        *universe_ptr = new_universe;
       }
     }
   }
