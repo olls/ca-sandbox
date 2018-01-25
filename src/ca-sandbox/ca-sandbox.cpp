@@ -366,28 +366,37 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       Array::clear(cell_initialisation_options->set_of_initial_states);
       default_cell_initialisation_options(cell_initialisation_options);
 
-      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
+      universe_ui->loading_error_message.n_elements = 0;
+      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
 
-      if (new_universe != 0)
+      if (new_universe == 0)
       {
-        if (loaded_rule->config.neighbourhood_region_size >= new_universe->cell_block_dim)
-        {
-          universe_ui->loading_error = true;
-          universe_ui->loading_error_message = new_string("cell_block_dim is too small for the current neighbourhood_region_size.\n");
-        }
-        else
-        {
-          // Successfully loaded new_universe!
-          state->universe = new_universe;
-          copy_string(universe_ui->loaded_file_name,
-                      universe_ui->cells_file_picker.selected_file,
-                      strlen(universe_ui->cells_file_picker.selected_file)+1);
-        }
+        universe_ui->loading_error = true;
+      }
+      else if (loaded_rule->config.neighbourhood_region_size >= new_universe->cell_block_dim)
+      {
+        universe_ui->loading_error = true;
+        append_string(universe_ui->loading_error_message, new_string("cell_block_dim is too small for the current neighbourhood_region_size.\n"));
+      }
+
+      if (universe_ui->loading_error)
+      {
+        print("%.*s\n", universe_ui->loading_error_message.n_elements, universe_ui->loading_error_message.elements);
       }
       else
       {
-        universe_ui->loading_error_message = new_string("other error...");
-        universe_ui->loading_error = true;
+        // Successfully loaded new_universe!
+        if (state->universe)
+        {
+          destroy_cell_hashmap(state->universe);
+          un_allocate(state->universe);
+        }
+
+        state->universe = new_universe;
+        universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
+        copy_string(universe_ui->loaded_file_name,
+                    universe_ui->cells_file_picker.selected_file,
+                    strlen(universe_ui->cells_file_picker.selected_file)+1);
       }
     }
 

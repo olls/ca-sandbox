@@ -17,7 +17,7 @@
 
 
 void
-read_cell_block(String *file_string, Universe *universe, NamedStates *named_states)
+read_cell_block(String *file_string, Universe *universe, NamedStates *named_states, Array::Array<char>& error_message)
 {
   String line;
   String label;
@@ -91,7 +91,7 @@ read_cell_block(String *file_string, Universe *universe, NamedStates *named_stat
       b32 state_read = read_state_name(named_states, file_string, cell_state);
       if (!state_read)
       {
-        print("Invalid state name in cell block.\n");
+        append_string(error_message, new_string("Invalid state name in cell block.\n"));
       }
     }
   }
@@ -103,7 +103,7 @@ read_cell_block(String *file_string, Universe *universe, NamedStates *named_stat
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] universe  Universe to fill in
 b32
-load_universe_from_file(String file_string, Universe *universe, NamedStates *named_states)
+load_universe_from_file(String file_string, Universe *universe, NamedStates *named_states, Array::Array<char>& error_message)
 {
   b32 success = true;
 
@@ -118,7 +118,7 @@ load_universe_from_file(String file_string, Universe *universe, NamedStates *nam
 
   if (!success)
   {
-    print("Missing/erroneous values in file\n");
+    append_string(error_message, new_string("Missing/erroneous values in file\n"));
   }
   else
   {
@@ -131,7 +131,7 @@ load_universe_from_file(String file_string, Universe *universe, NamedStates *nam
          cell_block_index < n_cell_blocks;
          ++cell_block_index)
     {
-      read_cell_block(&file_string, universe, named_states);
+      read_cell_block(&file_string, universe, named_states, error_message);
     }
   }
 
@@ -184,7 +184,7 @@ debug_print_simulate_options(SimulateOptions *simulate_options)
 /// @param[out] simulate_options  SimulateOptions to fill in (Unspecified values are left alone, so
 ///                                 fill in with defaults before calling)
 b32
-load_simulate_options(String file_string, SimulateOptions *simulate_options)
+load_simulate_options(String file_string, SimulateOptions *simulate_options, Array::Array<char>& error_message)
 {
   b32 success = true;
 
@@ -217,7 +217,7 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
     if (error_in_border_limits)
     {
       success &= false;
-      print("Error in border definitions\n");
+      append_string(error_message, new_string("Error in border definitions\n"));
     }
   }
 
@@ -227,7 +227,7 @@ load_simulate_options(String file_string, SimulateOptions *simulate_options)
   }
   else
   {
-    print("Error whilst parsing simulate options\n");
+    append_string(error_message, new_string("Error whilst parsing simulate options\n"));
   }
 
   return success;
@@ -278,7 +278,7 @@ debug_print_cell_initialisation_options(CellInitialisationOptions *cell_initiali
 /// @param[in] file_string  String containing the contents of the .cell file
 /// @param[out] cell_intialisation_options  CellInitialisationOptions object to fill in
 b32
-load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, Array::Array<char>& error_message)
 {
   b32 success = true;
 
@@ -301,7 +301,7 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 
       if (cell_initialisation_options->set_of_initial_states.n_elements == 0)
       {
-        print("No initial states found\n");
+        append_string(error_message, new_string("No initial states found\n"));
         success &= false;
       }
     }
@@ -313,7 +313,7 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
   }
   else
   {
-    print("Error whilst loading cell initialisation options.\n");
+    append_string(error_message, new_string("Error whilst loading cell initialisation options.\n"));
   }
 
   return success;
@@ -327,7 +327,7 @@ load_cell_initialisation_options(String file_string, CellInitialisationOptions *
 /// NamedStates is needed to read the states in the .cells file
 ///
 Universe *
-load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, Array::Array<char>& error_message)
 {
   Universe *result = allocate(Universe, 1);
   b32 success = true;
@@ -340,13 +340,14 @@ load_universe(const char *filename, SimulateOptions *simulate_options, CellIniti
   String universe_file_string = get_file_string(filename, &universe_file);
   if (universe_file_string.start == 0)
   {
+    append_string(error_message, new_string("File empty\n"));
     success = false;
   }
   else
   {
-    success &= load_universe_from_file(universe_file_string, result, named_states);
-    success &= load_simulate_options(universe_file_string, simulate_options);
-    success &= load_cell_initialisation_options(universe_file_string, cell_initialisation_options, named_states);
+    success &= load_universe_from_file(universe_file_string, result, named_states, error_message);
+    success &= load_simulate_options(universe_file_string, simulate_options, error_message);
+    success &= load_cell_initialisation_options(universe_file_string, cell_initialisation_options, named_states, error_message);
 
     close_file(&universe_file);
   }

@@ -24,7 +24,7 @@ struct UniverseUI
   u32 edited_cell_block_dim;
 
   b32 loading_error;
-  String loading_error_message;
+  Array::Array<char> loading_error_message;
 };
 
 

@@ -24,20 +24,8 @@
 ///   (Cell data follows; list of state values separated by ` ` or `\n`s)
 
 
-b32
-load_universe_from_file(String file_string, Universe *universe, NamedStates *named_states);
-
-
-b32
-load_simulate_options(String file_string, SimulateOptions *simulate_options);
-
-
-b32
-load_cell_initialisation_options(String file_string, CellInitialisationOptions *cell_intialisation_options, NamedStates *named_states);
-
-
 Universe *
-load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
+load_universe(const char *filename, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, Array::Array<char>& error_message);
 
 
 void

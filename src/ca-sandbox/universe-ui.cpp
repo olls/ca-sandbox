@@ -64,7 +64,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
 
   if (ImGui::BeginPopupModal(loading_error_modal_title))
   {
-    ImGui::Text("%.*s", string_length(universe_ui->loading_error_message), universe_ui->loading_error_message.start);
+    ImGui::Text("%.*s", universe_ui->loading_error_message.n_elements, universe_ui->loading_error_message.elements);
 
     if (ImGui::Button("OK"))
     {
