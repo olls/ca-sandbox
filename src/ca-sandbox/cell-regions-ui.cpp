@@ -108,6 +108,114 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
 }
 
 
+/// Generates the two other coordinates of a square given the start and end position (in UniversePosition%s)
+///
+void
+square_universe_coordinates(UniversePosition& start, UniversePosition& end, UniversePosition *start_end, UniversePosition *end_start)
+{
+  *start_end = {{start.cell_block_position.x, end.cell_block_position.y},
+                {start.cell_position.x, end.cell_position.y}};
+  *end_start = {{end.cell_block_position.x, start.cell_block_position.y},
+                {end.cell_position.x, start.cell_position.y}};
+}
+
+
+/// Draws triangles depicting the currently selected region in the UniverseUI
+///
+u32
+cell_region_selection_drawing_upload(CellRegionsUI *cell_regions_ui, Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo)
+{
+  s32vec2 start_inner_corner_block = cell_regions_ui->start_selection_block;
+  s32vec2 start_inner_corner_cell = cell_regions_ui->start_selection_cell;
+  s32vec2 end_inner_corner_block = cell_regions_ui->end_selection_block;
+  s32vec2 end_inner_corner_cell = cell_regions_ui->end_selection_cell;
+
+  correct_cell_block_order(start_inner_corner_block, start_inner_corner_cell,
+                           end_inner_corner_block, end_inner_corner_cell);
+
+  vec2 start_inner_corner_cell_prop = vec2_divide((vec2){(r32)start_inner_corner_cell.x,  (r32)start_inner_corner_cell.y}, universe->cell_block_dim);
+  vec2 end_inner_corner_cell_prop = vec2_divide((vec2){(r32)end_inner_corner_cell.x,  (r32)end_inner_corner_cell.y}, universe->cell_block_dim);
+
+  // Outer border edge
+  UniversePosition start_inner_corner = {start_inner_corner_block, start_inner_corner_cell_prop};
+  UniversePosition end_inner_corner = {end_inner_corner_block, end_inner_corner_cell_prop};
+
+  UniversePosition start_end_inner_corner, end_start_inner_corner;
+  square_universe_coordinates(start_inner_corner, end_inner_corner, &start_end_inner_corner, &end_start_inner_corner);
+
+  // Inner border edge
+  UniversePosition start_outer_corner = {start_inner_corner.cell_block_position, vec2_add(start_inner_corner.cell_position, -0.05)};
+  UniversePosition end_outer_corner = {end_inner_corner.cell_block_position, vec2_add(end_inner_corner.cell_position, 0.05)};
+
+  UniversePosition start_end_outer_corner, end_start_outer_corner;
+  square_universe_coordinates(start_outer_corner, end_outer_corner, &start_end_outer_corner, &end_start_outer_corner);
+
+  vec4 inner_colour = {0.5, 0.5, 0.5, 1};
+  GeneralUnvierseVertex vertex_inner_start     = {start_inner_corner, inner_colour};
+  GeneralUnvierseVertex vertex_inner_start_end = {start_end_inner_corner, inner_colour};
+  GeneralUnvierseVertex vertex_inner_end       = {end_inner_corner, inner_colour};
+  GeneralUnvierseVertex vertex_inner_end_start = {end_start_inner_corner, inner_colour};
+
+  vec4 outer_colour = {0.6, 0.6, 0.6, 1};
+  GeneralUnvierseVertex vertex_outer_start     = {start_outer_corner, outer_colour};
+  GeneralUnvierseVertex vertex_outer_start_end = {start_end_outer_corner, outer_colour};
+  GeneralUnvierseVertex vertex_outer_end       = {end_outer_corner, outer_colour};
+  GeneralUnvierseVertex vertex_outer_end_start = {end_start_outer_corner, outer_colour};
+
+  u32 vertex_inner_start_pos     = opengl_buffer_new_element(general_universe_vbo, &vertex_inner_start);
+  u32 vertex_inner_start_end_pos = opengl_buffer_new_element(general_universe_vbo, &vertex_inner_start_end);
+  u32 vertex_inner_end_pos       = opengl_buffer_new_element(general_universe_vbo, &vertex_inner_end);
+  u32 vertex_inner_end_start_pos = opengl_buffer_new_element(general_universe_vbo, &vertex_inner_end_start);
+
+  u32 vertex_outer_start_pos     = opengl_buffer_new_element(general_universe_vbo, &vertex_outer_start);
+  u32 vertex_outer_start_end_pos = opengl_buffer_new_element(general_universe_vbo, &vertex_outer_start_end);
+  u32 vertex_outer_end_pos       = opengl_buffer_new_element(general_universe_vbo, &vertex_outer_end);
+  u32 vertex_outer_end_start_pos = opengl_buffer_new_element(general_universe_vbo, &vertex_outer_end_start);
+
+  u32 start_pos = general_universe_ibo->elements_used;
+
+  // Top edge
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_pos);
+
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_end_start_pos);
+
+  // Right edge
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_start_pos);
+
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_end_start_pos);
+
+  // Bottom edge
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_start_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_end_pos);
+
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_end_pos);
+
+  // Left edge
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_start_end_pos);
+
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_outer_start_end_pos);
+  opengl_buffer_new_element(general_universe_ibo, &vertex_inner_start_end_pos);
+
+  u32 end_pos = general_universe_ibo->elements_used;
+
+  return (end_pos - start_pos);
+}
+
+
 u32
 debug_cell_region_selection_drawing_upload(CellRegionsUI *cell_regions_ui, Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo)
 {

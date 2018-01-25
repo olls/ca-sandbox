@@ -190,3 +190,29 @@ cell_block_round(vec2 real_cell_block)
   result.y = cell_block_round(real_cell_block.y);
   return result;
 }
+
+
+void
+correct_cell_block_order(s32& start_block, s32& start_cell, s32& end_block, s32& end_cell)
+{
+  if (cell_position_greater_than_or_equal_to(start_block, start_cell, end_block, end_cell))
+  {
+    s32 temp_end_block = end_block;
+    s32 temp_end_cell = end_cell;
+
+    end_block = start_block;
+    end_cell = start_cell;
+
+    start_block = temp_end_block;
+    start_cell = temp_end_cell;
+  }
+}
+
+
+/// Updates the cell block coordinates so that start is always closest to the origin
+void
+correct_cell_block_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell)
+{
+  correct_cell_block_order(start_block.x, start_cell.x, end_block.x, end_cell.x);
+  correct_cell_block_order(start_block.y, start_cell.y, end_block.y, end_cell.y);
+}

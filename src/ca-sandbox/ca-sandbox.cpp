@@ -39,7 +39,7 @@
 // #define DEBUG_CELL_BLOCK_DRAWING
 // #define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
 // #define DEBUG_SCREEN_DRAWING
-#define DEBUG_CELL_REGION_SELECTION_DRAWING
+// #define DEBUG_CELL_REGION_SELECTION_DRAWING
 
 /// @file
 /// @brief Program root file.
@@ -539,6 +539,11 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       void *general_universe_ibo_offset = (void *)(intptr_t)(first_index * sizeof(GLushort));
 
       general_universe_triangles_ibo.n_elements += (last_index - first_index) + 1;
+    }
+
+    if (cell_regions_ui->making_selection_dragging)
+    {
+      general_universe_triangles_ibo.n_elements += cell_region_selection_drawing_upload(cell_regions_ui, state->universe, general_universe_vbo, general_universe_ibo);
     }
 
     // Get attribute locations

@@ -31,6 +31,10 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
 
 
 u32
+cell_region_selection_drawing_upload(CellRegionsUI *cell_regions_ui, Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo);
+
+
+u32
 debug_cell_region_selection_drawing_upload(CellRegionsUI *cell_regions_ui, Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo);
 
 

@@ -54,4 +54,8 @@ s32vec2
 cell_block_round(vec2 real_cell_block);
 
 
+void
+correct_cell_block_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell);
+
+
 #endif
