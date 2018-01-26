@@ -42,7 +42,13 @@ compile_shader(const char filename[], GLuint shader_type, GLuint *result)
       GLchar *info_log = allocate(GLchar, log_size);
       glGetShaderInfoLog(*result, log_size, NULL, info_log);
 
-      print("Shader compile error (%s): \"%s\"\n", filename, info_log);
+      while (info_log[log_size-1] == '\n' ||
+             info_log[log_size-1] == '\0')
+      {
+        log_size -= 1;
+      }
+
+      print("Shader compile error (%s): \"%.*s\"\n", filename, log_size, info_log);
       free(info_log);
 
       glDeleteShader(*result);
@@ -91,7 +97,13 @@ create_shader_program(const char *filenames[], GLenum types[], u32 n_shaders, GL
       GLchar *info_log = allocate(GLchar, log_size);
       glGetShaderInfoLog(*result, log_size, NULL, info_log);
 
-      print("Shader link error: \"%s\"\n", info_log);
+      while (info_log[log_size-1] == '\n' ||
+             info_log[log_size-1] == '\0')
+      {
+        log_size -= 1;
+      }
+
+      print("Shader link error: \"%.*s\"\n", log_size, info_log);
       free(info_log);
 
       glDeleteShader(*result);

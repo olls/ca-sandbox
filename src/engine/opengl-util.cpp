@@ -171,6 +171,11 @@ opengl_debug_output_callback(GLenum source, GLenum type, GLuint id, GLenum sever
       } break;
   }
 
+  while (message[length-1] == '\n' ||
+         message[length-1] == '\0')
+  {
+    length -= 1;
+  }
   print("Source: %s, Type: %s, ID: %d, Severity: %s, \"%.*s\"\n", source_str, type_str, id, severity_str, length, message);
 }
 
