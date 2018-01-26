@@ -311,20 +311,21 @@ namespace Array
   }
 
   template<typename T, bool dynamic_elem_size>
-  void
+  T *
   add_n(Array<T, dynamic_elem_size>& array, T *new_elements, u32 n_new_elements)
   {
     T *add_position = add_n(array, n_new_elements);
     ARRAY_MEMCPY(add_position, new_elements, n_new_elements*array.element_size);
+    return add_position;
   }
 
   // This procedure adds all the elements from another (different) array with the same element type
   //
   template<typename T, bool dynamic_elem_size>
-  void
+  T *
   add(Array<T, dynamic_elem_size>& array, Array<T, dynamic_elem_size>& other_array)
   {
-    add_n(array, other_array.elements, other_array.n_elements);
+    return add_n(array, other_array.elements, other_array.n_elements);
   }
 
   template<typename T, bool dynamic_elem_size>
@@ -352,17 +353,17 @@ namespace Array
   }
 
   template<typename T, bool dynamic_elem_size>
-  void
+  T *
   add(Array<T, dynamic_elem_size>& array, T new_element)
   {
-    add_n(array, &new_element, 1);
+    return add_n(array, &new_element, 1);
   }
 
   template<typename T, bool dynamic_elem_size>
-  void
+  T *
   add(Array<T, dynamic_elem_size>& array, T *new_element)
   {
-    add_n(array, new_element, 1);
+    return add_n(array, new_element, 1);
   }
 
 

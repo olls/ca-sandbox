@@ -6,12 +6,12 @@
 #include "engine/vectors.h"
 #include "engine/opengl-util.h"
 #include "engine/opengl-buffer.h"
+#include "engine/opengl-shaders.h"
 #include "engine/opengl-general-buffers.h"
 
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/cells-editor.h"
-#include "ca-sandbox/named-states.h"
 
 #include <GL/glew.h>
 
@@ -19,6 +19,27 @@ const r32 CELLS_WIDTH = 1;
 
 /// @file
 /// @brief Functions for drawing the Universe to the screen using OpenGL instancing.
+
+
+b32
+init_cell_drawing_shaders(CellDrawing *cell_drawing)
+{
+  b32 success = true;
+
+  GLenum shader_types[] = {
+    GL_VERTEX_SHADER,
+    GL_FRAGMENT_SHADER
+  };
+
+  const char *cells_filenames[] = {
+    "shaders/cell-instancing.glvs",
+    "shaders/screen.glfs"
+  };
+
+  success &= create_shader_program(cells_filenames, shader_types, 2, &cell_drawing->shader_program);
+
+  return success;
+}
 
 
 /// @brief Initialise the CellInstancing struct by creating the OpenGL_Buffer which holds the
@@ -31,8 +52,15 @@ const r32 CELLS_WIDTH = 1;
 ///                                    index elements.
 ///
 void
-init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer)
+init_cell_drawing(CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer)
 {
+  glGenVertexArrays(1, &cell_drawing->vao);
+  glBindVertexArray(cell_drawing->vao);
+
+  cell_drawing->mat4_projection_matrix_uniform = glGetUniformLocation(cell_drawing->shader_program, "projection_matrix");
+  cell_drawing->cell_block_dim_uniform = glGetUniformLocation(cell_drawing->shader_program, "cell_block_dim");
+  cell_drawing->cell_width_uniform = glGetUniformLocation(cell_drawing->shader_program, "cell_width");
+
   vec2 vertices[] = {
     {0, 0},
     {0, 1},
@@ -64,6 +92,8 @@ init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex
   cell_instancing->cell_general_indices_position = opengl_buffer_add_elements(general_index_buffer, cell_instancing->cell_n_indices, indices);
 
   create_opengl_buffer(&cell_instancing->buffer, sizeof(CellInstance), GL_ARRAY_BUFFER, GL_STREAM_DRAW);
+
+  glBindVertexArray(0);
 }
 
 
@@ -124,54 +154,44 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 }
 
 
-/// @brief Upload all Cells in the Universe to the CellInstancing.buffer so that they can be drawn.
+/// @brief Upload all Cells in the CellBlocks to the CellInstancing.buffer so that they can be drawn.
 ///
 /// Overwrites the buffer each call, so any updates are drawn. CellInastances could be updated
 ///   individually more cleverly, but it isn't worth the complexity while re-uploading them each
 ///   frame is fast enough.
 ///
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, u32 n_highlighted_cells, UniversePosition highlighted_cells[])
+upload_cell_instances(CellBlocks *cell_blocks, CellInstancing *cell_instancing)
 {
+  cell_instancing->buffer.elements_used = 0;
+
   for (u32 hash_slot = 0;
-       hash_slot < universe->hashmap_size;
+       hash_slot < cell_blocks->hashmap_size;
        ++hash_slot)
   {
-    CellBlock *cell_block = universe->hashmap[hash_slot];
+    CellBlock *cell_block = cell_blocks->hashmap[hash_slot];
 
     while (cell_block != 0)
     {
       s32vec2 cell_position;
       for (cell_position.y = 0;
-           cell_position.y < universe->cell_block_dim;
+           cell_position.y < cell_blocks->cell_block_dim;
            ++cell_position.y)
       {
         for (cell_position.x = 0;
-             cell_position.x < universe->cell_block_dim;
+             cell_position.x < cell_blocks->cell_block_dim;
              ++cell_position.x)
         {
           // TODO: Check if block is visible on screen?
 
           UniversePosition current_cell = {
             .cell_block_position = cell_block->block_position,
-            .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, universe->cell_block_dim)
+            .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, cell_blocks->cell_block_dim)
           };
 
-          CellState cell_state = cell_block->cell_states[(cell_position.y * universe->cell_block_dim) + cell_position.x];
+          CellState cell_state = cell_block->cell_states[(cell_position.y * cell_blocks->cell_block_dim) + cell_position.x];
 
           vec4 colour = get_state_colour(cell_state);
-
-          for (u32 highlighted_cell_index = 0;
-               highlighted_cell_index < n_highlighted_cells;
-               ++highlighted_cell_index)
-          {
-            UniversePosition highlighted_cell = highlighted_cells[highlighted_cell_index];
-            if (cell_position_equal_to(highlighted_cell, current_cell))
-            {
-              colour = lighten_colour(colour);
-              break;
-            }
-          }
 
           CellInstance cell_instance = {
             .block_position = current_cell.cell_block_position,
@@ -206,30 +226,22 @@ draw_cell_instances(CellInstancing *cell_instancing)
 void
 draw_cell_blocks(CellBlocks *cell_blocks,
                  CellInstancing *cell_instancing,
-                 GLuint cell_instance_drawing_vao,
-                 GLuint cell_instance_drawing_shader_program,
-                 GLuint cell_instance_drawing_mat4_projection_matrix_uniform,
-                 GLuint cell_instance_drawing_cell_block_dim_uniform,
-                 GLuint cell_instance_drawing_cell_width_uniform,
+                 CellDrawing *cell_drawing,
                  OpenGL_Buffer *general_vertex_buffer,
-                 mat4x4 projection_matrix,
-                 u32 n_highlighted_cells, UniversePosition highlighted_cells[])
+                 mat4x4 projection_matrix)
 {
-  cell_instancing->buffer.elements_used = 0;
-  upload_cell_instances(cell_blocks, cell_instancing, n_highlighted_cells, highlighted_cells);
-
-  glBindVertexArray(cell_instance_drawing_vao);
-  glUseProgram(cell_instance_drawing_shader_program);
+  glBindVertexArray(cell_drawing->vao);
+  glUseProgram(cell_drawing->shader_program);
 
   mat4x4 projection_matrix_t;
   mat4x4Transpose(projection_matrix_t, projection_matrix);
-  glUniformMatrix4fv(cell_instance_drawing_mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix_t[0][0]);
+  glUniformMatrix4fv(cell_drawing->mat4_projection_matrix_uniform, 1, GL_TRUE, &projection_matrix_t[0][0]);
 
-  glUniform1i(cell_instance_drawing_cell_block_dim_uniform, cell_blocks->cell_block_dim);
-  glUniform1f(cell_instance_drawing_cell_width_uniform, CELLS_WIDTH);
+  glUniform1i(cell_drawing->cell_block_dim_uniform, cell_blocks->cell_block_dim);
+  glUniform1f(cell_drawing->cell_width_uniform, CELLS_WIDTH);
 
   // Re-initialise attributes in case instance buffer has been reallocated
-  init_cell_instances_buffer_attributes(&cell_instancing->buffer, general_vertex_buffer, cell_instance_drawing_shader_program);
+  init_cell_instances_buffer_attributes(&cell_instancing->buffer, general_vertex_buffer, cell_drawing->shader_program);
 
   draw_cell_instances(cell_instancing);
 

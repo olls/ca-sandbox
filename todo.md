@@ -24,3 +24,6 @@
 - colour cells state buttons in rule patterns UI where only one state is used
 - reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)
 - resize universe hashmap, if saturated
+- remove null cell blocks button
+- modifier key for making selection instead of button
+- store cell boundaries of original selection in regions

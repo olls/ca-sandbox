@@ -51,6 +51,16 @@ struct CellInstance
 };
 
 
+struct CellDrawing
+{
+  GLuint vao;
+  GLuint shader_program;
+  GLuint mat4_projection_matrix_uniform;
+  GLuint cell_block_dim_uniform;
+  GLuint cell_width_uniform;
+};
+
+
 struct GeneralUnvierseVertex
 {
   UniversePosition vertex;
@@ -65,8 +75,12 @@ struct BufferDrawingLocation
 };
 
 
+b32
+init_cell_drawing_shaders(CellDrawing *cell_drawing);
+
+
 void
-init_cell_drawing(CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer);
+init_cell_drawing(CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *general_vertex_buffer, OpenGL_Buffer *general_index_buffer);
 
 
 void
@@ -74,7 +88,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 
 
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing, CellsEditor *cells_editor);
+upload_cell_instances(Universe *universe, CellInstancing *cell_instancing);
 
 
 void
@@ -84,14 +98,9 @@ draw_cell_instances(CellInstancing *cell_instancing);
 void
 draw_cell_blocks(CellBlocks *cell_blocks,
                  CellInstancing *cell_instancing,
-                 GLuint cell_instance_drawing_vao,
-                 GLuint cell_instance_drawing_shader_program,
-                 GLuint cell_instance_drawing_mat4_projection_matrix_uniform,
-                 GLuint cell_instance_drawing_cell_block_dim_uniform,
-                 GLuint cell_instance_drawing_cell_width_uniform,
+                 CellDrawing *cell_drawing,
                  OpenGL_Buffer *general_vertex_buffer,
-                 mat4x4 projection_matrix,
-                 u32 n_highlighted_cells, UniversePosition highlighted_cells[]);
+                 mat4x4 projection_matrix);
 
 
 void

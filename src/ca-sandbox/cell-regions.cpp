@@ -1,5 +1,7 @@
 #include "ca-sandbox/cell-regions.h"
 
+#include "ca-sandbox/cell-block-coordinate-system.h"
+
 
 CellRegion *
 get_cell_region_by_name(CellRegions *cell_regions, String *search_name)
@@ -37,10 +39,52 @@ copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 
 
     while (from_cell_block != 0)
     {
-      s32vec2 to_block_position = vec2_add(from_cell_block->block_position, to_offset);
-      CellBlock *to_cell_block = get_or_create_uninitialised_cell_block(to, to_block_position);
+      // TODO: start/end cell boundaries as well as block
 
-      memcpy(to_cell_block->cell_states, from_cell_block->cell_states, cell_block_states_size);
+      if (from_cell_block->block_position.x >= start_block.x &&
+          from_cell_block->block_position.y >= start_block.y &&
+          from_cell_block->block_position.x <= end_block.x &&
+          from_cell_block->block_position.y <= end_block.y)
+      {
+        s32vec2 to_block_position = vec2_add(from_cell_block->block_position, to_offset);
+        CellBlock *to_cell_block = get_or_create_uninitialised_cell_block(to, to_block_position);
+
+        s32vec2 this_block_start_cell = {0, 0};
+        if (from_cell_block->block_position.x == start_block.x)
+        {
+          this_block_start_cell.x = start_cell.x;
+        }
+        if (from_cell_block->block_position.y == start_block.y)
+        {
+          this_block_start_cell.y = start_cell.y;
+        }
+        s32vec2 this_block_end_cell = {(s32)from->cell_block_dim, (s32)from->cell_block_dim};
+        if (from_cell_block->block_position.x == end_block.x)
+        {
+          this_block_end_cell.x = end_cell.x;
+        }
+        if (from_cell_block->block_position.y == end_block.y)
+        {
+          this_block_end_cell.y = end_cell.y;
+        }
+
+        s32vec2 cell_position;
+        for (cell_position.y = this_block_start_cell.y;
+             cell_position.y < this_block_end_cell.y;
+             ++cell_position.y)
+        {
+          for (cell_position.x = this_block_start_cell.x;
+               cell_position.x < this_block_end_cell.x;
+               ++cell_position.x)
+          {
+            u32 cell_index = get_cell_index_in_block(to, cell_position);
+            CellState *from_cell_state = from_cell_block->cell_states + cell_index;
+            CellState *to_cell_state = to_cell_block->cell_states + cell_index;
+
+            *to_cell_state = *from_cell_state;
+          }
+        }
+      }
 
       // Follow any hashmap collision chains
       from_cell_block = from_cell_block->next_block;
@@ -49,12 +93,20 @@ copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 
 }
 
 
-void
-make_new_region(CellRegions *cell_regions, Universe *universe, const char *name, s32vec2 start_selection_block, s32vec2 start_selection_cell, s32vec2 end_selection_block, s32vec2 end_selection_cell)
+CellRegion *
+make_new_region(CellRegions *cell_regions, Universe *universe, const char *name, UniversePosition selection_start, UniversePosition selection_end)
 {
+  char *name_memory = allocate(char, strlen(name));
+  copy_string(name_memory, name, strlen(name));
+
+  String name_string = {};
+  name_string.start = name_memory;
+  name_string.end = name_string.start + strlen(name);
+
   CellRegion new_region = {
-    .name = new_string(name),
-    .cell_blocks = {}
+    .name = name_string,
+    .cell_blocks = {},
+    .texture = 0
   };
 
   init_cell_hashmap(&new_region.cell_blocks);
@@ -62,20 +114,25 @@ make_new_region(CellRegions *cell_regions, Universe *universe, const char *name,
   // Use same cell_block_dim as original
   new_region.cell_blocks.cell_block_dim = universe->cell_block_dim;
 
-  s32vec2 offset = vec2_multiply(start_selection_block, -1);
-  copy_cell_blocks(universe, &new_region.cell_blocks, start_selection_block, start_selection_cell, end_selection_block, end_selection_cell, offset);
+  s32vec2 selection_start_block = selection_start.cell_block_position;
+  s32vec2 selection_end_block = selection_end.cell_block_position;
+  s32vec2 selection_start_cell = vec2_to_s32vec2(vec2_multiply(selection_start.cell_position, universe->cell_block_dim));
+  s32vec2 selection_end_cell = vec2_to_s32vec2(vec2_multiply(selection_end.cell_position, universe->cell_block_dim));
 
-  Array::add(cell_regions->regions, new_region);
+  s32vec2 offset = vec2_multiply(selection_start_block, -1);
+  copy_cell_blocks(universe, &new_region.cell_blocks, selection_start_block, selection_start_cell, selection_end_block, selection_end_cell, offset);
+
+  CellRegion *result = Array::add(cell_regions->regions, new_region);
+
+  return result;
 }
 
 
-s32vec2
-get_cell_blocks_dimentions(CellBlocks *cell_blocks)
+void
+get_cell_blocks_dimentions(CellBlocks *cell_blocks, s32vec2 *lowest_coords, s32vec2 *highest_coords)
 {
-  s32vec2 result;
-
-  s32vec2 lowest_coords = {};
-  s32vec2 highest_coords = {};
+  *lowest_coords = {};
+  *highest_coords = {};
 
   b32 first_block_found = false;
   for (u32 cell_block_slot = 0;
@@ -89,35 +146,31 @@ get_cell_blocks_dimentions(CellBlocks *cell_blocks)
       if (!first_block_found)
       {
         first_block_found = true;
-        lowest_coords = cell_block->block_position;
-        highest_coords = cell_block->block_position;
+        *lowest_coords = cell_block->block_position;
+        *highest_coords = cell_block->block_position;
       }
       else
       {
-        if (cell_block->block_position.x < lowest_coords.x)
+        if (cell_block->block_position.x < lowest_coords->x)
         {
-          lowest_coords.x = cell_block->block_position.x;
+          lowest_coords->x = cell_block->block_position.x;
         }
-        else if (cell_block->block_position.x > highest_coords.x)
+        else if (cell_block->block_position.x > highest_coords->x)
         {
-          highest_coords.x = cell_block->block_position.x;
+          highest_coords->x = cell_block->block_position.x;
         }
 
-        if (cell_block->block_position.y < lowest_coords.y)
+        if (cell_block->block_position.y < lowest_coords->y)
         {
-          lowest_coords.y = cell_block->block_position.y;
+          lowest_coords->y = cell_block->block_position.y;
         }
-        else if (cell_block->block_position.y > highest_coords.y)
+        else if (cell_block->block_position.y > highest_coords->y)
         {
-          highest_coords.y = cell_block->block_position.y;
+          highest_coords->y = cell_block->block_position.y;
         }
       }
 
       cell_block = cell_block->next_block;
     }
   }
-
-  result = vec2_subtract(highest_coords, lowest_coords);
-
-  return result;
 }

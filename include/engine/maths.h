@@ -84,5 +84,12 @@ ipow(u64 base, u64 exp)
 }
 
 
+template <typename T>
+T
+sign(T x)
+{
+  return x >= 0 ? 1 : -1;
+}
+
 
 #endif

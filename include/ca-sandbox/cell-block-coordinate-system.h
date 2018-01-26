@@ -14,6 +14,27 @@ struct UniversePosition
 };
 
 
+inline UniversePosition
+vec2_add(UniversePosition a, UniversePosition b)
+{
+  UniversePosition result = {
+    .cell_block_position = vec2_add(a.cell_block_position, b.cell_block_position),
+    .cell_position = vec2_add(a.cell_position, b.cell_position)
+  };
+  return result;
+}
+
+inline UniversePosition
+vec2_multiply(UniversePosition a, vec2 b)
+{
+  UniversePosition result = {
+    .cell_block_position = vec2_multiply(a.cell_block_position, vec2_to_s32vec2(b)),
+    .cell_position = vec2_multiply(a.cell_position, b)
+  };
+  return result;
+}
+
+
 void
 normalise_cell_coord(Universe *universe, s32 *cell_block_coord, s32 *cell_coord);
 
@@ -55,7 +76,15 @@ cell_block_round(vec2 real_cell_block);
 
 
 void
-correct_cell_block_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell);
+correct_cell_block_square_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell);
+
+
+void
+correct_cell_block_square_order(UniversePosition& start, UniversePosition& end);
+
+
+void
+quantise_0to1_cell_position(vec2& continuous, u32 cell_block_dim);
 
 
 #endif

@@ -12,6 +12,7 @@ struct CellsEditor
 {
   b32 cell_highlighted;  //< Indicates whether a cell is currently being hovered over with the mouse
   UniversePosition highlighted_cell;  //< The position of the cell currently highlighted
+  CellState highlighted_cell_state;
 
   b32 cell_block_highlighted;  //< Indicates whether a potential cell block is currently being hovered over with the mouse
   s32vec2 highlighted_cell_block;  //< The position of the potential cell block currently highlighted

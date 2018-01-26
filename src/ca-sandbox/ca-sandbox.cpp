@@ -13,6 +13,8 @@
 #include "engine/opengl-shaders.h"
 #include "engine/opengl-buffer.h"
 #include "engine/opengl-general-buffers.h"
+#include "engine/colour.h"
+#include "engine/drawing.h"
 
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/load-universe.h"
@@ -30,6 +32,7 @@
 #include "ca-sandbox/named-states-ui.h"
 #include "ca-sandbox/save-rule-config.h"
 #include "ca-sandbox/cell-regions-ui.h"
+#include "ca-sandbox/minimap.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
@@ -39,7 +42,7 @@
 // #define DEBUG_CELL_BLOCK_DRAWING
 // #define DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
 // #define DEBUG_SCREEN_DRAWING
-// #define DEBUG_CELL_REGION_SELECTION_DRAWING
+// #define DEBUG_CELL_SELECTIONS_DRAWING
 
 /// @file
 /// @brief Program root file.
@@ -58,7 +61,7 @@ const r32 INITIAL_SIM_FREQUENCY = 30;
 ///
 /// TODO: Shader compilation should probably be moved to the locations where the shaders are used.
 b32
-init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *screen_shader_program)
+init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *texture_shader_program, GLuint *screen_shader_program)
 {
   b32 success = true;
 
@@ -80,6 +83,13 @@ init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_draw
   };
 
   success &= create_shader_program(cells_filenames, shader_types, 2, cell_instance_drawing_shader_program);
+
+  const char *texture_filenames[] = {
+    "shaders/passthrough.glvs",
+    "shaders/texture.glfs"
+  };
+
+  success &= create_shader_program(texture_filenames, shader_types, 2, texture_shader_program);
 
   const char *screen_filenames[] = {
     "shaders/screen.glvs",
@@ -113,53 +123,6 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     memset(state, 0, sizeof(CA_SandboxState));
 
     state->init = true;
-    state->imgui_context = 0;
-
-    // state->frame_timing = {};
-
-    state->general_universe_shader_program = 0;
-    state->general_universe_vao = 0;
-    // state->general_universe_vbo = {};
-    // state->general_universe_ibo = {};
-    state->general_universe_mat4_projection_matrix_uniform = 0;
-
-    // state->general_vertex_buffer = {};
-    // state->general_index_buffer = {};
-
-    state->cell_instance_drawing_shader_program = 0;
-    state->cell_instance_drawing_vao = 0;
-    // state->cell_instancing = {};
-    state->cell_instance_drawing_mat4_projection_matrix_uniform = 0;
-    state->cell_instance_drawing_cell_block_dim_uniform = 0;
-    state->cell_instance_drawing_cell_width_uniform = 0;
-
-    state->screen_shader_program = 0;
-    state->screen_vao = 0;
-
-    state->universe = 0;
-    // state->simulate_options = {};
-    // state->cell_initialisation_options = {};
-    state->cells_file_loaded = false;
-
-    // state->loaded_rule = {};
-    state->rule_file_loaded = false;
-    // state->rule_creation_thread = {};
-
-    state->simulation_ui.sim_frequency = INITIAL_SIM_FREQUENCY;
-    state->simulation_ui.simulating = false;
-    state->simulation_ui.step_simulation = false;
-    state->simulation_ui.simulation_step = 0;
-    state->simulation_ui.last_sim_time = get_us();
-    state->simulation_ui.last_simulation_delta = 0;
-    // state->universe_ui = {};
-    // state->rule_ui = {};
-    // state->cells_editor = {};
-    // state->cell_regions_ui = {};
-
-    state->view_panning.scale = 0.3;
-    state->view_panning.offset = {0,0};
-
-    // state->screen_mouse_pos = {};
   }
 
   CA_SandboxState *state = *state_ptr;
@@ -172,6 +135,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   OpenGL_Buffer *general_index_buffer = &state->general_index_buffer;
 
   CellInstancing *cell_instancing = &state->cell_instancing;
+  CellDrawing *cell_drawing = &state->cell_drawing;
 
   SimulateOptions *simulate_options = &state->simulate_options;
   CellInitialisationOptions *cell_initialisation_options = &state->cell_initialisation_options;
@@ -184,6 +148,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   CellRegionsUI *cell_regions_ui = &state->cell_regions_ui;
   RuleCreationThread *rule_creation_thread = &state->rule_creation_thread;
   ViewPanning *view_panning = &state->view_panning;
+  CellSelectionsUI *cell_selections_ui = &state->cell_selections_ui;
 
   if (state->init)
   {
@@ -202,7 +167,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     opengl_create_general_buffers(general_vertex_buffer, general_index_buffer);
 
-    b32 shader_success = init_shaders(&state->general_universe_shader_program, &state->cell_instance_drawing_shader_program, &state->screen_shader_program);
+    b32 shader_success = init_shaders(&state->general_universe_shader_program, &cell_drawing->shader_program, &state->texture_shader_program, &state->screen_shader_program);
     result.success &= shader_success;
 
     // General universe drawing
@@ -227,16 +192,14 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     // Cell instance drawing
     {
-      state->cell_instance_drawing_mat4_projection_matrix_uniform = glGetUniformLocation(state->cell_instance_drawing_shader_program, "projection_matrix");
-      state->cell_instance_drawing_cell_block_dim_uniform = glGetUniformLocation(state->cell_instance_drawing_shader_program, "cell_block_dim");
-      state->cell_instance_drawing_cell_width_uniform = glGetUniformLocation(state->cell_instance_drawing_shader_program, "cell_width");
+      result.success &= init_cell_drawing_shaders(cell_drawing);
+      init_cell_drawing(cell_drawing, cell_instancing, general_vertex_buffer, general_index_buffer);
+    }
 
-      glGenVertexArrays(1, &state->cell_instance_drawing_vao);
-      glBindVertexArray(state->cell_instance_drawing_vao);
-
-      init_cell_drawing(cell_instancing, general_vertex_buffer, general_index_buffer);
-
-      glBindVertexArray(0);
+    // Minimap
+    {
+      state->minimap_framebuffer = create_minimap_framebuffer();
+      state->rendered_texture_uniform = glGetUniformLocation(state->texture_shader_program, "rendered_texture");
     }
 
 #ifdef DEBUG_SCREEN_DRAWING
@@ -258,6 +221,9 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     }
 
     opengl_print_errors();
+
+    simulation_ui->sim_frequency = INITIAL_SIM_FREQUENCY;
+    view_panning->scale = 0.3;
   }
 
   ImGui::SetCurrentContext(state->imgui_context);
@@ -327,12 +293,13 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     ImGui::ShowTestWindow();
 
+    do_cell_selections_ui(cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
     do_simulation_ui(simulation_ui, frame_timing->frame_start, loaded_rule->rule_tree_built, &universe_ui->reload_cells_file, &universe_ui->save_cells_file);
     do_rule_ui(rule_ui, loaded_rule, rule_creation_thread);
     do_simulate_options_ui(simulate_options, state->universe);
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
-    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, mouse_universe_pos, &mouse_click_consumed);
+    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer, mouse_universe_pos, &mouse_click_consumed);
 
     //
     // Save
@@ -481,59 +448,9 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     if (state->universe != 0)
     {
-      UniversePosition *highlighted_cells = 0;
-      u32 n_highlighted_cells = 0;
-      if (cells_editor->cell_highlighted)
-      {
-        n_highlighted_cells = 1;
-        highlighted_cells = &cells_editor->highlighted_cell;
-      }
+      upload_cell_instances(state->universe, cell_instancing);
 
-      draw_cell_blocks(state->universe,
-                       cell_instancing,
-                       state->cell_instance_drawing_vao,
-                       state->cell_instance_drawing_shader_program,
-                       state->cell_instance_drawing_mat4_projection_matrix_uniform,
-                       state->cell_instance_drawing_cell_block_dim_uniform,
-                       state->cell_instance_drawing_cell_width_uniform,
-                       general_vertex_buffer,
-                       view_panning->projection_matrix,
-                       n_highlighted_cells, highlighted_cells);
-
-      // Mini map
-
-      mat4x4 mini_map_projection_matrix;
-      mat4x4Identity(mini_map_projection_matrix);
-
-      s32vec2 dim = get_cell_blocks_dimentions(state->universe);
-      dim = vec2_add(dim, 1);
-
-      vec2 centre = vec2_multiply(s32vec2_to_vec2(dim), -0.5);
-      vec3 offset = {};
-      offset.xy = centre;
-      mat4x4Translate(mini_map_projection_matrix, offset);
-
-      ImGui::Value("centre", centre);
-
-      mat4x4 mini_map_projection_matrix_aspect;
-      mat4x4MultiplyMatrix(mini_map_projection_matrix_aspect, mini_map_projection_matrix, aspect_ratio);
-
-      s32 largest_dim = max(dim.x, dim.y);
-      r32 scale = 0.5 * (1.0 / largest_dim);
-      mat4x4Scale(mini_map_projection_matrix_aspect, scale);
-
-      mat4x4Translate(mini_map_projection_matrix_aspect, {0.75, -0.75});
-
-      draw_cell_blocks(state->universe,
-                       cell_instancing,
-                       state->cell_instance_drawing_vao,
-                       state->cell_instance_drawing_shader_program,
-                       state->cell_instance_drawing_mat4_projection_matrix_uniform,
-                       state->cell_instance_drawing_cell_block_dim_uniform,
-                       state->cell_instance_drawing_cell_width_uniform,
-                       general_vertex_buffer,
-                       mini_map_projection_matrix_aspect,
-                       0, 0);
+      draw_cell_blocks(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, view_panning->projection_matrix);
     }
 
     //
@@ -552,37 +469,35 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     BufferDrawingLocation general_universe_triangles_ibo = {};
     general_universe_triangles_ibo.start_position = general_universe_ibo->elements_used;
 
+    if (cells_editor->cell_highlighted)
+    {
+      vec4 highlighted_cell_colour = get_state_colour(cells_editor->highlighted_cell_state);
+      highlighted_cell_colour = lighten_colour(highlighted_cell_colour);
+      GeneralUnvierseVertex colour_template = {{{}, {}}, highlighted_cell_colour};
+
+      u32 colour_template_position_offset = offsetof(GeneralUnvierseVertex, vertex);
+
+      r32 cell_dim = 1.0 / state->universe->cell_block_dim;
+      UniversePosition cell_size = {{}, {cell_dim, cell_dim}};
+
+      general_universe_triangles_ibo.n_elements += make_square_triangle_vertices(cells_editor->highlighted_cell, cell_size, colour_template, colour_template_position_offset, general_universe_vbo, general_universe_ibo);
+    }
+
     if (cells_editor->cell_block_highlighted)
     {
       vec4 potential_cell_block_colour = {0.8, 0.8, 0.8, 1};
+      GeneralUnvierseVertex colour_template = {{{}, {}}, potential_cell_block_colour};
 
-      GeneralUnvierseVertex cell_block_vertices[] = {
-        {{cells_editor->highlighted_cell_block, {0, 0}}, potential_cell_block_colour},
-        {{cells_editor->highlighted_cell_block, {1, 0}}, potential_cell_block_colour},
-        {{cells_editor->highlighted_cell_block, {1, 1}}, potential_cell_block_colour},
-        {{cells_editor->highlighted_cell_block, {0, 1}}, potential_cell_block_colour}
-      };
+      u32 colour_template_position_offset = offsetof(GeneralUnvierseVertex, vertex);
 
-      GLushort vbo_index_a = opengl_buffer_new_element(general_universe_vbo, cell_block_vertices + 0);
-      GLushort vbo_index_b = opengl_buffer_new_element(general_universe_vbo, cell_block_vertices + 1);
-      GLushort vbo_index_c = opengl_buffer_new_element(general_universe_vbo, cell_block_vertices + 2);
-      GLushort vbo_index_d = opengl_buffer_new_element(general_universe_vbo, cell_block_vertices + 3);
-
-      GLuint first_index = opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
-      opengl_buffer_new_element(general_universe_ibo, &vbo_index_b);
-      opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
-      opengl_buffer_new_element(general_universe_ibo, &vbo_index_a);
-      opengl_buffer_new_element(general_universe_ibo, &vbo_index_c);
-      GLuint last_index = opengl_buffer_new_element(general_universe_ibo, &vbo_index_d);
-
-      void *general_universe_ibo_offset = (void *)(intptr_t)(first_index * sizeof(GLushort));
-
-      general_universe_triangles_ibo.n_elements += (last_index - first_index) + 1;
+      UniversePosition block_size = {{1, 1}, {}};
+      UniversePosition block_start_pos = {cells_editor->highlighted_cell_block, {}};
+      general_universe_triangles_ibo.n_elements += make_square_triangle_vertices(block_start_pos, block_size, colour_template, colour_template_position_offset, general_universe_vbo, general_universe_ibo);
     }
 
-    if (cell_regions_ui->making_selection_dragging)
+    if (cell_selections_ui->making_selection || cell_selections_ui->selection_made)
     {
-      general_universe_triangles_ibo.n_elements += cell_region_selection_drawing_upload(cell_regions_ui, state->universe, general_universe_vbo, general_universe_ibo);
+      general_universe_triangles_ibo.n_elements += cell_selections_drawing_upload(cell_selections_ui, state->universe, general_universe_vbo, general_universe_ibo);
     }
 
     // Get attribute locations
@@ -592,6 +507,32 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     opengl_print_errors();
     glBindVertexArray(0);
+
+    //
+    // Mini map drawing
+    //
+
+    if (state->universe != 0)
+    {
+
+      if (vec2_eq(state->minimap_texture_size, {0, 0}))
+      {
+        state->minimap_texture_size = {300, 300};
+        state->minimap_texture = create_minimap_texture(state->minimap_texture_size, state->minimap_framebuffer);
+      }
+
+      ImGui::Value("tex", state->minimap_texture);
+
+      draw_minimap_texture(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size);
+      opengl_print_errors();
+
+      draw_minimap_texture_to_screen(state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size, state->texture_shader_program, state->rendered_texture_uniform);
+
+      // Reset view port (draw_minimap_texture_to_screen modifies it...)
+      glViewport(0, 0, window_size.x, window_size.y);
+
+      opengl_print_errors();
+    }
 
     //
     // Debug universe lines drawing
@@ -623,10 +564,10 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     debug_universe_lines_ibo.n_elements += 2;
 #endif
 
-#ifdef DEBUG_CELL_REGION_SELECTION_DRAWING
+#ifdef DEBUG_CELL_SELECTIONS_DRAWING
     if (state->universe != 0)
     {
-      debug_universe_lines_ibo.n_elements += debug_cell_region_selection_drawing_upload(cell_regions_ui, state->universe, general_universe_vbo, general_universe_ibo);
+      debug_universe_lines_ibo.n_elements += debug_cell_selections_drawing_upload(cell_selections_ui, state->universe, general_universe_vbo, general_universe_ibo);
     }
 #endif
 

@@ -1,0 +1,15 @@
+#version 330 core
+
+
+uniform sampler2D rendered_texture;
+
+in vec2 UV;
+
+out vec4 color_out;
+
+
+void
+main()
+{
+  color_out = texture(rendered_texture, UV);
+}

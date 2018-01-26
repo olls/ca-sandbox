@@ -14,6 +14,7 @@
 #include "ca-sandbox/view-panning.h"
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/cell-regions-ui.h"
+#include "ca-sandbox/cell-selections-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -44,12 +45,14 @@ struct CA_SandboxState
   OpenGL_Buffer general_vertex_buffer;
   OpenGL_Buffer general_index_buffer;
 
-  GLuint cell_instance_drawing_shader_program;
-  GLuint cell_instance_drawing_vao;
   CellInstancing cell_instancing;
-  GLuint cell_instance_drawing_mat4_projection_matrix_uniform;
-  GLuint cell_instance_drawing_cell_block_dim_uniform;
-  GLuint cell_instance_drawing_cell_width_uniform;
+  CellDrawing cell_drawing;
+
+  GLuint texture_shader_program;
+  GLuint rendered_texture_uniform;
+  GLuint minimap_framebuffer;
+  GLuint minimap_texture;
+  s32vec2 minimap_texture_size;
 
   GLuint screen_shader_program;
   GLuint screen_vao;
@@ -63,6 +66,7 @@ struct CA_SandboxState
   b32 rule_file_loaded;
   RuleCreationThread rule_creation_thread;
 
+  CellSelectionsUI cell_selections_ui;
   SimulationUI simulation_ui;
   UniverseUI universe_ui;
   RuleUI rule_ui;

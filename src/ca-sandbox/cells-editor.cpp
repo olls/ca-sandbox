@@ -55,14 +55,15 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
 
       cells_editor->highlighted_cell.cell_position = cell_position_proportion;
 
+      u32 cell_index = get_cell_index_in_block(universe, cell_position);
+      CellState *cell_state = hovered_cell_block->cell_states + cell_index;
+      cells_editor->highlighted_cell_state = *cell_state;
+
       if (!cells_editor->currently_dragging_cell_block_creation &&
           ImGui::IsMouseClicked(0))
       {
         *mouse_click_consumed = true;
         cells_editor->currently_dragging_state = true;
-
-        u32 cell_index = get_cell_index_in_block(universe, cell_position);
-        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
 
         // Choose which state we are dragging
 
@@ -110,6 +111,7 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
   if (ImGui::BeginPopup("cell block context menu"))
   {
     ImGui::Text("Cell State: %.*s", string_length(cells_editor->current_contex_menu_cell_state), cells_editor->current_contex_menu_cell_state.start);
+    ImGui::Text("Cell Block: %d %d", cells_editor->current_context_menu_cell_block.x, cells_editor->current_context_menu_cell_block.y);
     if (ImGui::Button("Delete cell block"))
     {
       ImGui::CloseCurrentPopup();

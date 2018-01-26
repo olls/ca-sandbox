@@ -89,6 +89,16 @@ cell_position_greater_than_or_equal_to(s32 cell_block_position_test, s32 cell_po
   return result;
 }
 
+b32
+cell_position_greater_than_or_equal_to(s32 cell_block_position_test, r32 cell_position_test,
+                                       s32 cell_block_position_bound, r32 cell_position_bound)
+{
+  b32 result = (cell_block_position_test > cell_block_position_bound ||
+                (cell_block_position_test == cell_block_position_bound &&
+                 cell_position_test >= cell_position_bound));
+  return result;
+}
+
 
 /// @brief Greater-than-or-equal-to (>=) test for global (cell block + cell) coordinates
 ///
@@ -102,6 +112,17 @@ cell_position_greater_than_or_equal_to(s32 cell_block_position_test, s32 cell_po
 b32
 cell_position_greater_than_or_equal_to(s32vec2 cell_block_position_test, s32vec2 cell_position_test,
                                        s32vec2 cell_block_position_bound, s32vec2 cell_position_bound)
+{
+  b32 result = (cell_position_greater_than_or_equal_to(cell_block_position_test.x, cell_position_test.x,
+                                                       cell_block_position_bound.x, cell_position_bound.x) &&
+                cell_position_greater_than_or_equal_to(cell_block_position_test.y, cell_position_test.y,
+                                                       cell_block_position_bound.y, cell_position_bound.y));
+  return result;
+}
+
+b32
+cell_position_greater_than_or_equal_to(s32vec2 cell_block_position_test, vec2 cell_position_test,
+                                       s32vec2 cell_block_position_bound, vec2 cell_position_bound)
 {
   b32 result = (cell_position_greater_than_or_equal_to(cell_block_position_test.x, cell_position_test.x,
                                                        cell_block_position_bound.x, cell_position_bound.x) &&
@@ -193,7 +214,7 @@ cell_block_round(vec2 real_cell_block)
 
 
 void
-correct_cell_block_order(s32& start_block, s32& start_cell, s32& end_block, s32& end_cell)
+correct_cell_block_square_order(s32& start_block, s32& start_cell, s32& end_block, s32& end_cell)
 {
   if (cell_position_greater_than_or_equal_to(start_block, start_cell, end_block, end_cell))
   {
@@ -208,11 +229,50 @@ correct_cell_block_order(s32& start_block, s32& start_cell, s32& end_block, s32&
   }
 }
 
+void
+correct_cell_block_square_order(s32& start_block, r32& start_cell, s32& end_block, r32& end_cell)
+{
+  if (cell_position_greater_than_or_equal_to(start_block, start_cell, end_block, end_cell))
+  {
+    s32 temp_end_block = end_block;
+    r32 temp_end_cell = end_cell;
+
+    end_block = start_block;
+    end_cell = start_cell;
+
+    start_block = temp_end_block;
+    start_cell = temp_end_cell;
+  }
+}
+
 
 /// Updates the cell block coordinates so that start is always closest to the origin
 void
-correct_cell_block_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell)
+correct_cell_block_square_order(s32vec2& start_block, s32vec2& start_cell, s32vec2& end_block, s32vec2& end_cell)
 {
-  correct_cell_block_order(start_block.x, start_cell.x, end_block.x, end_cell.x);
-  correct_cell_block_order(start_block.y, start_cell.y, end_block.y, end_cell.y);
+  correct_cell_block_square_order(start_block.x, start_cell.x, end_block.x, end_cell.x);
+  correct_cell_block_square_order(start_block.y, start_cell.y, end_block.y, end_cell.y);
+}
+
+
+void
+correct_cell_block_square_order(UniversePosition& start, UniversePosition& end)
+{
+  correct_cell_block_square_order(start.cell_block_position.x, start.cell_position.x, end.cell_block_position.x, end.cell_position.x);
+  correct_cell_block_square_order(start.cell_block_position.y, start.cell_position.y, end.cell_block_position.y, end.cell_position.y);
+}
+
+
+void
+quantise_0to1_cell_position(r32& continuous, u32 cell_block_dim)
+{
+  continuous = (r32)(s32)(continuous * cell_block_dim) / cell_block_dim;
+}
+
+
+void
+quantise_0to1_cell_position(vec2& continuous, u32 cell_block_dim)
+{
+  quantise_0to1_cell_position(continuous.x, cell_block_dim);
+  quantise_0to1_cell_position(continuous.y, cell_block_dim);
 }

@@ -182,8 +182,8 @@ inline vec
 vec2_sign(vec a)
 {
   vec result = {
-    .x = a.x >= 0 ? 1 : -1,
-    .y = a.y >= 0 ? 1 : -1
+    .x = sign(a.x),
+    .y = sign(a.y)
   };
   return result;
 }
@@ -392,9 +392,9 @@ inline vec
 vec3_sign(vec a)
 {
   vec result = {
-    .x = a.x >= 0 ? 1 : -1,
-    .y = a.y >= 0 ? 1 : -1,
-    .z = a.z >= 0 ? 1 : -1
+    .x = sign(a.x),
+    .y = sign(a.y),
+    .z = sign(a.z)
   };
   return result;
 }
@@ -617,10 +617,10 @@ inline vec
 vec4_sign(vec a)
 {
   vec result = {
-    .x = a.x >= 0 ? 1 : -1,
-    .y = a.y >= 0 ? 1 : -1,
-    .z = a.z >= 0 ? 1 : -1,
-    .w = a.w >= 0 ? 1 : -1
+    .x = sign(a.x),
+    .y = sign(a.y),
+    .z = sign(a.z),
+    .w = sign(a.w)
   };
   return result;
 }
