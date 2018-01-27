@@ -33,11 +33,11 @@ do_cell_selections_ui(CellSelectionsUI *cell_selections_ui, UniversePosition mou
         cell_selections_ui->selection_end = mouse_universe_pos;
       }
 
-      if (!ImGui::IsMouseDown(0) && cell_selections_ui->making_selection)
-      {
-        cell_selections_ui->making_selection = false;
-        cell_selections_ui->selection_made = true;
-      }
+    }
+    if (!ImGui::IsMouseDown(0) && cell_selections_ui->making_selection)
+    {
+      cell_selections_ui->making_selection = false;
+      cell_selections_ui->selection_made = true;
     }
   }
 }

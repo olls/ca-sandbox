@@ -27,3 +27,5 @@
 - remove null cell blocks button
 - modifier key for making selection instead of button
 - store cell boundaries of original selection in regions
+- separate model matrix and projection matrix uniform (ie: aspect ratio goes in projection, view_panning goes in model)
+- render border

@@ -27,7 +27,7 @@ get_cell_region_by_name(CellRegions *cell_regions, String *search_name)
 
 
 void
-copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 start_cell, s32vec2 end_block, s32vec2 end_cell, s32vec2 to_offset = {})
+copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 start_cell, s32vec2 end_block, s32vec2 end_cell, s32vec2 to_block_offset = {}, s32vec2 to_cell_offset = {})
 {
   to->cell_block_dim = from->cell_block_dim;
   const u32 cell_block_states_size = from->cell_block_dim * from->cell_block_dim * sizeof(CellState);
@@ -40,16 +40,11 @@ copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 
 
     while (from_cell_block != 0)
     {
-      // TODO: start/end cell boundaries as well as block
-
       if (from_cell_block->block_position.x >= start_block.x &&
           from_cell_block->block_position.y >= start_block.y &&
           from_cell_block->block_position.x <= end_block.x &&
           from_cell_block->block_position.y <= end_block.y)
       {
-        s32vec2 to_block_position = vec2_add(from_cell_block->block_position, to_offset);
-        CellBlock *to_cell_block = get_or_create_uninitialised_cell_block(to, to_block_position);
-
         s32vec2 this_block_start_cell = {0, 0};
         if (from_cell_block->block_position.x == start_block.x)
         {
@@ -78,9 +73,16 @@ copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 
                cell_position.x < this_block_end_cell.x;
                ++cell_position.x)
           {
-            u32 cell_index = get_cell_index_in_block(to, cell_position);
-            CellState *from_cell_state = from_cell_block->cell_states + cell_index;
-            CellState *to_cell_state = to_cell_block->cell_states + cell_index;
+            u32 from_cell_index = get_cell_index_in_block(to, cell_position);
+            CellState *from_cell_state = from_cell_block->cell_states + from_cell_index;
+
+            s32vec2 to_block_position = vec2_add(from_cell_block->block_position, to_block_offset);
+            s32vec2 to_cell_position = vec2_add(cell_position, to_cell_offset);
+            normalise_cell_coord(to, &to_block_position, &to_cell_position);
+            CellBlock *to_cell_block = get_or_create_uninitialised_cell_block(to, to_block_position);
+
+            u32 to_cell_index = get_cell_index_in_block(to, to_cell_position);
+            CellState *to_cell_state = to_cell_block->cell_states + to_cell_index;
 
             *to_cell_state = *from_cell_state;
           }
@@ -102,7 +104,14 @@ make_region_texture(CellRegion *region, Universe *universe, GLuint minimap_frame
 
   if (region->texture != 0)
   {
-    upload_cell_instances(&region->cell_blocks, cell_instancing);
+    Border region_border = {
+      .type = BorderType::FIXED,
+      .min_corner_block = region->start_block,
+      .min_corner_cell = region->start_cell,
+      .max_corner_block = region->end_block,
+      .max_corner_cell = region->end_cell
+    };
+    upload_cell_instances(&region->cell_blocks, region_border, cell_instancing);
     draw_minimap_texture(&region->cell_blocks, cell_instancing, cell_drawing, cell_vertices_buffer, minimap_framebuffer, region->texture, region->texture_size);
   }
 }
@@ -111,84 +120,67 @@ make_region_texture(CellRegion *region, Universe *universe, GLuint minimap_frame
 void
 make_new_region(CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui, Universe *universe, const char *name, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer)
 {
-  if (cell_selections_ui->selection_made)
-  {
-    char *name_memory = allocate(char, strlen(name));
-    copy_string(name_memory, name, strlen(name));
+  char *name_memory = allocate(char, strlen(name));
+  copy_string(name_memory, name, strlen(name));
 
-    String name_string = {};
-    name_string.start = name_memory;
-    name_string.end = name_string.start + strlen(name);
+  String name_string = {};
+  name_string.start = name_memory;
+  name_string.end = name_string.start + strlen(name);
 
-    CellRegion new_region = {
-      .name = name_string,
-      .cell_blocks = {},
-      .texture = 0
-    };
+  CellRegion new_region = {
+    .name = name_string,
+    .cell_blocks = {},
+    .texture = 0
+  };
 
-    init_cell_hashmap(&new_region.cell_blocks);
+  init_cell_hashmap(&new_region.cell_blocks);
 
-    // Use same cell_block_dim as original
-    new_region.cell_blocks.cell_block_dim = universe->cell_block_dim;
+  // Use same cell_block_dim as original
+  new_region.cell_blocks.cell_block_dim = universe->cell_block_dim;
 
-    new_region.start_block = cell_selections_ui->selection_start.cell_block_position;
-    new_region.end_block = cell_selections_ui->selection_end.cell_block_position;
-    new_region.start_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_start.cell_position, universe->cell_block_dim));
-    new_region.end_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_end.cell_position, universe->cell_block_dim));
+  s32vec2 from_start_block = cell_selections_ui->selection_start.cell_block_position;
+  s32vec2 from_end_block = cell_selections_ui->selection_end.cell_block_position;
+  s32vec2 from_start_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_start.cell_position, universe->cell_block_dim));
+  s32vec2 from_end_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_end.cell_position, universe->cell_block_dim));
 
-    s32vec2 offset = vec2_multiply(new_region.start_block, -1);
-    copy_cell_blocks(universe, &new_region.cell_blocks, new_region.start_block, new_region.start_cell, new_region.end_block, new_region.end_cell, offset);
+  s32vec2 offset = vec2_multiply(cell_selections_ui->selection_start.cell_block_position, -1);
 
-    make_region_texture(&new_region, universe, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
+  copy_cell_blocks(universe, &new_region.cell_blocks, from_start_block, from_start_cell, from_end_block, from_end_cell, offset);
 
-    CellRegion *result = Array::add(cell_regions->regions, new_region);
-  }
+  new_region.start_block = {0, 0};
+  new_region.end_block = vec2_add(cell_selections_ui->selection_end.cell_block_position, offset);
+
+  new_region.start_cell = from_start_cell;
+  new_region.end_cell = from_end_cell;
+
+  make_region_texture(&new_region, universe, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
+
+  CellRegion *result = Array::add(cell_regions->regions, new_region);
 }
 
 
 void
-get_cell_blocks_dimentions(CellBlocks *cell_blocks, s32vec2 *lowest_coords, s32vec2 *highest_coords)
+add_region_to_universe(CellRegions *cell_regions, Universe *universe, u32 region_index, UniversePosition place_position)
 {
-  *lowest_coords = {};
-  *highest_coords = {};
+  CellRegion& copy_from = cell_regions->regions[region_index];
 
-  b32 first_block_found = false;
-  for (u32 cell_block_slot = 0;
-       cell_block_slot < cell_blocks->hashmap_size;
-       ++cell_block_slot)
-  {
-    CellBlock *cell_block = cell_blocks->hashmap[cell_block_slot];
+  assert(copy_from.cell_blocks.cell_block_dim == universe->cell_block_dim);
 
-    while (cell_block != 0)
-    {
-      if (!first_block_found)
-      {
-        first_block_found = true;
-        *lowest_coords = cell_block->block_position;
-        *highest_coords = cell_block->block_position;
-      }
-      else
-      {
-        if (cell_block->block_position.x < lowest_coords->x)
-        {
-          lowest_coords->x = cell_block->block_position.x;
-        }
-        else if (cell_block->block_position.x > highest_coords->x)
-        {
-          highest_coords->x = cell_block->block_position.x;
-        }
+  s32vec2 cell_dim = vec2_multiply(vec2_subtract(copy_from.end_block, copy_from.start_block), copy_from.cell_blocks.cell_block_dim);
+  cell_dim = vec2_add(cell_dim, copy_from.end_cell);
+  cell_dim = vec2_subtract(cell_dim, copy_from.start_cell);
+  s32vec2 midpoint_offset_cell = vec2_multiply(cell_dim, 0.5);
 
-        if (cell_block->block_position.y < lowest_coords->y)
-        {
-          lowest_coords->y = cell_block->block_position.y;
-        }
-        else if (cell_block->block_position.y > highest_coords->y)
-        {
-          highest_coords->y = cell_block->block_position.y;
-        }
-      }
+  s32vec2 start_offset_block = copy_from.start_block;
+  s32vec2 start_offset_cell = vec2_multiply(copy_from.start_cell, -1);
 
-      cell_block = cell_block->next_block;
-    }
-  }
+  s32vec2 mouse_offset_cell = vec2_to_s32vec2(vec2_multiply(place_position.cell_position, copy_from.cell_blocks.cell_block_dim));
+  s32vec2 mouse_offset_block = place_position.cell_block_position;
+
+  s32vec2 block_offset = vec2_add(start_offset_block, mouse_offset_block);
+  s32vec2 cell_offset = vec2_subtract(vec2_add(start_offset_cell, mouse_offset_cell), midpoint_offset_cell);
+
+  normalise_cell_coord(&copy_from.cell_blocks, &block_offset, &cell_offset);
+
+  copy_cell_blocks(&copy_from.cell_blocks, universe, copy_from.start_block, copy_from.start_cell, copy_from.end_block, copy_from.end_cell, block_offset, cell_offset);
 }

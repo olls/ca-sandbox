@@ -161,7 +161,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 ///   frame is fast enough.
 ///
 void
-upload_cell_instances(CellBlocks *cell_blocks, CellInstancing *cell_instancing)
+upload_cell_instances(CellBlocks *cell_blocks, Border border, CellInstancing *cell_instancing)
 {
   cell_instancing->buffer.elements_used = 0;
 
@@ -184,22 +184,25 @@ upload_cell_instances(CellBlocks *cell_blocks, CellInstancing *cell_instancing)
         {
           // TODO: Check if block is visible on screen?
 
-          UniversePosition current_cell = {
-            .cell_block_position = cell_block->block_position,
-            .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, cell_blocks->cell_block_dim)
-          };
+          if (check_border(border, cell_block->block_position, cell_position))
+          {
+            UniversePosition current_cell = {
+              .cell_block_position = cell_block->block_position,
+              .cell_position = vec2_divide((vec2){(r32)cell_position.x, (r32)cell_position.y}, cell_blocks->cell_block_dim)
+            };
 
-          CellState cell_state = cell_block->cell_states[(cell_position.y * cell_blocks->cell_block_dim) + cell_position.x];
+            CellState cell_state = cell_block->cell_states[(cell_position.y * cell_blocks->cell_block_dim) + cell_position.x];
 
-          vec4 colour = get_state_colour(cell_state);
+            vec4 colour = get_state_colour(cell_state);
 
-          CellInstance cell_instance = {
-            .block_position = current_cell.cell_block_position,
-            .cell_position = current_cell.cell_position,
-            .colour = colour
-          };
+            CellInstance cell_instance = {
+              .block_position = current_cell.cell_block_position,
+              .cell_position = current_cell.cell_position,
+              .colour = colour
+            };
 
-          opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+            opengl_buffer_new_element(&cell_instancing->buffer, &cell_instance);
+          }
         }
       }
 

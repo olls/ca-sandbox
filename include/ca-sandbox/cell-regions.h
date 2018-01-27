@@ -47,7 +47,7 @@ make_new_region(CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui,
 
 
 void
-get_cell_blocks_dimentions(CellBlocks *cell_blocks, s32vec2 *lowest_coords, s32vec2 *highest_coords);
+add_region_to_universe(CellRegions *cell_regions, Universe *universe, u32 region_index, UniversePosition place_position);
 
 
 #endif

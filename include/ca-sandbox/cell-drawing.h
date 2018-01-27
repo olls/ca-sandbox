@@ -1,11 +1,12 @@
 #ifndef CELL_DRAWING_H_DEF
 #define CELL_DRAWING_H_DEF
 
-#include "engine/vectors.h"
-#include "engine/opengl-buffer.h"
-
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cells-editor.h"
+#include "ca-sandbox/border.h"
+
+#include "engine/vectors.h"
+#include "engine/opengl-buffer.h"
 
 /// @file
 /// @brief Data structures for drawing the Cell%s with OpenGL
@@ -88,7 +89,7 @@ init_cell_instances_buffer_attributes(OpenGL_Buffer *cell_instances_buffer, Open
 
 
 void
-upload_cell_instances(Universe *universe, CellInstancing *cell_instancing);
+upload_cell_instances(Universe *universe, Border border, CellInstancing *cell_instancing);
 
 
 void

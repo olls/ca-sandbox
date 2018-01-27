@@ -276,3 +276,67 @@ quantise_0to1_cell_position(vec2& continuous, u32 cell_block_dim)
   quantise_0to1_cell_position(continuous.x, cell_block_dim);
   quantise_0to1_cell_position(continuous.y, cell_block_dim);
 }
+
+
+void
+get_cell_blocks_dimentions(CellBlocks *cell_blocks, s32vec2 *lowest_coords, s32vec2 *highest_coords)
+{
+  *lowest_coords = {};
+  *highest_coords = {};
+
+  b32 first_block_found = false;
+  for (u32 cell_block_slot = 0;
+       cell_block_slot < cell_blocks->hashmap_size;
+       ++cell_block_slot)
+  {
+    CellBlock *cell_block = cell_blocks->hashmap[cell_block_slot];
+
+    while (cell_block != 0)
+    {
+      if (!first_block_found)
+      {
+        first_block_found = true;
+        *lowest_coords = cell_block->block_position;
+        *highest_coords = cell_block->block_position;
+      }
+      else
+      {
+        if (cell_block->block_position.x < lowest_coords->x)
+        {
+          lowest_coords->x = cell_block->block_position.x;
+        }
+        else if (cell_block->block_position.x > highest_coords->x)
+        {
+          highest_coords->x = cell_block->block_position.x;
+        }
+
+        if (cell_block->block_position.y < lowest_coords->y)
+        {
+          lowest_coords->y = cell_block->block_position.y;
+        }
+        else if (cell_block->block_position.y > highest_coords->y)
+        {
+          highest_coords->y = cell_block->block_position.y;
+        }
+      }
+
+      cell_block = cell_block->next_block;
+    }
+  }
+}
+
+
+void
+midpoint(s32 start_block, s32 start_cell, s32 end_block, s32 end_cell, r32& midpoint_block, r32& midpoint_cell)
+{
+  midpoint_block = (end_block - start_block) * 0.5;
+  midpoint_cell = (end_cell - start_cell) * 0.5;
+}
+
+
+void
+midpoint(s32vec2 start_block, s32vec2 start_cell, s32vec2 end_block, s32vec2 end_cell, vec2& midpoint_block, vec2& midpoint_cell)
+{
+  midpoint(start_block.x, start_cell.x, end_block.x, end_cell.x, midpoint_block.x, midpoint_cell.x);
+  midpoint(start_block.y, start_cell.y, end_block.y, end_cell.y, midpoint_block.y, midpoint_cell.y);
+}

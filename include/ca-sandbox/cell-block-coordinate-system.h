@@ -87,4 +87,12 @@ void
 quantise_0to1_cell_position(vec2& continuous, u32 cell_block_dim);
 
 
+void
+get_cell_blocks_dimentions(CellBlocks *cell_blocks, s32vec2 *lowest_coords, s32vec2 *highest_coords);
+
+
+void
+midpoint(s32vec2 start_block, s32vec2 start_cell, s32vec2 end_block, s32vec2 end_cell, vec2& midpoint_block, vec2& midpoint_cell);
+
+
 #endif

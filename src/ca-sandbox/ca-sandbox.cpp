@@ -299,7 +299,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_simulate_options_ui(simulate_options, state->universe);
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
-    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui);
+    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
 
     if (cell_regions_ui->make_new_region)
     {
@@ -454,9 +454,29 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     if (state->universe != 0)
     {
-      upload_cell_instances(state->universe, cell_instancing);
+      upload_cell_instances(state->universe, simulate_options->border, cell_instancing);
 
+      // Main view
       draw_cell_blocks(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, view_panning->projection_matrix);
+
+      // Minimap
+      {
+        if (vec2_eq(state->minimap_texture_size, {0, 0}))
+        {
+          state->minimap_texture_size = {300, 300};
+          state->minimap_texture = create_minimap_texture(state->minimap_texture_size, state->minimap_framebuffer);
+        }
+
+        ImGui::Value("tex", state->minimap_texture);
+
+        draw_minimap_texture(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size);
+        opengl_print_errors();
+
+        ImTextureID tex_id = (void *)(intptr_t)state->minimap_texture;
+        ImGui::Image(tex_id, s32vec2_to_vec2(state->minimap_texture_size), ImVec2(0,0), ImVec2(1,1), ImColor(0xFF, 0xFF, 0xFF, 0xFF), ImColor(0xFF, 0xFF, 0xFF, 0x80));
+
+        glViewport(0, 0, window_size.x, window_size.y);
+      }
     }
 
     //
@@ -515,29 +535,50 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     glBindVertexArray(0);
 
     //
-    // Mini map drawing
+    // Region placement drawing
     //
 
-    if (state->universe != 0)
+    if (cell_regions_ui->placing_region)
     {
+      CellRegion& region = cell_regions->regions[cell_regions_ui->placing_region_index];
 
-      if (vec2_eq(state->minimap_texture_size, {0, 0}))
-      {
-        state->minimap_texture_size = {300, 300};
-        state->minimap_texture = create_minimap_texture(state->minimap_texture_size, state->minimap_framebuffer);
-      }
+      Border region_border = {
+        .type = BorderType::FIXED,
+        .min_corner_block = region.start_block,
+        .min_corner_cell = region.start_cell,
+        .max_corner_block = region.end_block,
+        .max_corner_cell = region.end_cell
+      };
+      upload_cell_instances(&region.cell_blocks, region_border, cell_instancing);
 
-      ImGui::Value("tex", state->minimap_texture);
+      vec2 start_offset = s32vec2_to_vec2(region.start_block);
+      start_offset = vec2_add(start_offset, vec2_multiply(s32vec2_to_vec2(region.start_cell), -1.0 / region.cell_blocks.cell_block_dim));
 
-      draw_minimap_texture(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size);
-      opengl_print_errors();
+      s32vec2 cell_dim = vec2_multiply(vec2_subtract(region.end_block, region.start_block), region.cell_blocks.cell_block_dim);
+      cell_dim = vec2_add(cell_dim, region.end_cell);
+      cell_dim = vec2_subtract(cell_dim, region.start_cell);
+      vec2 midpoint_offset = vec2_multiply(s32vec2_to_vec2(vec2_multiply(cell_dim, 0.5)), 1.0/region.cell_blocks.cell_block_dim);
 
-      draw_minimap_texture_to_screen(state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size, state->texture_shader_program, state->rendered_texture_uniform);
+      vec2 mouse_cell_offset = mouse_universe_pos.cell_position;
+      quantise_0to1_cell_position(mouse_cell_offset, region.cell_blocks.cell_block_dim);
+      vec2 mouse_offset = vec2_add(s32vec2_to_vec2(mouse_universe_pos.cell_block_position), mouse_cell_offset);
 
-      // Reset view port (draw_minimap_texture_to_screen modifies it...)
-      glViewport(0, 0, window_size.x, window_size.y);
+      vec2 offset = {};
+      offset = vec2_add(offset, mouse_offset);
+      offset = vec2_add(offset, start_offset);
+      offset = vec2_subtract(offset, midpoint_offset);
 
-      opengl_print_errors();
+      vec3 offset_3 = {};
+      offset_3.xy = offset;
+
+      mat4x4 placing_region_projection_matrix;
+      mat4x4Identity(placing_region_projection_matrix);
+      mat4x4Translate(placing_region_projection_matrix, offset_3);
+
+      mat4x4 placing_region_projection_matrix_aspect;
+      mat4x4MultiplyMatrix(placing_region_projection_matrix_aspect, placing_region_projection_matrix, view_panning->projection_matrix);
+
+      draw_cell_blocks(&region.cell_blocks, cell_instancing, cell_drawing, general_vertex_buffer, placing_region_projection_matrix_aspect);
     }
 
     //
