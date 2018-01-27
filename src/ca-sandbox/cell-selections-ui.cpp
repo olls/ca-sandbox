@@ -38,6 +38,8 @@ do_cell_selections_ui(CellSelectionsUI *cell_selections_ui, UniversePosition mou
     {
       cell_selections_ui->making_selection = false;
       cell_selections_ui->selection_made = true;
+
+      correct_cell_block_square_order(cell_selections_ui->selection_start, cell_selections_ui->selection_end);
     }
   }
 }

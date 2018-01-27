@@ -82,6 +82,10 @@ u32
 cell_block_states_array_size(CellBlocks *cell_blocks);
 
 
+void
+init_cells(CellBlocks *cell_blocks, CellInitialisationOptions *cell_initialisation_options, CellBlock *cell_block, s32vec2 position, s32vec2 start = {-1, -1}, s32vec2 end = {-1, -1});
+
+
 CellBlock *
 create_cell_block(CellBlocks *cell_blocks, CellInitialisationOptions *cell_initialisation_options, s32vec2 search_cell_block_position);
 

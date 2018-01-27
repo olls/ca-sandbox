@@ -101,16 +101,33 @@ allocate_cell_block(CellBlocks *cell_blocks, s32vec2 position)
 ///   state and previous_state.
 ///
 void
-init_cells(CellBlocks *cell_blocks, CellInitialisationOptions *cell_initialisation_options, CellBlock *cell_block, s32vec2 position)
+init_cells(CellBlocks *cell_blocks, CellInitialisationOptions *cell_initialisation_options, CellBlock *cell_block, s32vec2 position, s32vec2 start, s32vec2 end)
 {
   print("Initialised CellBlock (%d, %d).\n", position.x, position.y);
 
-  for (u32 cell_y = 0;
-       cell_y < cell_blocks->cell_block_dim;
+  if (start.x == -1)
+  {
+    start.x = 0;
+  }
+  if (start.y == -1)
+  {
+    start.y = 0;
+  }
+  if (end.x == -1)
+  {
+    end.x = (s32)cell_blocks->cell_block_dim;
+  }
+  if (end.y == -1)
+  {
+    end.y = (s32)cell_blocks->cell_block_dim;
+  }
+
+  for (u32 cell_y = start.y;
+       cell_y < end.y;
        ++cell_y)
   {
-    for (u32 cell_x = 0;
-         cell_x < cell_blocks->cell_block_dim;
+    for (u32 cell_x = start.x;
+         cell_x < end.x;
          ++cell_x)
     {
       u32 cell_pos = (cell_y * cell_blocks->cell_block_dim) + cell_x;

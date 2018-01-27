@@ -33,6 +33,7 @@
 #include "ca-sandbox/save-rule-config.h"
 #include "ca-sandbox/cell-regions-ui.h"
 #include "ca-sandbox/minimap.h"
+#include "ca-sandbox/selection-tools-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
@@ -300,6 +301,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
     do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
+    do_selection_tools_ui(cell_selections_ui, state->universe, cell_initialisation_options);
 
     if (cell_regions_ui->make_new_region)
     {
