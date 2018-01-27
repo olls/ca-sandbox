@@ -3,6 +3,8 @@
 
 #include "ca-sandbox/cell-block-coordinate-system.h"
 
+#include <GL/glew.h>
+
 
 CellRegion *
 get_cell_region_by_name(CellRegions *cell_regions, String *search_name)
@@ -183,4 +185,15 @@ add_region_to_universe(CellRegions *cell_regions, Universe *universe, u32 region
   normalise_cell_coord(&copy_from.cell_blocks, &block_offset, &cell_offset);
 
   copy_cell_blocks(&copy_from.cell_blocks, universe, copy_from.start_block, copy_from.start_cell, copy_from.end_block, copy_from.end_cell, block_offset, cell_offset);
+}
+
+
+void
+delete_region(CellRegions *cell_regions, u32 region_index)
+{
+  CellRegion& region = cell_regions->regions[region_index];
+
+  glDeleteTextures(1, &region.texture);
+
+  Array::remove(cell_regions->regions, region_index);
 }

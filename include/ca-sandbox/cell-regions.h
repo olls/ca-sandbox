@@ -50,4 +50,8 @@ void
 add_region_to_universe(CellRegions *cell_regions, Universe *universe, u32 region_index, UniversePosition place_position);
 
 
+void
+delete_region(CellRegions *cell_regions, u32 region_index);
+
+
 #endif

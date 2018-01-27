@@ -34,10 +34,17 @@ display_regions(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions)
       cell_regions_ui->placing_region_index = region_index;
     }
 
-    if (cell_region.texture)
+    if (ImGui::Button("Delete region"))
     {
-      ImTextureID tex_id = (void *)(intptr_t)cell_region.texture;
-      ImGui::Image(tex_id, s32vec2_to_vec2(cell_region.texture_size), ImVec2(0,0), ImVec2(1,1), ImColor(0xFF, 0xFF, 0xFF, 0xFF), ImColor(0xFF, 0xFF, 0xFF, 0x80));
+      delete_region(cell_regions, region_index);
+    }
+    else
+    {
+      if (cell_region.texture)
+      {
+        ImTextureID tex_id = (void *)(intptr_t)cell_region.texture;
+        ImGui::Image(tex_id, s32vec2_to_vec2(cell_region.texture_size), ImVec2(0,0), ImVec2(1,1), ImColor(0xFF, 0xFF, 0xFF, 0xFF), ImColor(0xFF, 0xFF, 0xFF, 0x80));
+      }
     }
 
     ImGui::PopID();
