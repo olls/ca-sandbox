@@ -1,4 +1,5 @@
 #include "ca-sandbox/cell-regions.h"
+#include "ca-sandbox/minimap.h"
 
 #include "ca-sandbox/cell-block-coordinate-system.h"
 
@@ -93,38 +94,55 @@ copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 
 }
 
 
-CellRegion *
-make_new_region(CellRegions *cell_regions, Universe *universe, const char *name, UniversePosition selection_start, UniversePosition selection_end)
+void
+make_region_texture(CellRegion *region, Universe *universe, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer)
 {
-  char *name_memory = allocate(char, strlen(name));
-  copy_string(name_memory, name, strlen(name));
+  region->texture_size = {200, 150};
+  region->texture = create_minimap_texture(region->texture_size, minimap_framebuffer);
 
-  String name_string = {};
-  name_string.start = name_memory;
-  name_string.end = name_string.start + strlen(name);
+  if (region->texture != 0)
+  {
+    upload_cell_instances(&region->cell_blocks, cell_instancing);
+    draw_minimap_texture(&region->cell_blocks, cell_instancing, cell_drawing, cell_vertices_buffer, minimap_framebuffer, region->texture, region->texture_size);
+  }
+}
 
-  CellRegion new_region = {
-    .name = name_string,
-    .cell_blocks = {},
-    .texture = 0
-  };
 
-  init_cell_hashmap(&new_region.cell_blocks);
+void
+make_new_region(CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui, Universe *universe, const char *name, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer)
+{
+  if (cell_selections_ui->selection_made)
+  {
+    char *name_memory = allocate(char, strlen(name));
+    copy_string(name_memory, name, strlen(name));
 
-  // Use same cell_block_dim as original
-  new_region.cell_blocks.cell_block_dim = universe->cell_block_dim;
+    String name_string = {};
+    name_string.start = name_memory;
+    name_string.end = name_string.start + strlen(name);
 
-  s32vec2 selection_start_block = selection_start.cell_block_position;
-  s32vec2 selection_end_block = selection_end.cell_block_position;
-  s32vec2 selection_start_cell = vec2_to_s32vec2(vec2_multiply(selection_start.cell_position, universe->cell_block_dim));
-  s32vec2 selection_end_cell = vec2_to_s32vec2(vec2_multiply(selection_end.cell_position, universe->cell_block_dim));
+    CellRegion new_region = {
+      .name = name_string,
+      .cell_blocks = {},
+      .texture = 0
+    };
 
-  s32vec2 offset = vec2_multiply(selection_start_block, -1);
-  copy_cell_blocks(universe, &new_region.cell_blocks, selection_start_block, selection_start_cell, selection_end_block, selection_end_cell, offset);
+    init_cell_hashmap(&new_region.cell_blocks);
 
-  CellRegion *result = Array::add(cell_regions->regions, new_region);
+    // Use same cell_block_dim as original
+    new_region.cell_blocks.cell_block_dim = universe->cell_block_dim;
 
-  return result;
+    new_region.start_block = cell_selections_ui->selection_start.cell_block_position;
+    new_region.end_block = cell_selections_ui->selection_end.cell_block_position;
+    new_region.start_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_start.cell_position, universe->cell_block_dim));
+    new_region.end_cell = vec2_to_s32vec2(vec2_multiply(cell_selections_ui->selection_end.cell_position, universe->cell_block_dim));
+
+    s32vec2 offset = vec2_multiply(new_region.start_block, -1);
+    copy_cell_blocks(universe, &new_region.cell_blocks, new_region.start_block, new_region.start_cell, new_region.end_block, new_region.end_cell, offset);
+
+    make_region_texture(&new_region, universe, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
+
+    CellRegion *result = Array::add(cell_regions->regions, new_region);
+  }
 }
 
 

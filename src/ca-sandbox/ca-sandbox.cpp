@@ -299,7 +299,13 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_simulate_options_ui(simulate_options, state->universe);
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
-    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer, mouse_universe_pos, &mouse_click_consumed);
+    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui);
+
+    if (cell_regions_ui->make_new_region)
+    {
+      cell_regions_ui->make_new_region = false;
+      make_new_region(cell_regions, cell_selections_ui, state->universe, cell_regions_ui->new_region_name_buffer, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer);
+    }
 
     //
     // Save

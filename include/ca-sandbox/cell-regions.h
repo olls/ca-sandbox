@@ -6,6 +6,8 @@
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/cell-drawing.h"
 
 #include "engine/my-array.h"
 #include "engine/text.h"
@@ -19,6 +21,11 @@ struct CellRegion
 {
   String name;
   CellBlocks cell_blocks;
+
+  s32vec2 start_block;
+  s32vec2 start_cell;
+  s32vec2 end_block;
+  s32vec2 end_cell;
 
   GLuint texture;
   s32vec2 texture_size;
@@ -35,8 +42,8 @@ CellRegion *
 get_cell_region_by_name(CellRegions *cell_regions, String search_name);
 
 
-CellRegion *
-make_new_region(CellRegions *cell_regions, Universe *universe, const char *name, UniversePosition selection_start, UniversePosition selection_end);
+void
+make_new_region(CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui, Universe *universe, const char *name, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer);
 
 
 void

@@ -3,11 +3,8 @@
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/universe.h"
-#include "ca-sandbox/cell-drawing.h"
 #include "ca-sandbox/cell-selections-ui.h"
-#include "ca-sandbox/minimap.h"
 
-#include "engine/opengl-buffer.h"
 #include "engine/vectors.h"
 #include "engine/print.h"
 
@@ -15,23 +12,7 @@
 
 
 void
-make_region_texture(CellRegion *region, Universe *universe, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer)
-{
-  region->texture_size = {200, 150};
-  region->texture = create_minimap_texture(region->texture_size, minimap_framebuffer);
-
-  if (region->texture != 0)
-  {
-    upload_cell_instances(&region->cell_blocks, cell_instancing);
-    draw_minimap_texture(&region->cell_blocks, cell_instancing, cell_drawing, cell_vertices_buffer, minimap_framebuffer, region->texture, region->texture_size);
-  }
-}
-
-
-// TODO:  Instead of passing all the cell drawing objects through this function, return a struct
-//        indicating a cell region to create.  Main loop then calls make_region_texture.
-void
-do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Universe *universe, CellSelectionsUI *cell_selections_ui, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer, UniversePosition mouse_universe_pos, b32 *mouse_click_consumed)
+do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Universe *universe, CellSelectionsUI *cell_selections_ui)
 {
   if (ImGui::Begin("Cell Regions"))
   {
@@ -53,10 +34,7 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
           }
           else
           {
-            CellRegion *new_region = make_new_region(cell_regions, universe, cell_regions_ui->new_region_name_buffer, cell_selections_ui->selection_start, cell_selections_ui->selection_end);
-            cell_regions_ui->new_region_name_buffer[0] = '\0';
-
-            make_region_texture(new_region, universe, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
+            cell_regions_ui->make_new_region = true;
           }
         }
 
