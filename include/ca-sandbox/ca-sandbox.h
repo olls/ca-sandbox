@@ -15,6 +15,7 @@
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/cell-regions-ui.h"
 #include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/cell-tools.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -74,6 +75,8 @@ struct CA_SandboxState
 
   CellRegions cell_regions;
   CellRegionsUI cell_regions_ui;
+
+  CellTools cell_tools;
 
   ViewPanning view_panning;
   vec2 screen_mouse_pos;

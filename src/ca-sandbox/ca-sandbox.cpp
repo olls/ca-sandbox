@@ -33,7 +33,7 @@
 #include "ca-sandbox/save-rule-config.h"
 #include "ca-sandbox/cell-regions-ui.h"
 #include "ca-sandbox/minimap.h"
-#include "ca-sandbox/selection-tools-ui.h"
+#include "ca-sandbox/cell-tools-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
@@ -150,6 +150,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   RuleCreationThread *rule_creation_thread = &state->rule_creation_thread;
   ViewPanning *view_panning = &state->view_panning;
   CellSelectionsUI *cell_selections_ui = &state->cell_selections_ui;
+  CellTools *cell_tools = &state->cell_tools;
 
   if (state->init)
   {
@@ -301,13 +302,15 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
     do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
-    do_selection_tools_ui(cell_selections_ui, state->universe, cell_initialisation_options);
+    do_cell_tools_ui(cell_tools);
 
     if (cell_regions_ui->make_new_region)
     {
       cell_regions_ui->make_new_region = false;
       make_new_region(cell_regions, cell_selections_ui, state->universe, cell_regions_ui->new_region_name_buffer, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer);
     }
+
+    perform_cell_tools(cell_tools, cell_selections_ui, state->universe, cell_initialisation_options, &loaded_rule->config);
 
     //
     // Save

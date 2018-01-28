@@ -30,3 +30,4 @@
 - separate model matrix and projection matrix uniform (ie: aspect ratio goes in projection, view_panning goes in model)
 - render border
 - tabbed interface
+- render selection in screen space - for constant line width

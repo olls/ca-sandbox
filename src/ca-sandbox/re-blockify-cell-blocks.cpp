@@ -7,6 +7,8 @@
 void
 convert_cell_block_position(s32vec2 block_position, s32vec2 cell_position, u32 old_cell_block_dim, u32 new_cell_block_dim, s32vec2 *new_block_position, s32vec2 *new_cell_position)
 {
+  // TODO:  This does not handle -ve block_positions correctly!
+
   s32vec2 old_block_position_cells = vec2_multiply(block_position, old_cell_block_dim);
   old_block_position_cells = vec2_add(old_block_position_cells, cell_position);
   *new_block_position = vec2_multiply(old_block_position_cells, (1.0 / new_cell_block_dim));

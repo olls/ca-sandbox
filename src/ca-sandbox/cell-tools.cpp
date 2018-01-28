@@ -1,11 +1,6 @@
-#include "ca-sandbox/selection-tools-ui.h"
+#include "ca-sandbox/cell-tools.h"
 
-#include "ca-sandbox/cell-selections-ui.h"
-#include "ca-sandbox/universe.h"
-
-#include "engine/print.h"
-
-#include "imgui/imgui.h"
+#include "ca-sandbox/rule.h"
 
 
 void
@@ -60,25 +55,69 @@ set_null(CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialis
 
 
 void
-do_selection_tools_ui(CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialisationOptions *cell_initialisation_options)
+delete_null_cell_blocks(Universe *universe, RuleConfiguration *rule_config)
 {
-  if (ImGui::Begin("Selection Tools"))
+  for (u32 cell_block_slot = 0;
+       cell_block_slot < universe->hashmap_size;
+       ++cell_block_slot)
+  {
+    CellBlock *cell_block = universe->hashmap[cell_block_slot];
+
+    while (cell_block != 0)
+    {
+      b32 block_null = true;
+
+      s32vec2 cell_position;
+      for (cell_position.y = 0;
+           cell_position.y < universe->cell_block_dim;
+           ++cell_position.y)
+      {
+        for (cell_position.x = 0;
+             cell_position.x < universe->cell_block_dim;
+             ++cell_position.x)
+        {
+          u32 cell_index = get_cell_index_in_block(universe, cell_position);
+          CellState cell_state = cell_block->cell_states[cell_index];
+
+          if (!is_null_state(rule_config, cell_state))
+          {
+            block_null = false;
+            break;
+          }
+        }
+
+        if (!block_null)
+        {
+          break;
+        }
+      }
+
+      if (block_null)
+      {
+        delete_cell_block(universe, cell_block->block_position);
+      }
+
+      cell_block = cell_block->next_block;
+    }
+  }
+}
+
+
+void
+perform_cell_tools(CellTools *cell_tools, CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_configuration)
+{
+  if (cell_tools->flags & CellToolFlags__SetSelectionNull)
   {
     if (cell_selections_ui->selection_made)
     {
-
-      ImGui::Value("start_block", cell_selections_ui->selection_start.cell_block_position);
-      ImGui::Value("end_block", cell_selections_ui->selection_end.cell_block_position);
-
-      ImGui::Value("start_cell", cell_selections_ui->selection_start.cell_position);
-      ImGui::Value("end_cell", cell_selections_ui->selection_end.cell_position);
-
-      if (ImGui::Button("Set selection to null"))
-      {
-        set_null(cell_selections_ui, universe, cell_initialisation_options);
-      }
+      set_null(cell_selections_ui, universe, cell_initialisation_options);
     }
   }
 
-  ImGui::End();
+  if (cell_tools->flags & CellToolFlags__DeleteNullBlocks)
+  {
+    delete_null_cell_blocks(universe, rule_configuration);
+  }
+
+  cell_tools->flags = CellToolFlags__zero;
 }
