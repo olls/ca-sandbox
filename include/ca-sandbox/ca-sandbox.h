@@ -80,6 +80,9 @@ struct CA_SandboxState
 
   ViewPanning view_panning;
   vec2 screen_mouse_pos;
+
+  b32 left_side_bar_open;
+  b32 right_side_bar_open;
 };
 
 

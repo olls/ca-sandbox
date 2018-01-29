@@ -23,55 +23,58 @@
 void
 do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
 {
-  if (ImGui::Begin("Universe"))
+  if (*universe_ptr != 0)
   {
-    if (*universe_ptr != 0)
-    {
-      u32 string_length = strlen(universe_ui->loaded_file_name);
-      ImGui::Text("Cells file: %.*s", string_length, universe_ui->loaded_file_name);
-    }
-
-    const char *cells_file_picker_name = "Cells file picker";
-    if (ImGui::Button("Change cells file"))
-    {
-      ImGui::OpenPopup(cells_file_picker_name);
-      universe_ui->cells_file_picker.current_item = 0;
-      universe_ui->cells_file_picker.root_directory = ".";
-      copy_string(universe_ui->cells_file_picker.current_path, "cells", 6);
-    }
-
-    if (file_picker(cells_file_picker_name, &universe_ui->cells_file_picker))
-    {
-      universe_ui->reload_cells_file = true;
-    }
-
-    if (*universe_ptr != 0)
-    {
-      if (ImGui::Button("Save cells file"))
-      {
-        universe_ui->save_cells_file = true;
-      }
-
-      ImGui::DragInt("Cell Block Dimensions", (s32 *)&universe_ui->edited_cell_block_dim, 1.0f, 1, 0, "%0.0f");
-      if (ImGui::Button("Reblockify cells file"))
-      {
-        Universe *old_universe = *universe_ptr;
-        Universe *new_universe = allocate(Universe, 1);
-        init_cell_hashmap(new_universe);
-        new_universe->cell_block_dim = universe_ui->edited_cell_block_dim;
-
-        re_blockify_cell_blocks(old_universe, new_universe);
-
-        destroy_cell_hashmap(old_universe);
-        un_allocate(old_universe);
-
-        *universe_ptr = new_universe;
-      }
-    }
+    u32 string_length = strlen(universe_ui->loaded_file_name);
+    ImGui::Text("Cells file: %.*s", string_length, universe_ui->loaded_file_name);
   }
 
-  ImGui::End();
+  const char *cells_file_picker_name = "Cells file picker";
+  if (ImGui::Button("Change cells file"))
+  {
+    ImGui::OpenPopup(cells_file_picker_name);
+    universe_ui->cells_file_picker.current_item = 0;
+    universe_ui->cells_file_picker.root_directory = ".";
+    copy_string(universe_ui->cells_file_picker.current_path, "cells", 6);
+  }
 
+  if (file_picker(cells_file_picker_name, &universe_ui->cells_file_picker))
+  {
+    universe_ui->reload_cells_file = true;
+  }
+
+  if (*universe_ptr != 0)
+  {
+    if (ImGui::Button("Save cells file"))
+    {
+      universe_ui->save_cells_file = true;
+    }
+
+    ImGui::Text("Cell Block Dimensions");
+    ImGui::PushItemWidth(ImGui::GetWindowContentRegionWidth()*0.5);
+    ImGui::DragInt("###Cell Block Dimensions", (s32 *)&universe_ui->edited_cell_block_dim, 1.0f, 1, 1024, "%0.0f");
+    ImGui::SameLine();
+    if (ImGui::Button("Reblockify cells file"))
+    {
+      Universe *old_universe = *universe_ptr;
+      Universe *new_universe = allocate(Universe, 1);
+      init_cell_hashmap(new_universe);
+      new_universe->cell_block_dim = universe_ui->edited_cell_block_dim;
+
+      re_blockify_cell_blocks(old_universe, new_universe);
+
+      destroy_cell_hashmap(old_universe);
+      un_allocate(old_universe);
+
+      *universe_ptr = new_universe;
+    }
+  }
+}
+
+
+void
+universe_ui_modals(UniverseUI *universe_ui)
+{
   const char *loading_error_modal_title = "Error whist loading new cells file:";
   if (universe_ui->loading_error)
   {

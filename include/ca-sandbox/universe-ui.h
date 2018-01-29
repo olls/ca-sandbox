@@ -32,4 +32,8 @@ void
 do_universe_ui(UniverseUI *universe_ui, Universe **universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
 
 
+void
+universe_ui_modals(UniverseUI *universe_ui);
+
+
 #endif

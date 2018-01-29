@@ -22,18 +22,13 @@
 #include "ca-sandbox/rule.h"
 #include "ca-sandbox/load-rule.h"
 #include "ca-sandbox/simulate.h"
-#include "ca-sandbox/rule-ui.h"
-#include "ca-sandbox/simulation-ui.h"
-#include "ca-sandbox/simulate-options-ui.h"
-#include "ca-sandbox/universe-ui.h"
 #include "ca-sandbox/view-panning.h"
 #include "ca-sandbox/cells-editor.h"
 #include "ca-sandbox/save-universe.h"
-#include "ca-sandbox/named-states-ui.h"
 #include "ca-sandbox/save-rule-config.h"
-#include "ca-sandbox/cell-regions-ui.h"
 #include "ca-sandbox/minimap.h"
-#include "ca-sandbox/cell-tools-ui.h"
+#include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/main-gui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
@@ -224,6 +219,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     opengl_print_errors();
 
+    setup_imgui_style();
+
     simulation_ui->sim_frequency = INITIAL_SIM_FREQUENCY;
     view_panning->scale = 0.3;
   }
@@ -289,20 +286,13 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     UniversePosition mouse_universe_pos = screen_position_to_universe_position(view_panning, state->screen_mouse_pos);
 
+    do_cell_selections_ui(cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
+
     //
     // Draw imGui elements
     //
 
-    ImGui::ShowTestWindow();
-
-    do_cell_selections_ui(cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
-    do_simulation_ui(simulation_ui, frame_timing->frame_start, loaded_rule->rule_tree_built, &universe_ui->reload_cells_file, &universe_ui->save_cells_file);
-    do_rule_ui(rule_ui, loaded_rule, rule_creation_thread);
-    do_simulate_options_ui(simulate_options, state->universe);
-    do_universe_ui(universe_ui, &state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
-    do_named_states_ui(&loaded_rule->config, &cells_editor->active_state);
-    do_cell_regions_ui(cell_regions_ui, cell_regions, state->universe, cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
-    do_cell_tools_ui(cell_tools);
+    do_main_gui(state, window_size, mouse_universe_pos, &mouse_click_consumed);
 
     if (cell_regions_ui->make_new_region)
     {
@@ -471,8 +461,6 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
           state->minimap_texture_size = {300, 300};
           state->minimap_texture = create_minimap_texture(state->minimap_texture_size, state->minimap_framebuffer);
         }
-
-        ImGui::Value("tex", state->minimap_texture);
 
         draw_minimap_texture(state->universe, cell_instancing, cell_drawing, general_vertex_buffer, state->minimap_framebuffer, state->minimap_texture, state->minimap_texture_size);
         opengl_print_errors();

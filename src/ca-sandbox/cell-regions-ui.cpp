@@ -55,45 +55,42 @@ display_regions(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions)
 void
 do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Universe *universe, CellSelectionsUI *cell_selections_ui, UniversePosition mouse_universe_position, b32 *mouse_click_consumed)
 {
-  if (ImGui::Begin("Cell Regions"))
+  if (universe != 0)
   {
-    if (universe != 0)
+    if (!cell_selections_ui->selection_made)
     {
-      if (!cell_selections_ui->selection_made)
+      ImGui::TextWrapped("Select a region of cells using shift + mouse drag to create a new region");
+    }
+    else
+    {
+      ImGui::InputText("New region name", cell_regions_ui->new_region_name_buffer, BUFFER_NAME_MAX_LENGTH);
+      const char *give_region_name_label = "Give region a name first";
+      if (ImGui::Button("Make new region from selection"))
       {
-        ImGui::TextWrapped("Select a region of cells using shift + mouse drag to create a new region");
+        if (strlen(cell_regions_ui->new_region_name_buffer) == 0)
+        {
+          ImGui::OpenPopup(give_region_name_label);
+        }
+        else
+        {
+          cell_selections_ui->selection_made = false;
+          cell_regions_ui->make_new_region = true;
+        }
       }
-      else
-      {
-        ImGui::InputText("New region name", cell_regions_ui->new_region_name_buffer, BUFFER_NAME_MAX_LENGTH);
-        const char *give_region_name_label = "Give region a name first";
-        if (ImGui::Button("Make new region from selection"))
-        {
-          if (strlen(cell_regions_ui->new_region_name_buffer) == 0)
-          {
-            ImGui::OpenPopup(give_region_name_label);
-          }
-          else
-          {
-            cell_selections_ui->selection_made = false;
-            cell_regions_ui->make_new_region = true;
-          }
-        }
 
-        ImGui::SetNextWindowContentSize({200, 0});
-        if (ImGui::BeginPopupModal(give_region_name_label))
+      ImGui::SetNextWindowContentSize({200, 0});
+      if (ImGui::BeginPopupModal(give_region_name_label))
+      {
+        if (ImGui::Button("OK"))
         {
-          if (ImGui::Button("OK"))
-          {
-            ImGui::CloseCurrentPopup();
-          }
-          ImGui::EndPopup();
+          ImGui::CloseCurrentPopup();
         }
+        ImGui::EndPopup();
       }
     }
-
-    display_regions(cell_regions_ui, cell_regions);
   }
+
+  display_regions(cell_regions_ui, cell_regions);
 
   if (cell_regions_ui->placing_region &&
       ImGui::IsMouseClicked(0) &&
@@ -103,6 +100,4 @@ do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Un
     cell_regions_ui->placing_region = false;
     add_region_to_universe(cell_regions, universe, cell_regions_ui->placing_region_index, mouse_universe_position);
   }
-
-  ImGui::End();
 }

@@ -4,9 +4,12 @@
 #include "engine/types.h"
 #include "engine/vectors.h"
 
+#include "imgui/imgui.h"
+
 
 namespace ImGui
 {
+  bool BeginCustomMainMenuBar(ImVec2 start_offset, ImVec2 end_offset);
   b32 RadioButton(const char *label, u32 *v, u32 v_button);
   b32 DragU32(const char* label, u32* v, r32 v_speed, u32 v_min, u32 v_max, const char* display_format);
   void Value(const char* prefix, vec2 vec);

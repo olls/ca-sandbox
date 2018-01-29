@@ -467,84 +467,81 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 void
 do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread)
 {
-  ImGuiWindowFlags window_flags = 0;
+  u32 filename_length = strlen(rule_ui->file_picker.selected_file);
+  ImGui::Text("Rule file: %.*s", filename_length, rule_ui->file_picker.selected_file);
 
-  if (ImGui::Begin("Rule Editor", NULL, window_flags))
+  const char *rule_file_picker_name = "Rule file picker";
+  if (ImGui::Button("Change rule file"))
   {
-    u32 filename_length = strlen(rule_ui->file_picker.selected_file);
-    ImGui::Text("Rule file: %.*s", filename_length, rule_ui->file_picker.selected_file);
+    ImGui::OpenPopup(rule_file_picker_name);
+    rule_ui->file_picker.current_item = 0;
+    rule_ui->file_picker.root_directory = ".";
+    copy_string(rule_ui->file_picker.current_path, "rules", 6);
+  }
 
-    const char *rule_file_picker_name = "Rule file picker";
-    if (ImGui::Button("Change rule file"))
+  file_picker(rule_file_picker_name, &rule_ui->file_picker);
+
+  ImGui::SameLine();
+  if (ImGui::Button("Load rule file"))
+  {
+    rule_ui->reload_rule_file = true;
+  }
+
+  if (ImGui::Button("Save rule file"))
+  {
+    rule_ui->save_rule_file = true;
+  }
+
+  if (!rule_creation_thread->currently_running)
+  {
+    if (ImGui::Button("Build rule tree from patterns"))
     {
-      ImGui::OpenPopup(rule_file_picker_name);
-      rule_ui->file_picker.current_item = 0;
-      rule_ui->file_picker.root_directory = ".";
-      copy_string(rule_ui->file_picker.current_path, "rules", 6);
+      start_build_rule_tree_thread(rule_creation_thread, rule);
     }
-
-    file_picker(rule_file_picker_name, &rule_ui->file_picker);
-
-    ImGui::SameLine();
-    if (ImGui::Button("Load rule file"))
+    if (rule_creation_thread->last_build_total_time != 0)
     {
-      rule_ui->reload_rule_file = true;
+      const char *unit;
+      r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
+      ImGui::SameLine();
+      ImGui::Text("Build took %.2f %s", last_build_time, unit);
+      ImGui::Spacing();
     }
+  }
+  else
+  {
+    ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
+  }
 
-    if (ImGui::Button("Save rule file"))
-    {
-      rule_ui->save_rule_file = true;
-    }
-
-    if (!rule_creation_thread->currently_running)
-    {
-      if (ImGui::Button("Build rule tree from patterns"))
-      {
-        start_build_rule_tree_thread(rule_creation_thread, rule);
-      }
-      if (rule_creation_thread->last_build_total_time != 0)
-      {
-        const char *unit;
-        r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
-        ImGui::SameLine();
-        ImGui::Text("Build took %.2f %s", last_build_time, unit);
-        ImGui::Spacing();
-      }
-    }
-    else
-    {
-      ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
-    }
-
-    // Display all rule patterns
-    ImGui::TextWrapped(
+  // Display all rule patterns
+  ImGui::TextWrapped(
 """Modify each of the patterns below by clicking on the state buttons to \
 change the state which it matches, or right clicking on them to change them \
 to a wildcard match.""");
 
-    for (u32 rule_pattern_n = 0;
-         rule_pattern_n < rule->config.rule_patterns.n_elements;
-         ++rule_pattern_n)
+  ImGui::BeginChild("Rule patterns");
+
+  for (u32 rule_pattern_n = 0;
+       rule_pattern_n < rule->config.rule_patterns.n_elements;
+       ++rule_pattern_n)
+  {
+    RulePattern *rule_pattern = Array::get(rule->config.rule_patterns, rule_pattern_n);
+
+    char label[64 + MAX_COMMENT_LENGTH];
+    sprintf(label, "Pattern %d: %s###pattern_%d", rule_pattern_n, rule_pattern->comment, rule_pattern_n);
+
+    ImGui::PushID(rule_pattern_n);
+    if (ImGui::CollapsingHeader(label))
     {
-      RulePattern *rule_pattern = Array::get(rule->config.rule_patterns, rule_pattern_n);
-
-      char label[64 + MAX_COMMENT_LENGTH];
-      sprintf(label, "Pattern %d: %s###pattern_%d", rule_pattern_n, rule_pattern->comment, rule_pattern_n);
-
-      ImGui::PushID(rule_pattern_n);
-      if (ImGui::CollapsingHeader(label))
-      {
-        ImGui::InputText("Comment", rule_pattern->comment, MAX_COMMENT_LENGTH);
-        display_rule_pattern(&rule->config, rule_pattern);
-      }
-      ImGui::PopID();
+      ImGui::InputText("Comment", rule_pattern->comment, MAX_COMMENT_LENGTH);
+      display_rule_pattern(&rule->config, rule_pattern);
     }
-
-    if (ImGui::Button("Add pattern"))
-    {
-      RulePattern *new_rule_pattern = Array::add(rule->config.rule_patterns);
-    }
+    ImGui::PopID();
   }
 
-  ImGui::End();
+  if (ImGui::Button("Add pattern"))
+  {
+    RulePattern *new_rule_pattern = Array::add(rule->config.rule_patterns);
+  }
+
+  ImGui::EndChild();
 }

@@ -3,6 +3,30 @@
 #include "engine/vectors.h"
 
 #include "imgui/imgui.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui/imgui_internal.h"
+
+
+bool
+ImGui::BeginCustomMainMenuBar(ImVec2 start_offset, ImVec2 end_offset)
+{
+  ImGuiIO& io = ImGui::GetIO();
+  ImGuiStyle& style = ImGui::GetStyle();
+
+  SetNextWindowPos(start_offset);
+  SetNextWindowSize(ImVec2(io.DisplaySize.x, ImGui::GetFontSize() + style.FramePadding.y * 2.0f) - start_offset - end_offset);
+  PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0,0));
+  if (!Begin("##MainMenuBar", NULL, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_MenuBar)
+      || !BeginMenuBar())
+  {
+    End();
+    PopStyleVar(2);
+    return false;
+  }
+
+  return true;
+}
 
 
 b32
