@@ -127,7 +127,7 @@ get_neighbouring_cell_state(Border *border, Universe *universe, s32vec2 neighbou
   else if (outside_border && border->type == BorderType::TORUS)
   {
     print("Error: Attempting to use cell outside border whilst in TORUS mode.\n");
-    assert(0);
+    assert(false);
     result = false;
   }
   else

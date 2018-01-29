@@ -172,7 +172,7 @@ cell_state_button(String label, vec2 item_spacing, vec2 frame_padding)
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, item_spacing);
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, frame_padding);
 
-  result = ImGui::Button(label.start, label.end);
+  result = ImGui::Button(label.start);
 
   ImGui::PopStyleVar(2);
   return result;
@@ -198,7 +198,7 @@ cell_state_button(const char *id, CellState *state, NamedStates *named_states, v
     ImGui::OpenPopup("cell state menu");
   }
 
-  ImGui::SetNextWindowContentWidth(300);
+  ImGui::SetNextWindowContentSize({300, 0});
   if (ImGui::BeginPopup("cell state menu"))
   {
     // Displays radio button selector in pop-up-menu to pick CellState
@@ -274,7 +274,7 @@ cell_state_group_button(CellStateGroup *cell_state_group, NamedStates *named_sta
     ImGui::OpenPopup("cell state group menu");
   }
 
-  ImGui::SetNextWindowContentWidth(300);
+  ImGui::SetNextWindowContentSize({300, 0});
   if (ImGui::BeginPopup("cell state group menu"))
   {
     multi_cell_state_selector(cell_state_group, named_states);
@@ -327,7 +327,7 @@ pattern_cell_state_button(PatternCellState *pattern_cell, NamedStates *named_sta
     ImGui::OpenPopup("pattern cell state menu");
   }
 
-  ImGui::SetNextWindowContentWidth(300);
+  ImGui::SetNextWindowContentSize({300, 0});
   if (ImGui::BeginPopup("pattern cell state menu"))
   {
     pattern_cell_state_menu(pattern_cell, named_states);
@@ -390,7 +390,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
       {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, cell_btn_frame_padding);
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, cell_btn_item_spacing);
-        r32 item_vertical_spacing = ImGui::GetItemsLineHeightWithSpacing() - cell_btn_item_spacing.y;
+        r32 item_vertical_spacing = ImGui::GetFrameHeightWithSpacing() - cell_btn_item_spacing.y;
         ImGui::Dummy(vec2{0, item_vertical_spacing});
         ImGui::PopStyleVar(2);
       }
@@ -417,7 +417,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
   // Result and count matching configuration
   ImGui::BeginGroup();
 
-  ImGui::AlignFirstTextHeightToWidgets();
+  ImGui::AlignTextToFramePadding();
   ImGui::Text("Result:");
   ImGui::SameLine();
   cell_state_button("resulting cell", &rule_pattern->result, &rule_config->named_states, cell_btn_item_spacing, cell_btn_frame_padding);
@@ -428,7 +428,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
   {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, {9, 6});
 
-    ImGui::AlignFirstTextHeightToWidgets();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text("Number of wildcard cells matching");
     ImGui::SameLine();
     ImGui::PopStyleVar();

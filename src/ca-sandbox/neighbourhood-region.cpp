@@ -154,7 +154,7 @@ get_neighbourhood_region_cell_delta(NeighbourhoodRegionShape shape, u32 size, u3
       else
       {
         print("Error: index passed into get_von_neumann_neighbour_delta is too large for size.\n");
-        assert(0);
+        assert(false);
       }
 
       result = vec2_multiply(result, distance_from_centre);

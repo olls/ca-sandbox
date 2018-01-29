@@ -18,7 +18,6 @@
 // Data
 static double       g_Time = 0.0f;
 static bool         g_MousePressed[3] = { false, false, false };
-static float        g_MouseWheel = 0.0f;
 static GLuint       g_FontTexture = 0;
 static int          g_ShaderHandle = 0, g_VertHandle = 0, g_FragHandle = 0;
 static int          g_AttribLocationTex = 0, g_AttribLocationProjMtx = 0;
@@ -26,8 +25,8 @@ static int          g_AttribLocationPosition = 0, g_AttribLocationUV = 0, g_Attr
 static unsigned int g_VboHandle = 0, g_VaoHandle = 0, g_ElementsHandle = 0;
 
 // This is the main rendering function that you have to implement and provide to ImGui (via setting up 'RenderDrawListsFn' in the ImGuiIO structure)
-// If text or lines are blurry when integrating ImGui in your engine:
-// - in your Render function, try translating your projection matrix by (0.5f,0.5f) or (0.375f,0.375f)
+// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
+// If text or lines are blurry when integrating ImGui in your engine: in your Render function, try translating your projection matrix by (0.5f,0.5f) or (0.375f,0.375f)
 void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
 {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
@@ -43,9 +42,11 @@ void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
     glActiveTexture(GL_TEXTURE0);
     GLint last_program; glGetIntegerv(GL_CURRENT_PROGRAM, &last_program);
     GLint last_texture; glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+    GLint last_sampler; glGetIntegerv(GL_SAMPLER_BINDING, &last_sampler);
     GLint last_array_buffer; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
     GLint last_element_array_buffer; glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &last_element_array_buffer);
     GLint last_vertex_array; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
+    GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
     GLint last_viewport[4]; glGetIntegerv(GL_VIEWPORT, last_viewport);
     GLint last_scissor_box[4]; glGetIntegerv(GL_SCISSOR_BOX, last_scissor_box);
     GLenum last_blend_src_rgb; glGetIntegerv(GL_BLEND_SRC_RGB, (GLint*)&last_blend_src_rgb);
@@ -59,13 +60,14 @@ void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
     GLboolean last_enable_depth_test = glIsEnabled(GL_DEPTH_TEST);
     GLboolean last_enable_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
 
-    // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled
+    // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_SCISSOR_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Setup viewport, orthographic projection matrix
     glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
@@ -80,6 +82,7 @@ void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
     glUniform1i(g_AttribLocationTex, 0);
     glUniformMatrix4fv(g_AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
     glBindVertexArray(g_VaoHandle);
+    glBindSampler(0, 0); // Rely on combined texture/sampler state.
 
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
@@ -112,6 +115,7 @@ void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
     // Restore modified GL state
     glUseProgram(last_program);
     glBindTexture(GL_TEXTURE_2D, last_texture);
+    glBindSampler(0, last_sampler);
     glActiveTexture(last_active_texture);
     glBindVertexArray(last_vertex_array);
     glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
@@ -122,6 +126,7 @@ void ImGui_ImplSdlGL3_RenderDrawLists(ImDrawData* draw_data)
     if (last_enable_cull_face) glEnable(GL_CULL_FACE); else glDisable(GL_CULL_FACE);
     if (last_enable_depth_test) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
     if (last_enable_scissor_test) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, last_polygon_mode[0]);
     glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
     glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
 }
@@ -136,6 +141,10 @@ static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
     SDL_SetClipboardText(text);
 }
 
+// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -143,10 +152,10 @@ bool ImGui_ImplSdlGL3_ProcessEvent(SDL_Event* event)
     {
     case SDL_MOUSEWHEEL:
         {
-            if (event->wheel.y > 0)
-                g_MouseWheel = 1;
-            if (event->wheel.y < 0)
-                g_MouseWheel = -1;
+            if (event->wheel.x > 0) io.MouseWheelH += 1;
+            if (event->wheel.x < 0) io.MouseWheelH -= 1;
+            if (event->wheel.y > 0) io.MouseWheel += 1;
+            if (event->wheel.y < 0) io.MouseWheel -= 1;
             return true;
         }
     case SDL_MOUSEBUTTONDOWN:
@@ -262,11 +271,9 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects()
     glEnableVertexAttribArray(g_AttribLocationUV);
     glEnableVertexAttribArray(g_AttribLocationColor);
 
-#define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
-    glVertexAttribPointer(g_AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)OFFSETOF(ImDrawVert, pos));
-    glVertexAttribPointer(g_AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)OFFSETOF(ImDrawVert, uv));
-    glVertexAttribPointer(g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)OFFSETOF(ImDrawVert, col));
-#undef OFFSETOF
+    glVertexAttribPointer(g_AttribLocationPosition, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, pos));
+    glVertexAttribPointer(g_AttribLocationUV, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, uv));
+    glVertexAttribPointer(g_AttribLocationColor, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*)IM_OFFSETOF(ImDrawVert, col));
 
     ImGui_ImplSdlGL3_CreateFontsTexture();
 
@@ -316,6 +323,7 @@ bool    ImGui_ImplSdlGL3_Init(SDL_Window* window)
     io.KeyMap[ImGuiKey_PageDown] = SDL_SCANCODE_PAGEDOWN;
     io.KeyMap[ImGuiKey_Home] = SDL_SCANCODE_HOME;
     io.KeyMap[ImGuiKey_End] = SDL_SCANCODE_END;
+    io.KeyMap[ImGuiKey_Insert] = SDL_SCANCODE_INSERT;
     io.KeyMap[ImGuiKey_Delete] = SDLK_DELETE;
     io.KeyMap[ImGuiKey_Backspace] = SDLK_BACKSPACE;
     io.KeyMap[ImGuiKey_Enter] = SDLK_RETURN;
@@ -371,26 +379,34 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
     io.DeltaTime = g_Time > 0.0 ? (float)(current_time - g_Time) : (float)(1.0f / 60.0f);
     g_Time = current_time;
 
-    // Setup inputs
-    // (we already got mouse wheel, keyboard keys & characters from SDL_PollEvent())
+    // Setup mouse inputs (we already got mouse wheel, keyboard keys & characters from our event handler)
     int mx, my;
-    Uint32 mouseMask = SDL_GetMouseState(&mx, &my);
-    if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS)
-        io.MousePos = ImVec2((float)mx, (float)my);   // Mouse position, in pixels (set to -1,-1 if no mouse / on another screen, etc.)
-    else
-        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-
-    io.MouseDown[0] = g_MousePressed[0] || (mouseMask & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;		// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-    io.MouseDown[1] = g_MousePressed[1] || (mouseMask & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
-    io.MouseDown[2] = g_MousePressed[2] || (mouseMask & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
+    Uint32 mouse_buttons = SDL_GetMouseState(&mx, &my);
+    io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+    io.MouseDown[0] = g_MousePressed[0] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0;  // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+    io.MouseDown[1] = g_MousePressed[1] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
+    io.MouseDown[2] = g_MousePressed[2] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
     g_MousePressed[0] = g_MousePressed[1] = g_MousePressed[2] = false;
 
-    io.MouseWheel = g_MouseWheel;
-    g_MouseWheel = 0.0f;
+    // We need to use SDL_CaptureMouse() to easily retrieve mouse coordinates outside of the client area. This is only supported from SDL 2.0.4 (released Jan 2016)
+#if (SDL_MAJOR_VERSION >= 2) && (SDL_MINOR_VERSION >= 0) && (SDL_PATCHLEVEL >= 4)
+    if ((SDL_GetWindowFlags(window) & (SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_MOUSE_CAPTURE)) != 0)
+        io.MousePos = ImVec2((float)mx, (float)my);
+    bool any_mouse_button_down = false;
+    for (int n = 0; n < IM_ARRAYSIZE(io.MouseDown); n++)
+        any_mouse_button_down |= io.MouseDown[n];
+    if (any_mouse_button_down && (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_CAPTURE) == 0)
+        SDL_CaptureMouse(SDL_TRUE);
+    if (!any_mouse_button_down && (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_CAPTURE) != 0)
+        SDL_CaptureMouse(SDL_FALSE);
+#else
+    if ((SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS) != 0)
+        io.MousePos = ImVec2((float)mx, (float)my);
+#endif
 
     // Hide OS mouse cursor if ImGui is drawing it
     SDL_ShowCursor(io.MouseDrawCursor ? 0 : 1);
 
-    // Start the frame
+    // Start the frame. This call will update the io.WantCaptureMouse, io.WantCaptureKeyboard flag that you can use to dispatch inputs (or not) to your application.
     ImGui::NewFrame();
 }

@@ -120,8 +120,10 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
       else
       {
         // Allocate new memory to store the state name in
-        char *state_name_text = allocate(char, string_length(state_name));
+        char *state_name_text = allocate(char, string_length(state_name) + 1);
         copy_string(state_name_text, state_name.start, string_length(state_name));
+        // Add \0 at string end for good measure.
+        state_name_text[string_length(state_name)] = '\0';
 
         NamedState new_named_state = {
           .name = {
