@@ -24,11 +24,13 @@ MAKE_FLAGS_ENUM_OPS(CellToolFlags)
 
 struct CellTools {
   CellToolFlags flags;
+
+  CellState state;
 };
 
 
 void
-perform_cell_tools(CellTools *cell_tools, CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_configuration);
+perform_cell_tools(CellTools *cell_tools, CellSelectionsUI *cell_selections_ui, Universe *universe, RuleConfiguration *rule_configuration);
 
 
 #endif

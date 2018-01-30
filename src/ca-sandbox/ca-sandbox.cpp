@@ -300,7 +300,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       make_new_region(cell_regions, cell_selections_ui, state->universe, cell_regions_ui->new_region_name_buffer, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer);
     }
 
-    perform_cell_tools(cell_tools, cell_selections_ui, state->universe, cell_initialisation_options, &loaded_rule->config);
+    perform_cell_tools(cell_tools, cell_selections_ui, state->universe, &loaded_rule->config);
 
     //
     // Save

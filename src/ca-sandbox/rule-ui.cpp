@@ -506,7 +506,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
       const char *unit;
       r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
       ImGui::SameLine();
-      ImGui::Text("Build took %.2f %s", last_build_time, unit);
+      ImGui::TextWrapped("Build took %.2f %s", last_build_time, unit);
       ImGui::Spacing();
     }
   }

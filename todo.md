@@ -10,6 +10,24 @@
 - reduce tree building time
 - profiling tools
 
+# composite states?
+- eg: Modifier: Transmission
+      Modifier: Ordinary
+      Modifier: Special
+      Modifier: Excited
+      Modifier: Quiescent
+
+      State: Ordinary & Transmission & Quiescent
+      State: Ordinary & Transmission & Excited
+      State: Special & Transmission & Quiescent
+      State: Special & Transmission & Excited
+
+- and templated patterns?
+  - eg: Pattern:
+        Var: a = Transmission & Excited
+
+    Var must have the same value at every use in the pattern for the pattern to match.
+
 # Functionality
 = better cell editing tools:
   - selections: move, copy, paste
@@ -24,10 +42,12 @@
 - colour cells state buttons in rule patterns UI where only one state is used
 - reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)
 - resize universe hashmap, if saturated
-- remove null cell blocks button
-- modifier key for making selection instead of button
-- store cell boundaries of original selection in regions
 - separate model matrix and projection matrix uniform (ie: aspect ratio goes in projection, view_panning goes in model)
 - render border
 - tabbed interface
 - render selection in screen space - for constant line width
+- tools for creation of new rule files
+- rotationally invariant patterns
+- delete states
+- unfiddlify named states given value by position in .rule file (to enable state deletion)
+    (would require reloading the cells file to update the state values stored in memory)

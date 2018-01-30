@@ -4,7 +4,7 @@
 
 
 void
-set_null(CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialisationOptions *cell_initialisation_options)
+set_cells_to_state(CellSelectionsUI *cell_selections_ui, Universe *universe, CellState new_state)
 {
   s32vec2 start_block = cell_selections_ui->selection_start.cell_block_position;
   s32vec2 end_block = cell_selections_ui->selection_end.cell_block_position;
@@ -25,8 +25,8 @@ set_null(CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialis
           cell_block->block_position.x <= end_block.x &&
           cell_block->block_position.y <= end_block.y)
       {
-        s32vec2 this_block_start_cell = {-1, -1};
-        s32vec2 this_block_end_cell = {-1, -1};
+        s32vec2 this_block_start_cell = {0, 0};
+        s32vec2 this_block_end_cell = {(s32)universe->cell_block_dim, (s32)universe->cell_block_dim};
 
         if (cell_block->block_position.x == start_block.x)
         {
@@ -45,7 +45,19 @@ set_null(CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialis
           this_block_end_cell.y = end_cell.y;
         }
 
-        init_cells(universe, cell_initialisation_options, cell_block, cell_block->block_position, this_block_start_cell, this_block_end_cell);
+        s32vec2 cell_position;
+        for (cell_position.y = this_block_start_cell.y;
+             cell_position.y < this_block_end_cell.y;
+             ++cell_position.y)
+        {
+          for (cell_position.x = this_block_start_cell.x;
+               cell_position.x < this_block_end_cell.x;
+               ++cell_position.x)
+          {
+            u32 cell_index = get_cell_index_in_block(universe, cell_position);
+            cell_block->cell_states[cell_index] = new_state;
+          }
+        }
       }
 
       cell_block = cell_block->next_block;
@@ -104,13 +116,13 @@ delete_null_cell_blocks(Universe *universe, RuleConfiguration *rule_config)
 
 
 void
-perform_cell_tools(CellTools *cell_tools, CellSelectionsUI *cell_selections_ui, Universe *universe, CellInitialisationOptions *cell_initialisation_options, RuleConfiguration *rule_configuration)
+perform_cell_tools(CellTools *cell_tools, CellSelectionsUI *cell_selections_ui, Universe *universe, RuleConfiguration *rule_configuration)
 {
   if (cell_tools->flags & CellToolFlags__SetSelectionNull)
   {
     if (cell_selections_ui->selection_made)
     {
-      set_null(cell_selections_ui, universe, cell_initialisation_options);
+      set_cells_to_state(cell_selections_ui, universe, cell_tools->state);
     }
   }
 

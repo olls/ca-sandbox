@@ -50,6 +50,10 @@ void
 debug_print_named_states(NamedStates *named_states);
 
 
+u32
+get_state_position_in_named_states(NamedStates *named_states, CellState state);
+
+
 String
 get_state_name(NamedStates *named_states, CellState state);
 

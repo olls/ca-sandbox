@@ -184,6 +184,28 @@ debug_print_named_states(NamedStates *named_states)
 }
 
 
+u32
+get_state_position_in_named_states(NamedStates *named_states, CellState state)
+{
+  u32 result;
+
+  for (u32 state_index = 0;
+       state_index < named_states->states.n_elements;
+       ++state_index)
+  {
+    NamedState& named_state = named_states->states[state_index];
+
+    if (named_state.value == state)
+    {
+      result = state_index;
+      break;
+    }
+  }
+
+  return result;
+}
+
+
 String
 get_state_name(NamedStates *named_states, CellState state)
 {
