@@ -34,8 +34,12 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
   {
     ImGui::OpenPopup(cells_file_picker_name);
     universe_ui->cells_file_picker.current_item = 0;
-    universe_ui->cells_file_picker.root_directory = ".";
-    copy_string(universe_ui->cells_file_picker.current_path, "cells", 6);
+
+    Array::clear(universe_ui->cells_file_picker.root_directory);
+    append_string(universe_ui->cells_file_picker.root_directory, new_string("."));
+
+    Array::clear(universe_ui->cells_file_picker.current_path);
+    append_string(universe_ui->cells_file_picker.current_path, new_string("cells"));
   }
 
   if (file_picker(cells_file_picker_name, &universe_ui->cells_file_picker))

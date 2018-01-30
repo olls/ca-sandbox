@@ -54,32 +54,15 @@ file_picker(const char *picker_name, FilePicker *picker)
     TinydirPackage tinydir_package = {};
 
     // Build string of root_directory/current_path
-    u32 root_length = strlen(picker->root_directory);
-    u32 path_length = strlen(picker->current_path);
+    Array::Array<char> current_directory;
+    Array::add(current_directory, picker->root_directory);
+    Array::add(current_directory, '/');
+    Array::add(current_directory, picker->current_path);
+    Array::add(current_directory, '\0');
 
-    u32 current_dirrctory_length = root_length + 1 + path_length + 1;
-    char current_dirrctory_data[current_dirrctory_length];
-    WriteString current_dirrctory = {
-      .start = current_dirrctory_data,
-      .current_position = current_dirrctory_data,
-      .end = current_dirrctory_data + current_dirrctory_length
-    };
+    tinydir_open_sorted(&tinydir_package.dir, current_directory.elements);
 
-    copy_string(current_dirrctory.current_position, picker->root_directory, root_length);
-    current_dirrctory.current_position += root_length;
-
-    current_dirrctory.current_position[0] = '/';
-    current_dirrctory.current_position += 1;
-
-    copy_string(current_dirrctory.current_position, picker->current_path, path_length);
-    current_dirrctory.current_position += path_length;
-
-    current_dirrctory.current_position[0] = '\0';
-    current_dirrctory.current_position += 1;
-
-    assert(current_dirrctory.current_position == current_dirrctory.end);
-
-    tinydir_open_sorted(&tinydir_package.dir, current_dirrctory.start);
+    Array::free_array(current_directory);
 
     ImGui::PushItemWidth(350);
     ImGui::ListBox("##file-picker", &picker->current_item, &get_filename_from_tinydir_file, &tinydir_package, tinydir_package.dir.n_files, 8);
@@ -92,77 +75,27 @@ file_picker(const char *picker_name, FilePicker *picker)
 
       if (file.is_dir)
       {
-        // Build string for new current_path = current_path/file.name\0
+        // Build string for new current_path = current_path/file.name
+        append_string(picker->current_path, new_string("/"));
+        append_string(picker->current_path, new_string(file.name));
 
-        u32 path_length = strlen(picker->current_path);
-        u32 file_length = strlen(file.name);
-
-        u32 folder_path_length = path_length + 1 + file_length + 1;
-        char folder_path_data[folder_path_length];
-        WriteString folder_path = {
-          .start = folder_path_data,
-          .current_position = folder_path_data,
-          .end = folder_path_data + folder_path_length
-        };
-
-        copy_string(folder_path.current_position, picker->current_path, path_length);
-        folder_path.current_position += path_length;
-
-        folder_path.current_position[0] = '/';
-        folder_path.current_position += 1;
-
-        copy_string(folder_path.current_position, file.name, file_length);
-        folder_path.current_position += file_length;
-
-        folder_path.current_position[0] = '\0';
-        folder_path.current_position += 1;
-
-        assert(folder_path.current_position == folder_path.end);
-
-        // Switch to the selected directory
-        copy_string(picker->current_path, folder_path.start, string_length(folder_path));
         picker->current_item = 0;
 
-        print("Changing to directory: %.*s\n", string_length(folder_path), folder_path.start);
+        print("Changing to directory: %.*s\n", picker->current_path.n_elements, picker->current_path.elements);
       }
       else
       {
         // Build string for absolute file path = root_directory/current_path/file.name\0
+        Array::clear(picker->selected_file);
 
-        u32 root_length = strlen(picker->root_directory);
-        u32 path_length = strlen(picker->current_path);
-        u32 file_length = strlen(file.name);
+        Array::add(picker->selected_file, picker->root_directory);
+        Array::add(picker->selected_file, '/');
+        Array::add(picker->selected_file, picker->current_path);
+        Array::add(picker->selected_file, '/');
+        append_string(picker->selected_file, new_string(file.name));
+        Array::add(picker->selected_file, '\0');
 
-        u32 selected_file_length = root_length + 1 + path_length + 1 + file_length + 1;
-        assert(selected_file_length < array_count(picker->selected_file));
-
-        WriteString selected_file = {
-          .start = picker->selected_file,
-          .current_position = picker->selected_file,
-          .end = picker->selected_file + selected_file_length
-        };
-
-        copy_string(selected_file.current_position, picker->root_directory, root_length);
-        selected_file.current_position += root_length;
-
-        selected_file.current_position[0] = '/';
-        selected_file.current_position += 1;
-
-        copy_string(selected_file.current_position, picker->current_path, path_length);
-        selected_file.current_position += path_length;
-
-        selected_file.current_position[0] = '/';
-        selected_file.current_position += 1;
-
-        copy_string(selected_file.current_position, file.name, file_length);
-        selected_file.current_position += file_length;
-
-        selected_file.current_position[0] = '\0';
-        selected_file.current_position += 1;
-
-        assert(selected_file.current_position == selected_file.end);
-
-        print("Selected file: %.*s\n", string_length(selected_file), selected_file.start);
+        print("Selected file: %.*s\n", picker->selected_file.n_elements, picker->selected_file.elements);
 
         ImGui::CloseCurrentPopup();
         file_chosen = true;

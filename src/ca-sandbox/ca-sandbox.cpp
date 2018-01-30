@@ -208,12 +208,12 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Load initial filename arguments
     if (argc >= 3)
     {
-      const char *rule_filename = argv[2];
-      copy_string(rule_ui->file_picker.selected_file, rule_filename, strlen(rule_filename)+1); // Plus one for \0
+      String rule_filename = new_string(argv[2]);
+      append_string(rule_ui->file_picker.selected_file, rule_filename);
       rule_ui->reload_rule_file = true;
 
-      const char *cells_filename = argv[1];
-      copy_string(universe_ui->cells_file_picker.selected_file, cells_filename, strlen(cells_filename)+1);
+      String cells_filename = new_string(argv[1]);
+      append_string(universe_ui->cells_file_picker.selected_file, cells_filename);
       universe_ui->reload_cells_file = true;
     }
 
@@ -315,7 +315,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     if (rule_ui->save_rule_file)
     {
       rule_ui->save_rule_file = false;
-      result.success &= save_rule_config_to_file(rule_ui->file_picker.selected_file, &loaded_rule->config);
+      result.success &= save_rule_config_to_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
     }
 
     //
@@ -327,8 +327,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       rule_ui->reload_rule_file = false;
       state->rule_file_loaded = true;
 
-      print("\nLoading rule file: %s\n", rule_ui->file_picker.selected_file);
-      result.success &= load_rule_file(rule_ui->file_picker.selected_file, &loaded_rule->config);
+      print("\nLoading rule file: %s\n", rule_ui->file_picker.selected_file.elements);
+      result.success &= load_rule_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
       print("\n");
 
       start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
@@ -347,7 +347,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       default_cell_initialisation_options(cell_initialisation_options);
 
       universe_ui->loading_error_message.n_elements = 0;
-      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
+      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file.elements, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
 
       if (new_universe == 0)
       {
@@ -375,8 +375,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         state->universe = new_universe;
         universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
         copy_string(universe_ui->loaded_file_name,
-                    universe_ui->cells_file_picker.selected_file,
-                    strlen(universe_ui->cells_file_picker.selected_file)+1);
+                    universe_ui->cells_file_picker.selected_file.elements,
+                    universe_ui->cells_file_picker.selected_file.n_elements);
       }
     }
 

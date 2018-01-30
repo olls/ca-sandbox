@@ -467,16 +467,19 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 void
 do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread)
 {
-  u32 filename_length = strlen(rule_ui->file_picker.selected_file);
-  ImGui::Text("Rule file: %.*s", filename_length, rule_ui->file_picker.selected_file);
+  ImGui::Text("Rule file: %.*s", rule_ui->file_picker.selected_file.n_elements, rule_ui->file_picker.selected_file.elements);
 
   const char *rule_file_picker_name = "Rule file picker";
   if (ImGui::Button("Change rule file"))
   {
     ImGui::OpenPopup(rule_file_picker_name);
     rule_ui->file_picker.current_item = 0;
-    rule_ui->file_picker.root_directory = ".";
-    copy_string(rule_ui->file_picker.current_path, "rules", 6);
+
+    Array::clear(rule_ui->file_picker.root_directory);
+    append_string(rule_ui->file_picker.root_directory, new_string("."));
+
+    Array::clear(rule_ui->file_picker.current_path);
+    append_string(rule_ui->file_picker.current_path, new_string("rules"));
   }
 
   file_picker(rule_file_picker_name, &rule_ui->file_picker);
