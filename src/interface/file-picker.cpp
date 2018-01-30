@@ -54,11 +54,11 @@ file_picker(const char *picker_name, FilePicker *picker)
     TinydirPackage tinydir_package = {};
 
     // Build string of root_directory/current_path
-    Array::Array<char> current_directory;
-    Array::add(current_directory, picker->root_directory);
-    Array::add(current_directory, '/');
-    Array::add(current_directory, picker->current_path);
-    Array::add(current_directory, '\0');
+    Array::Array<char, false, 64> current_directory;
+    current_directory += picker->root_directory;
+    current_directory += '/';
+    current_directory += picker->current_path;
+    current_directory += '\0';
 
     tinydir_open_sorted(&tinydir_package.dir, current_directory.elements);
 
@@ -76,7 +76,7 @@ file_picker(const char *picker_name, FilePicker *picker)
       if (file.is_dir)
       {
         // Build string for new current_path = current_path/file.name
-        append_string(picker->current_path, new_string("/"));
+        picker->current_path += '/';
         append_string(picker->current_path, new_string(file.name));
 
         picker->current_item = 0;
@@ -88,12 +88,12 @@ file_picker(const char *picker_name, FilePicker *picker)
         // Build string for absolute file path = root_directory/current_path/file.name\0
         Array::clear(picker->selected_file);
 
-        Array::add(picker->selected_file, picker->root_directory);
-        Array::add(picker->selected_file, '/');
-        Array::add(picker->selected_file, picker->current_path);
-        Array::add(picker->selected_file, '/');
+        picker->selected_file += picker->root_directory;
+        picker->selected_file += '/';
+        picker->selected_file += picker->current_path;
+        picker->selected_file += '/';
         append_string(picker->selected_file, new_string(file.name));
-        Array::add(picker->selected_file, '\0');
+        picker->selected_file += '\0';
 
         print("Selected file: %.*s\n", picker->selected_file.n_elements, picker->selected_file.elements);
 
