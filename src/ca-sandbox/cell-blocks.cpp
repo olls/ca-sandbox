@@ -25,6 +25,8 @@ init_cell_hashmap(CellBlocks *cell_blocks)
   cell_blocks->hashmap_size = INITIAL_CELL_HASHMAP_SIZE;
   cell_blocks->hashmap = allocate(CellBlock *, cell_blocks->hashmap_size);
   memset(cell_blocks->hashmap, 0, cell_blocks->hashmap_size * sizeof(CellBlock *));
+
+  cell_blocks->n_cell_blocks_in_use = 0;
 }
 
 
@@ -197,6 +199,8 @@ create_cell_block(CellBlocks *cell_blocks, CellInitialisationOptions *cell_initi
     result = *cell_block_slot;
 
     init_cells(cell_blocks, cell_initialisation_options, result, search_cell_block_position);
+
+    cell_blocks->n_cell_blocks_in_use += 1;
   }
   else
   {
@@ -217,6 +221,7 @@ create_uninitialised_cell_block(CellBlocks *cell_blocks, s32vec2 search_cell_blo
   if (*cell_block_slot == 0)
   {
     *cell_block_slot = allocate_cell_block(cell_blocks, search_cell_block_position);
+    cell_blocks->n_cell_blocks_in_use += 1;
     result = *cell_block_slot;
   }
 
@@ -234,6 +239,7 @@ get_or_create_uninitialised_cell_block(CellBlocks *cell_blocks, s32vec2 search_c
   if (*cell_block_slot == 0)
   {
     *cell_block_slot = allocate_cell_block(cell_blocks, search_cell_block_position);
+    cell_blocks->n_cell_blocks_in_use += 1;
   }
 
   result = *cell_block_slot;
@@ -264,6 +270,7 @@ get_or_create_cell_block(CellBlocks *cell_blocks, CellInitialisationOptions *cel
     result = *cell_block_slot;
 
     init_cells(cell_blocks, cell_initialisation_options, result, search_cell_block_position);
+    cell_blocks->n_cell_blocks_in_use += 1;
   }
   else
   {
@@ -311,6 +318,8 @@ delete_cell_block(CellBlocks *cell_blocks, s32vec2 search_cell_block_position)
     *cell_block_slot = cell_block->next_block;
     un_allocate(cell_block);
   }
+
+  cell_blocks->n_cell_blocks_in_use -= 1;
 }
 
 

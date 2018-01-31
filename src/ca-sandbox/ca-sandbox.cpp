@@ -419,6 +419,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         simulation_ui->last_sim_time = end_sim_time;
 
         simulation_ui->last_simulation_delta = (u32)(end_sim_time - start_sim_time) * (1.0/n_simulation_steps);
+        simulation_ui->last_simulation_delta_per_cell_block = simulation_ui->last_simulation_delta * (1.0/state->universe->n_cell_blocks_in_use);
+
 
         simulation_ui->simulation_delta_cumulative_average = (((u32)(end_sim_time - start_sim_time) +
                                                                (simulation_ui->simulation_delta_cumulative_average_n *

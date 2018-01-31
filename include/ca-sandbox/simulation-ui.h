@@ -38,6 +38,8 @@ struct SimulationUI
   /// The amount of time the last simulation step took
   u32 last_simulation_delta;
 
+  r32 last_simulation_delta_per_cell_block;
+
   u32 simulation_delta_cumulative_average;
   u32 simulation_delta_cumulative_average_n;
 };

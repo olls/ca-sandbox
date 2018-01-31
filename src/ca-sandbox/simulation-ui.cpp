@@ -65,10 +65,16 @@ do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_bui
       ImGui::DragFloat("Simulations per second", &simulation_ui->sim_frequency, 1, 0, 10000);
       ImGui::PopItemWidth();
 
-      ImGui::Text("Simulation Time: %.3fms", simulation_ui->last_simulation_delta * 0.001);
+      const char *unit;
+
+      r32 human_last_simulation_delta = human_time(simulation_ui->last_simulation_delta, &unit);
+      ImGui::Text("Simulation Time: %.2f %s", human_last_simulation_delta, unit);
+
+      r32 human_last_simulation_delta_per_cell_block = human_time(simulation_ui->last_simulation_delta_per_cell_block, &unit);
+      ImGui::Text("Simulation Time per Cell Block: %.3f %s", human_last_simulation_delta_per_cell_block, unit);
+
       ImGui::Text("Simulation Step: %lu", simulation_ui->simulation_step);
 
-      const char *unit;
       r32 human_cumulative_sim_time = human_time(simulation_ui->simulation_delta_cumulative_average, &unit);
       ImGui::Text("Cumulative Moving Average Simulation Time: %.2f %s", human_cumulative_sim_time, unit);
     }

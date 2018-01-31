@@ -30,7 +30,7 @@
 
 # Functionality
 = better cell editing tools:
-  - selections: move, copy, paste
+  - selections: move, rotate, mirror
   - sub-modules
 - cell initialisation options ui
 - ability to specify associated .rule file in .cells file

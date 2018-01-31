@@ -67,6 +67,9 @@ struct CellBlocks
 
   /// The length of the hashmap array.
   u32 hashmap_size;
+
+  /// Currently only used for diagnostics
+  u32 n_cell_blocks_in_use;
 };
 
 
