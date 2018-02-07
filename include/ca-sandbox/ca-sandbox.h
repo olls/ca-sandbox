@@ -56,6 +56,9 @@ struct CA_SandboxState
   s32vec2 minimap_texture_size;
 
   GLuint screen_shader_program;
+  GLuint screen_shader_colour_uniform;
+  GLuint screen_shader_aspect_ratio_uniform;
+
   GLuint screen_vao;
 
   Universe *universe;

@@ -22,8 +22,8 @@ void
 do_cell_selections_ui(CellSelectionsUI *cell_selections_ui, UniversePosition mouse_universe_pos, b32 *mouse_click_consumed);
 
 
-u32
-cell_selections_drawing_upload(CellSelectionsUI *cell_selections_ui, Universe *universe, OpenGL_Buffer *general_universe_vbo, OpenGL_Buffer *general_universe_ibo);
+void
+cell_selections_drawing_upload(CellSelectionsUI *cell_selections_ui, Universe *universe, mat4x4 universe_projection_matrix, mat4x4 aspect_ratio, OpenGL_Buffer *general_vbo, OpenGL_Buffer *general_ibo, BufferDrawingLocation *selection_vbo_position, BufferDrawingLocation *selection_ibo_position);
 
 
 u32

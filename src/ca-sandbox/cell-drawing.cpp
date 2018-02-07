@@ -56,6 +56,8 @@ init_cell_drawing(CellDrawing *cell_drawing, CellInstancing *cell_instancing, Op
 {
   glGenVertexArrays(1, &cell_drawing->vao);
   glBindVertexArray(cell_drawing->vao);
+  glBindBuffer(general_vertex_buffer->binding_target, general_vertex_buffer->id);
+  glBindBuffer(general_index_buffer->binding_target, general_index_buffer->id);
 
   cell_drawing->mat4_projection_matrix_uniform = glGetUniformLocation(cell_drawing->shader_program, "projection_matrix");
   cell_drawing->cell_block_dim_uniform = glGetUniformLocation(cell_drawing->shader_program, "cell_block_dim");
