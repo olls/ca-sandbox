@@ -226,6 +226,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     simulation_ui->sim_frequency = INITIAL_SIM_FREQUENCY;
     view_panning->scale = 0.3;
+    state->left_side_bar_open = true;
+    state->right_side_bar_open = true;
   }
 
   ImGui::SetCurrentContext(state->imgui_context);
