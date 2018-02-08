@@ -57,7 +57,7 @@ const r32 INITIAL_SIM_FREQUENCY = 30;
 ///
 /// TODO: Shader compilation should probably be moved to the locations where the shaders are used.
 b32
-init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *texture_shader_program, GLuint *screen_shader_program)
+init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_drawing_shader_program, GLuint *texture_shader_program)
 {
   b32 success = true;
 
@@ -86,13 +86,6 @@ init_shaders(GLuint *general_universe_shader_program, GLuint *cell_instance_draw
   };
 
   success &= create_shader_program(texture_filenames, shader_types, 2, texture_shader_program);
-
-  const char *screen_filenames[] = {
-    "shaders/screen.glvs",
-    "shaders/screen.glfs"
-  };
-
-  success &= create_shader_program(screen_filenames, shader_types, 2, screen_shader_program);
 
   return success;
 }
@@ -127,8 +120,9 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
   OpenGL_Buffer *general_universe_vbo = &state->general_universe_vbo;
   OpenGL_Buffer *general_universe_ibo = &state->general_universe_ibo;
-  OpenGL_Buffer *general_vertex_buffer = &state->general_vertex_buffer;
-  OpenGL_Buffer *general_index_buffer = &state->general_index_buffer;
+
+  GeneralVertexBuffer *general_vertex_buffer = &state->general_vertex_buffer;
+  GeneralIndexBuffer *general_index_buffer = &state->general_index_buffer;
 
   CellInstancing *cell_instancing = &state->cell_instancing;
   CellDrawing *cell_drawing = &state->cell_drawing;
@@ -146,6 +140,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   ViewPanning *view_panning = &state->view_panning;
   CellSelectionsUI *cell_selections_ui = &state->cell_selections_ui;
   CellTools *cell_tools = &state->cell_tools;
+  ScreenShader *screen_shader = &state->screen_shader;
 
   if (state->init)
   {
@@ -164,7 +159,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     opengl_create_general_buffers(general_vertex_buffer, general_index_buffer);
 
-    b32 shader_success = init_shaders(&state->general_universe_shader_program, &cell_drawing->shader_program, &state->texture_shader_program, &state->screen_shader_program);
+    b32 shader_success = init_shaders(&state->general_universe_shader_program, &cell_drawing->shader_program, &state->texture_shader_program);
     result.success &= shader_success;
 
     // General universe drawing
@@ -201,11 +196,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     // Screen space rendering
     {
-      glGenVertexArrays(1, &state->screen_vao);
-
-      state->screen_shader_colour_uniform = glGetUniformLocation(state->screen_shader_program, "colour");
-      state->screen_shader_aspect_ratio_uniform = glGetUniformLocation(state->screen_shader_program, "aspect_ratio");
-      opengl_print_errors();
+      result.success &= initialise_screen_shader(screen_shader);
     }
 
     // Load initial filename arguments
@@ -496,8 +487,9 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     general_universe_vbo->elements_used = 0;
     general_universe_ibo->elements_used = 0;
 
-    BufferDrawingLocation general_universe_triangles_ibo = {};
-    general_universe_triangles_ibo.start_position = general_universe_ibo->elements_used;
+    BufferDrawingLocation uploaded_vertices = {};
+    BufferDrawingLocation uploaded_indices = {};
+    uploaded_indices.start_position = general_universe_ibo->elements_used;
 
     if (cells_editor->cell_highlighted)
     {
@@ -510,7 +502,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       r32 cell_dim = 1.0 / state->universe->cell_block_dim;
       UniversePosition cell_size = {{}, {cell_dim, cell_dim}};
 
-      general_universe_triangles_ibo.n_elements += make_square_triangle_vertices(cells_editor->highlighted_cell, cell_size, colour_template, colour_template_position_offset, general_universe_vbo, general_universe_ibo);
+      upload_square(cells_editor->highlighted_cell, cell_size, colour_template, colour_template_position_offset,
+                    general_universe_vbo, general_universe_ibo, &uploaded_vertices.n_elements, &uploaded_indices.n_elements);
     }
 
     if (cells_editor->cell_block_highlighted)
@@ -522,13 +515,14 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
       UniversePosition block_size = {{1, 1}, {}};
       UniversePosition block_start_pos = {cells_editor->highlighted_cell_block, {}};
-      general_universe_triangles_ibo.n_elements += make_square_triangle_vertices(block_start_pos, block_size, colour_template, colour_template_position_offset, general_universe_vbo, general_universe_ibo);
+      upload_square(block_start_pos, block_size, colour_template, colour_template_position_offset,
+                    general_universe_vbo, general_universe_ibo, &uploaded_vertices.n_elements, &uploaded_indices.n_elements);
     }
 
     // Get attribute locations
     init_general_universe_attributes(general_universe_vbo, state->general_universe_shader_program);
 
-    glDrawElements(GL_TRIANGLES, general_universe_triangles_ibo.n_elements, GL_UNSIGNED_SHORT, (void *)(intptr_t)(general_universe_triangles_ibo.start_position*sizeof(GLushort)));
+    glDrawElements(GL_TRIANGLES, uploaded_indices.n_elements, GL_UNSIGNED_SHORT, (void *)(intptr_t)(uploaded_indices.start_position*sizeof(GLushort)));
 
     opengl_print_errors();
     glBindVertexArray(0);
@@ -539,37 +533,27 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     if (cell_selections_ui->making_selection || cell_selections_ui->selection_made)
     {
-      BufferDrawingLocation selection_vbo_position = {};
-      BufferDrawingLocation selection_ibo_position = {};
+      BufferDrawingLocation vertices_position = {};
+      BufferDrawingLocation colours_position = {};
+      BufferDrawingLocation ibo_position = {};
 
-      cell_selections_drawing_upload(cell_selections_ui, state->universe, view_panning->projection_matrix, aspect_ratio, general_vertex_buffer, general_index_buffer, &selection_vbo_position, &selection_ibo_position);
+      cell_selections_drawing_upload(cell_selections_ui, state->universe, view_panning->projection_matrix, aspect_ratio, &screen_shader->vertex_buffer, &screen_shader->colour_buffer, &screen_shader->index_buffer, &vertices_position, &colours_position, &ibo_position);
 
-      glBindVertexArray(state->screen_vao);
-      glUseProgram(state->screen_shader_program);
+      glBindVertexArray(screen_shader->vao);
+      glUseProgram(screen_shader->shader_program);
+      initialise_screen_shader_attributes(screen_shader);
 
-      glBindBuffer(general_index_buffer->binding_target, general_index_buffer->id);
-      glBindBuffer(general_vertex_buffer->binding_target, general_vertex_buffer->id);
-      GLuint attribute_pos = glGetAttribLocation(state->screen_shader_program, "pos");
-      if (attribute_pos == -1)
-      {
-        print("Failed to get attribute_pos\n");
-      }
-      glEnableVertexAttribArray(attribute_pos);
-      glVertexAttribPointer(attribute_pos, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
+      glUniformMatrix4fv(screen_shader->aspect_ratio_uniform, 1, GL_TRUE, &aspect_ratio[0][0]);
 
-      vec4 colour = {0.7, 0.7, 0.7, 1};
-      glUniform4fv(state->screen_shader_colour_uniform, 1, &colour.x);
-      glUniformMatrix4fv(state->screen_shader_aspect_ratio_uniform, 1, GL_TRUE, &aspect_ratio[0][0]);
+      glBindBuffer(screen_shader->index_buffer.binding_target, screen_shader->index_buffer.id);
+      glDrawElements(GL_TRIANGLES, ibo_position.n_elements, GL_UNSIGNED_SHORT, (void *)(intptr_t)(ibo_position.start_position*sizeof(GLushort)));
 
-      ImGui::Value("ibo start pos", selection_ibo_position.start_position);
-
-      glDrawElements(GL_TRIANGLES, selection_ibo_position.n_elements, GL_UNSIGNED_SHORT, (void *)(intptr_t)(selection_ibo_position.start_position*sizeof(GLushort)));
-
-      opengl_print_errors();
       glBindVertexArray(0);
+      opengl_print_errors();
 
-      general_vertex_buffer->elements_used -= selection_vbo_position.n_elements;
-      general_index_buffer->elements_used -= selection_ibo_position.n_elements;
+      screen_shader->vertex_buffer.elements_used -= vertices_position.n_elements;
+      screen_shader->colour_buffer.elements_used -= colours_position.n_elements;
+      screen_shader->index_buffer.elements_used -= ibo_position.n_elements;
     }
 
     //
@@ -639,7 +623,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 #endif
 
 #ifdef DEBUG_MOUSE_UNIVERSE_POSITION_DRAWING
-    GeneralUnvierseVertex origin_vertex = {{}, {1, 0, 0, 1}};
+    GeneralUnvierseVertex origin_vertex = {{0, 0}, {0, 0, 0, 1}};
     GeneralUnvierseVertex mouse_vertex = {mouse_universe_pos, {1, 0, 0, 1}};
     GLushort origin_index = opengl_buffer_new_element(general_universe_vbo, &origin_vertex);
     GLushort mouse_index = opengl_buffer_new_element(general_universe_vbo, &mouse_vertex);
@@ -670,31 +654,23 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
 #ifdef DEBUG_SCREEN_DRAWING
     // Draw mouse position line
-    vec2 vertices[] = {{0,  0}, state->screen_mouse_pos};
-    u32 vertices_pos = opengl_buffer_add_elements(general_vertex_buffer, array_count(vertices), vertices);
+    vec2 vertices[] = {{0, 0}, state->screen_mouse_pos};
+    vec4 colours[] = {{0, 0, 0, 1}, {0, 1, 0, 1}};
+    u32 vertices_pos = opengl_buffer_add_elements(&screen_shader->vertex_buffer, array_count(vertices), vertices);
+    u32 colours_pos = opengl_buffer_add_elements(&screen_shader->colour_buffer, array_count(colours), colours);
 
-    glBindVertexArray(state->screen_vao);
-    glUseProgram(state->screen_shader_program);
-    glBindBuffer(general_vertex_buffer->binding_target, general_vertex_buffer->id);
-
-    GLuint attribute_pos = glGetAttribLocation(state->screen_shader_program, "pos");
-    if (attribute_pos == -1)
-    {
-      print("Failed to get attribute_pos\n");
-    }
-    glEnableVertexAttribArray(attribute_pos);
-    glVertexAttribPointer(attribute_pos, 2, GL_FLOAT, GL_FALSE, sizeof(vec2), 0);
-
-    vec4 colour = {1, 0, 0, 1};
-    glUniform4fv(state->screen_shader_colour_uniform, 1, &colour.x);
+    glBindVertexArray(screen_shader->vao);
+    glUseProgram(screen_shader->shader_program);
+    initialise_screen_shader_attributes(screen_shader);
 
     mat4x4 id;
     mat4x4Identity(id);
-    glUniformMatrix4fv(state->screen_shader_aspect_ratio_uniform, 1, GL_TRUE, &id[0][0]);
+    glUniformMatrix4fv(screen_shader->aspect_ratio_uniform, 1, GL_TRUE, &id[0][0]);
 
     glDrawArrays(GL_LINES, vertices_pos, array_count(vertices));
 
-    general_vertex_buffer->elements_used -= array_count(vertices);
+    screen_shader->vertex_buffer.elements_used -= array_count(vertices);
+    screen_shader->colour_buffer.elements_used -= array_count(colours);
 
     opengl_print_errors();
     glUseProgram(0);

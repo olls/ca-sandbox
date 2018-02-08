@@ -6,9 +6,14 @@
 /// @file
 ///
 
+
+typedef OpenGL_Buffer GeneralVertexBuffer;
+typedef OpenGL_Buffer GeneralIndexBuffer;
+
+
 void
-opengl_create_general_buffers(OpenGL_Buffer *general_vertex_buffer,
-                              OpenGL_Buffer *general_index_buffer);
+opengl_create_general_buffers(GeneralVertexBuffer *general_vertex_buffer,
+                              GeneralIndexBuffer *general_index_buffer);
 
 
 #endif

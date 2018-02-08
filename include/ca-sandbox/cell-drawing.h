@@ -7,6 +7,7 @@
 
 #include "engine/vectors.h"
 #include "engine/opengl-buffer.h"
+#include "engine/drawing.h"
 
 /// @file
 /// @brief Data structures for drawing the Cell%s with OpenGL
@@ -66,13 +67,6 @@ struct GeneralUnvierseVertex
 {
   UniversePosition vertex;
   vec4 colour;
-};
-
-
-struct BufferDrawingLocation
-{
-  u32 start_position;
-  u32 n_elements;
 };
 
 

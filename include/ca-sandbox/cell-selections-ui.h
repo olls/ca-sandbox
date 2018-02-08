@@ -6,6 +6,7 @@
 
 #include "engine/types.h"
 #include "engine/opengl-buffer.h"
+#include "engine/drawing.h"
 
 
 struct CellSelectionsUI
@@ -23,7 +24,7 @@ do_cell_selections_ui(CellSelectionsUI *cell_selections_ui, UniversePosition mou
 
 
 void
-cell_selections_drawing_upload(CellSelectionsUI *cell_selections_ui, Universe *universe, mat4x4 universe_projection_matrix, mat4x4 aspect_ratio, OpenGL_Buffer *general_vbo, OpenGL_Buffer *general_ibo, BufferDrawingLocation *selection_vbo_position, BufferDrawingLocation *selection_ibo_position);
+cell_selections_drawing_upload(CellSelectionsUI *cell_selections_ui, Universe *universe, mat4x4 universe_projection_matrix, mat4x4 aspect_ratio, OpenGL_Buffer *vertex_buffer, OpenGL_Buffer *colour_buffer, OpenGL_Buffer *ibo, BufferDrawingLocation *vertices_position, BufferDrawingLocation *colours_position, BufferDrawingLocation *ibo_position);
 
 
 u32

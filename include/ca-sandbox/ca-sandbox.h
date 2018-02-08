@@ -5,6 +5,7 @@
 
 #include "engine/engine.h"
 #include "engine/opengl-buffer.h"
+#include "engine/opengl-general-buffers.h"
 
 #include "ca-sandbox/cell-drawing.h"
 #include "ca-sandbox/simulate-options-ui.h"
@@ -16,6 +17,7 @@
 #include "ca-sandbox/cell-regions-ui.h"
 #include "ca-sandbox/cell-selections-ui.h"
 #include "ca-sandbox/cell-tools.h"
+#include "ca-sandbox/screen-shader.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -43,8 +45,8 @@ struct CA_SandboxState
   OpenGL_Buffer general_universe_ibo;
   GLuint general_universe_mat4_projection_matrix_uniform;
 
-  OpenGL_Buffer general_vertex_buffer;
-  OpenGL_Buffer general_index_buffer;
+  GeneralVertexBuffer general_vertex_buffer;
+  GeneralIndexBuffer general_index_buffer;
 
   CellInstancing cell_instancing;
   CellDrawing cell_drawing;
@@ -55,11 +57,7 @@ struct CA_SandboxState
   GLuint minimap_texture;
   s32vec2 minimap_texture_size;
 
-  GLuint screen_shader_program;
-  GLuint screen_shader_colour_uniform;
-  GLuint screen_shader_aspect_ratio_uniform;
-
-  GLuint screen_vao;
+  ScreenShader screen_shader;
 
   Universe *universe;
   SimulateOptions simulate_options;
