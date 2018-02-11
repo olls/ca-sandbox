@@ -2,12 +2,12 @@
 // experimental/WIP feature, API will be reworked.
 
 #define _CRT_SECURE_NO_WARNINGS
-#include "imgui/imgui_tabs.h"
+#include "imgui_tabs.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_PLACEMENT_NEW
-#include "imgui/imgui_internal.h"
+#include <imgui_internal.h>
 
-#define TAB_SMOOTH_DRAG 1   // This work nicely but has overlapping issues (maybe render dragged tab separately, at end)
+#define TAB_SMOOTH_DRAG 0   // This work nicely but has overlapping issues (maybe render dragged tab separately, at end)
 
 // Basic keyed storage, slow/amortized insertion, O(Log N) queries over a dense/hot buffer
 template<typename T>
@@ -134,9 +134,7 @@ static bool ArrowButton(ImGuiID id, ImGuiDir dir, ImVec2 padding, ImGuiButtonFla
     bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
 
     const ImU32 col = ImGui::GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-#ifdef IMGUI_HAS_NAV
     ImGui::RenderNavHighlight(bb, id);
-#endif
     ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
     ImGui::RenderTriangle(bb.Min + padding, dir, 1.0f);
 
@@ -249,7 +247,7 @@ void    ImGui::BeginTabBar(const char* str_id, ImGuiTabBarFlags flags)
 
     // Draw separator
 #if 1
-    bool unfocused = !g.NavWindow || g.NavWindow->RootNonPopupWindow != window->RootWindow;
+    bool unfocused = !g.NavWindow;
 #else
     bool unfocused = false;
 #endif
@@ -366,10 +364,8 @@ static void TabBarLayout(ImGuiTabBar* tab_bar)
             selected_order = tab->CurrentOrder;
         if (most_recent_selected_tab == NULL || most_recent_selected_tab->LastFrameSelected < tab->LastFrameSelected)
             most_recent_selected_tab = tab;
-#ifdef IMGUI_HAS_NAV
         if (scroll_track_selected_tab == NULL && g.NavJustMovedToId == tab->Id)
             scroll_track_selected_tab = tab;
-#endif
         if (tab_bar->Flags & ImGuiTabBarFlags_SizingPolicyEqual)
         {
             const float TAB_MAX_WIDTH = g.FontSize * 13.0f;
@@ -527,13 +523,9 @@ bool    ImGui::TabItem(const char* label, bool* p_open, ImGuiTabItemFlags flags)
     // If the user called us with *p_open == false, we early out and don't render. We make a dummy call to ItemAdd() so that attempts to use a contextual popup menu with an implicit ID won't use an older ID.
     if (p_open && !*p_open)
     {
-#ifdef IMGUI_HAS_NAV
         PushItemFlag(ImGuiItemFlags_NoNav | ImGuiItemFlags_NoNavDefaultFocus, true);
         ItemAdd(ImRect(), id);
         PopItemFlag();
-#else
-        ItemAdd(ImRect(), id);
-#endif
         return false;
     }
     tab_bar->NextTabCount++;
@@ -686,7 +678,7 @@ bool    ImGui::TabItem(const char* label, bool* p_open, ImGuiTabItemFlags flags)
             bb.Translate(ImVec2(0.0f, (float)(int)((1.0f - tab->AppearAnim) * size.y)));
 
 #if 1
-        bool unfocused = (tab_selected) && (!g.NavWindow || g.NavWindow->RootNonPopupWindow != window->RootWindow);
+        bool unfocused = (tab_selected) && (!g.NavWindow);
 #else
         bool unfocused = false;
 #endif

@@ -153,7 +153,6 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Create ImGui context and font atlas
     state->imgui_context = ImGui::CreateContext();
     ImGui::SetCurrentContext(state->imgui_context);
-    ImGui::GetIO().Fonts = new ImFontAtlas();
 
     ImGui_ImplSdlGL3_Init(engine->sdl_window);
 
@@ -249,12 +248,12 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     ImGuiIO& io = ImGui::GetIO();
 
-    if (io.KeysDown[SDLK_ESCAPE] ||
-        (io.KeyCtrl && io.KeysDown['w']))
+    if (io.KeysDown[SDL_SCANCODE_ESCAPE] ||
+        (io.KeyCtrl && ImGui::IsKeyDown(SDL_SCANCODE_W)))
     {
       running = false;
     }
-    if (io.KeyCtrl && ImGui::IsKeyReleased('r'))
+    if (io.KeyCtrl && ImGui::IsKeyReleased(SDL_SCANCODE_R))
     {
       state->last_reload = frame_timing->frame_start;
       result.reload = true;
@@ -689,6 +688,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   if (!result.reload)
   {
     ImGui_ImplSdlGL3_Shutdown();
+    ImGui::DestroyContext();
   }
 
   return result;

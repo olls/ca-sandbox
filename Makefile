@@ -13,7 +13,7 @@ CC          := clang++
 TARGET      := ca-sandbox
 
 SRCDIR      := src
-INCDIR      := include
+INC         := -Iinclude -Iinclude/imgui
 OBJ_DIR     := obj
 DYNAMIC_LIBS_DIR := dynamic
 TARGETDIR   := bin
@@ -23,7 +23,6 @@ SO_PATH     := $(BUILD_DIR)/$(DYNAMIC_LIBS_DIR)
 LINKER_FLAGS := -Wl,-export-dynamic,--no-undefined,-rpath,$(SO_PATH)
 
 CFLAGS      := -Werror -Ofast -std=c++14 `sdl2-config --cflags`
-INC         := -I$(INCDIR)
 
 # Compiled using a dynamic library and a loader program.
 # See here [http://amir.rachum.com/blog/2016/09/17/shared-libraries/] for a good explanation of dynamic libraries.
