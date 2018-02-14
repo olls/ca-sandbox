@@ -16,58 +16,52 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
   ImGui::PushID("cells editor");
 
   cells_editor->cell_highlighted = false;
-  cells_editor->cell_block_highlighted = false;
 
   ImGuiIO& io = ImGui::GetIO();
   if (!*mouse_click_consumed)
   {
     CellBlock *hovered_cell_block = get_existing_cell_block(universe, universe_mouse_position.cell_block_position);
 
-    if (hovered_cell_block == 0)
+    // TODO: Check we are hovering a cell as well as block (i.e: account for gaps between cells)
+
+    cells_editor->cell_highlighted = true;
+    cells_editor->highlighted_cell.cell_block_position = universe_mouse_position.cell_block_position;
+
+    s32vec2 cell_position = vec2_to_s32vec2(vec2_multiply(universe_mouse_position.cell_position, universe->cell_block_dim));
+    vec2 cell_position_proportion = vec2_divide(s32vec2_to_vec2(cell_position), universe->cell_block_dim);
+
+    cells_editor->highlighted_cell.cell_position = cell_position_proportion;
+    if (hovered_cell_block != 0)
     {
-      // CellBlock editing
+      u32 cell_index = get_cell_index_in_block(universe, cell_position);
+      CellState hovered_cell_state = hovered_cell_block->cell_states[cell_index];
 
-      // Show cell block outline
-      cells_editor->cell_block_highlighted = true;
-      cells_editor->highlighted_cell_block = universe_mouse_position.cell_block_position;
-
-      if ((ImGui::IsMouseClicked(0) ||
-           (ImGui::IsMouseDragging() &&
-            cells_editor->currently_dragging_cell_block_creation)))
-      {
-        *mouse_click_consumed = true;
-
-        cells_editor->currently_dragging_cell_block_creation = true;
-        create_cell_block(universe, cell_initialisation_options, universe_mouse_position.cell_block_position);
-      }
+      cells_editor->highlighted_cell_state = hovered_cell_state;
     }
     else
     {
-      // Cell editing
+      cells_editor->highlighted_cell_state = 0;
+    }
 
-      // TODO: Check we are hovering a cell as well as block (i.e: account for gaps between cells)
+    b32 set_cell_state = false;
 
-      cells_editor->cell_highlighted = true;
-      cells_editor->highlighted_cell.cell_block_position = universe_mouse_position.cell_block_position;
+    if (ImGui::IsMouseClicked(0))
+    {
+      *mouse_click_consumed = true;
+      cells_editor->currently_dragging_state = true;
 
-      s32vec2 cell_position = vec2_to_s32vec2(vec2_multiply(universe_mouse_position.cell_position, universe->cell_block_dim));
-      vec2 cell_position_proportion = vec2_divide(s32vec2_to_vec2(cell_position), universe->cell_block_dim);
+      // Choose which state we are dragging
 
-      cells_editor->highlighted_cell.cell_position = cell_position_proportion;
-
-      u32 cell_index = get_cell_index_in_block(universe, cell_position);
-      CellState *cell_state = hovered_cell_block->cell_states + cell_index;
-      cells_editor->highlighted_cell_state = *cell_state;
-
-      if (!cells_editor->currently_dragging_cell_block_creation &&
-          ImGui::IsMouseClicked(0))
+      if (hovered_cell_block == 0)
       {
-        *mouse_click_consumed = true;
-        cells_editor->currently_dragging_state = true;
+        cells_editor->drag_state = cells_editor->active_state;
+      }
+      else
+      {
+        u32 cell_index = get_cell_index_in_block(universe, cell_position);
+        CellState hovered_cell_state = hovered_cell_block->cell_states[cell_index];
 
-        // Choose which state we are dragging
-
-        if (*cell_state != cells_editor->active_state)
+        if (hovered_cell_state != cells_editor->active_state)
         {
           cells_editor->drag_state = cells_editor->active_state;
         }
@@ -75,36 +69,46 @@ do_cells_editor(CellsEditor *cells_editor, Universe *universe, CellInitialisatio
         {
           cells_editor->drag_state = 0;
         }
-        *cell_state = cells_editor->drag_state;
       }
-      else if (cells_editor->currently_dragging_state &&
-               ImGui::IsMouseDragging())
+
+      set_cell_state = true;
+    }
+    else if (cells_editor->currently_dragging_state &&
+             ImGui::IsMouseDragging())
+    {
+      *mouse_click_consumed = true;
+      cells_editor->currently_dragging_state = true;
+
+      set_cell_state = true;
+    }
+    else if (ImGui::IsMouseClicked(1) && hovered_cell_block != 0)
+    {
+      *mouse_click_consumed = true;
+
+      cells_editor->current_context_menu_cell_block = universe_mouse_position.cell_block_position;
+
+      u32 cell_index = get_cell_index_in_block(universe, cell_position);
+      CellState *cell_state = hovered_cell_block->cell_states + cell_index;
+      cells_editor->current_contex_menu_cell_state = get_state_name(named_states, *cell_state);
+
+      ImGui::OpenPopup("cell block context menu");
+    }
+
+    if (set_cell_state)
+    {
+      if (hovered_cell_block == 0)
       {
-        *mouse_click_consumed = true;
-        cells_editor->currently_dragging_state = true;
-
-        u32 cell_index = get_cell_index_in_block(universe, cell_position);
-        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
-        *cell_state = cells_editor->drag_state;
+        hovered_cell_block = create_cell_block(universe, cell_initialisation_options, universe_mouse_position.cell_block_position);
       }
-      else if (ImGui::IsMouseClicked(1))
-      {
-        *mouse_click_consumed = true;
 
-        cells_editor->current_context_menu_cell_block = universe_mouse_position.cell_block_position;
-
-        u32 cell_index = get_cell_index_in_block(universe, cell_position);
-        CellState *cell_state = hovered_cell_block->cell_states + cell_index;
-        cells_editor->current_contex_menu_cell_state = get_state_name(named_states, *cell_state);;
-
-        ImGui::OpenPopup("cell block context menu");
-      }
+      u32 cell_index = get_cell_index_in_block(universe, cell_position);
+      CellState *cell_state = hovered_cell_block->cell_states + cell_index;
+      *cell_state = cells_editor->drag_state;
     }
   }
 
   if (!ImGui::IsMouseDown(0))
   {
-    cells_editor->currently_dragging_cell_block_creation = false;
     cells_editor->currently_dragging_state = false;
   }
 

@@ -14,14 +14,10 @@ struct CellsEditor
   UniversePosition highlighted_cell;  //< The position of the cell currently highlighted
   CellState highlighted_cell_state;
 
-  b32 cell_block_highlighted;  //< Indicates whether a potential cell block is currently being hovered over with the mouse
-  s32vec2 highlighted_cell_block;  //< The position of the potential cell block currently highlighted
-
   CellState active_state;
 
   CellState drag_state;
   b32 currently_dragging_state;
-  b32 currently_dragging_cell_block_creation;
 
   /// The position of the cell block the mouse was hovering over, when the context menu was opened.
   s32vec2 current_context_menu_cell_block;

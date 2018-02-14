@@ -442,7 +442,8 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     //
 
     glViewport(0, 0, window_size.x, window_size.y);
-    glClearColor(1, 1, 1, 1);
+    vec4 background_colour = get_state_colour(0);
+    glClearColor(background_colour.x, background_colour.y, background_colour.z, background_colour.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
     //
@@ -503,19 +504,6 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       UniversePosition cell_size = {{}, {cell_dim, cell_dim}};
 
       upload_square(cells_editor->highlighted_cell, cell_size, colour_template, colour_template_position_offset,
-                    general_universe_vbo, general_universe_ibo, &uploaded_vertices.n_elements, &uploaded_indices.n_elements);
-    }
-
-    if (cells_editor->cell_block_highlighted)
-    {
-      vec4 potential_cell_block_colour = {0.8, 0.8, 0.8, 1};
-      GeneralUnvierseVertex colour_template = {{{}, {}}, potential_cell_block_colour};
-
-      u32 colour_template_position_offset = offsetof(GeneralUnvierseVertex, vertex);
-
-      UniversePosition block_size = {{1, 1}, {}};
-      UniversePosition block_start_pos = {cells_editor->highlighted_cell_block, {}};
-      upload_square(block_start_pos, block_size, colour_template, colour_template_position_offset,
                     general_universe_vbo, general_universe_ibo, &uploaded_vertices.n_elements, &uploaded_indices.n_elements);
     }
 
