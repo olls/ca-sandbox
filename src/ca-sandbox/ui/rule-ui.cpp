@@ -1,4 +1,4 @@
-#include "ca-sandbox/rule-ui.h"
+#include "ca-sandbox/ui/rule-ui.h"
 
 #include "engine/types.h"
 #include "engine/vectors.h"
@@ -484,35 +484,39 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
 
   file_picker(rule_file_picker_name, &rule_ui->file_picker);
 
-  ImGui::SameLine();
-  if (ImGui::Button("Load rule file"))
+  if (rule_ui->file_picker.selected_file.n_elements != 0)
   {
-    rule_ui->reload_rule_file = true;
+    ImGui::SameLine();
+    if (ImGui::Button("Load rule file"))
+    {
+      rule_ui->reload_rule_file = true;
+    }
+
+    if (ImGui::Button("Save rule file"))
+    {
+      rule_ui->save_rule_file = true;
+    }
   }
 
-  if (ImGui::Button("Save rule file"))
+  if (rule_creation_thread->currently_running)
   {
-    rule_ui->save_rule_file = true;
+    ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
   }
-
-  if (!rule_creation_thread->currently_running)
+  else
   {
     if (ImGui::Button("Build rule tree from patterns"))
     {
       start_build_rule_tree_thread(rule_creation_thread, rule);
     }
-    if (rule_creation_thread->last_build_total_time != 0)
-    {
-      const char *unit;
-      r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
-      ImGui::SameLine();
-      ImGui::TextWrapped("Build took %.2f %s", last_build_time, unit);
-      ImGui::Spacing();
-    }
   }
-  else
+
+  if (rule_creation_thread->last_build_total_time != 0)
   {
-    ImGui::ProgressBar(((r64)rule_creation_thread->progress.done / (r64)rule_creation_thread->progress.total));
+    const char *unit;
+    r32 last_build_time = human_time(rule_creation_thread->last_build_total_time, &unit);
+    ImGui::SameLine();
+    ImGui::TextWrapped("Build took %.2f %s", last_build_time, unit);
+    ImGui::Spacing();
   }
 
   // Display all rule patterns

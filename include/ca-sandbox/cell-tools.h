@@ -1,7 +1,7 @@
 #ifndef CELL_TOOLS_H_DEF
 #define CELL_TOOLS_H_DEF
 
-#include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/ui/cell-selections-ui.h"
 #include "ca-sandbox/cell.h"
 #include "ca-sandbox/load-rule.h"
 

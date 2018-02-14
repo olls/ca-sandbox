@@ -8,16 +8,17 @@
 #include "engine/opengl-general-buffers.h"
 
 #include "ca-sandbox/cell-drawing.h"
-#include "ca-sandbox/simulate-options-ui.h"
-#include "ca-sandbox/simulation-ui.h"
-#include "ca-sandbox/universe-ui.h"
-#include "ca-sandbox/rule-ui.h"
 #include "ca-sandbox/view-panning.h"
 #include "ca-sandbox/cell-regions.h"
-#include "ca-sandbox/cell-regions-ui.h"
-#include "ca-sandbox/cell-selections-ui.h"
 #include "ca-sandbox/cell-tools.h"
 #include "ca-sandbox/screen-shader.h"
+
+#include "ca-sandbox/ui/simulate-options-ui.h"
+#include "ca-sandbox/ui/simulation-ui.h"
+#include "ca-sandbox/ui/universe-ui.h"
+#include "ca-sandbox/ui/rule-ui.h"
+#include "ca-sandbox/ui/cell-regions-ui.h"
+#include "ca-sandbox/ui/cell-selections-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"

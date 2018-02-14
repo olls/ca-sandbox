@@ -5,6 +5,7 @@
 
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
+#include "ca-sandbox/ui/new-universe-ui.h"
 
 #include "interface/file-picker.h"
 
@@ -20,6 +21,8 @@ struct UniverseUI
   char loaded_file_name[FILE_NAME_LIMIT];
   b32 reload_cells_file;
   b32 save_cells_file;
+
+  NewUniverseUI new_universe_ui;
 
   u32 edited_cell_block_dim;
 

@@ -1,9 +1,9 @@
-#include "ca-sandbox/cell-regions-ui.h"
+#include "ca-sandbox/ui/cell-regions-ui.h"
 
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/universe.h"
-#include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/ui/cell-selections-ui.h"
 
 #include "engine/vectors.h"
 #include "engine/print.h"

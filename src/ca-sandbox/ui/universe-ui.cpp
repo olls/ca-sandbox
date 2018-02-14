@@ -1,4 +1,4 @@
-#include "ca-sandbox/universe-ui.h"
+#include "ca-sandbox/ui/universe-ui.h"
 
 #include "engine/files.h"
 #include "engine/text.h"
@@ -25,8 +25,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
 {
   if (*universe_ptr != 0)
   {
-    u32 string_length = strlen(universe_ui->loaded_file_name);
-    ImGui::Text("Cells file: %.*s", string_length, universe_ui->loaded_file_name);
+    ImGui::InputText("Cells filename", universe_ui->loaded_file_name, FILE_NAME_LIMIT);
   }
 
   const char *cells_file_picker_name = "Cells file picker";
@@ -46,6 +45,13 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
   {
     universe_ui->reload_cells_file = true;
   }
+
+  const char *new_universe_ui_window_name = "New Universe";
+  if (ImGui::Button("New Cells File"))
+  {
+    open_new_universe_ui(&universe_ui->new_universe_ui);
+  }
+  new_universe_ui(&universe_ui->new_universe_ui);
 
   if (*universe_ptr != 0)
   {

@@ -6,7 +6,7 @@
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/universe.h"
-#include "ca-sandbox/cell-selections-ui.h"
+#include "ca-sandbox/ui/cell-selections-ui.h"
 #include "ca-sandbox/cell-drawing.h"
 
 #include "engine/my-array.h"

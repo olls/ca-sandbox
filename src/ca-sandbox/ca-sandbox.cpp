@@ -27,8 +27,9 @@
 #include "ca-sandbox/save-universe.h"
 #include "ca-sandbox/save-rule-config.h"
 #include "ca-sandbox/minimap.h"
-#include "ca-sandbox/cell-selections-ui.h"
 #include "ca-sandbox/main-gui.h"
+
+#include "ca-sandbox/ui/cell-selections-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
