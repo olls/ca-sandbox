@@ -482,16 +482,15 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
     append_string(rule_ui->file_picker.current_path, new_string("rules"));
   }
 
-  file_picker(rule_file_picker_name, &rule_ui->file_picker);
+  if (file_picker(rule_file_picker_name, &rule_ui->file_picker))
+  {
+    rule_ui->reload_rule_file = true;
+
+  }
 
   if (rule_ui->file_picker.selected_file.n_elements != 0)
   {
     ImGui::SameLine();
-    if (ImGui::Button("Load rule file"))
-    {
-      rule_ui->reload_rule_file = true;
-    }
-
     if (ImGui::Button("Save rule file"))
     {
       rule_ui->save_rule_file = true;
