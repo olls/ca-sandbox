@@ -294,6 +294,11 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     do_main_gui(state, window_size, mouse_universe_pos, &mouse_click_consumed);
 
+    if (ImGui::IsKeyPressed(SDL_SCANCODE_DELETE))
+    {
+      cell_tools->flags |= CellToolFlags__SetSelectionNull;
+    }
+
     if (cell_regions_ui->make_new_region)
     {
       cell_regions_ui->make_new_region = false;

@@ -67,13 +67,13 @@ set_cells_to_state(CellSelectionsUI *cell_selections_ui, Universe *universe, Cel
 
 
 void
-delete_null_cell_blocks(Universe *universe, RuleConfiguration *rule_config)
+delete_null_cell_blocks(CellBlocks *cell_blocks, RuleConfiguration *rule_config)
 {
   for (u32 cell_block_slot = 0;
-       cell_block_slot < universe->hashmap_size;
+       cell_block_slot < cell_blocks->hashmap_size;
        ++cell_block_slot)
   {
-    CellBlock *cell_block = universe->hashmap[cell_block_slot];
+    CellBlock *cell_block = cell_blocks->hashmap[cell_block_slot];
 
     while (cell_block != 0)
     {
@@ -81,14 +81,14 @@ delete_null_cell_blocks(Universe *universe, RuleConfiguration *rule_config)
 
       s32vec2 cell_position;
       for (cell_position.y = 0;
-           cell_position.y < universe->cell_block_dim;
+           cell_position.y < cell_blocks->cell_block_dim;
            ++cell_position.y)
       {
         for (cell_position.x = 0;
-             cell_position.x < universe->cell_block_dim;
+             cell_position.x < cell_blocks->cell_block_dim;
              ++cell_position.x)
         {
-          u32 cell_index = get_cell_index_in_block(universe, cell_position);
+          u32 cell_index = get_cell_index_in_block(cell_blocks, cell_position);
           CellState cell_state = cell_block->cell_states[cell_index];
 
           if (!is_null_state(rule_config, cell_state))
@@ -106,7 +106,7 @@ delete_null_cell_blocks(Universe *universe, RuleConfiguration *rule_config)
 
       if (block_null)
       {
-        delete_cell_block(universe, cell_block->block_position);
+        delete_cell_block(cell_blocks, cell_block->block_position);
       }
 
       cell_block = cell_block->next_block;
