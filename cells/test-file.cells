@@ -39,6 +39,16 @@ O  O  X  X  X  O  O  O
 O  O  O  O  O  O  O  O
 O  O  O  O  O  O  O  O
 
+CellBlock: 3, 0
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  X
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O
+
 CellBlock: -1, -1
 O  O  O  O  O  O  O  O
 O  O  O  O  O  O  O  O
@@ -59,4 +69,4 @@ O  O  O  O  X  X  O  O
 O  O  O  O  O  O  O  O
 O  O  O  O  O  O  O  O
 
-n_cell_blocks: 5
+n_cell_blocks: 6

@@ -1,4 +1,4 @@
-cell_block_dim: 4
+cell_block_dim: 16
 
 border_type: INFINITE
 border_min_block: 0 0
@@ -10,69 +10,111 @@ initialisation_type: RANDOM
 initial_states: O
 
 CellBlock: 0, 0
-O  O  O  O
-O  O  O  O
-O  B  A  X
-A  Z  O  X
+O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O  O
+O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O  O
+O  B  A  X  X  O  X  O  O  A  Y  X  X  O  O  O
+A  Z  O  X  Y  X  X  X  X  X  X  X  O  O  O  O
+X  Y  O  X  O  X  O  X  O  X  O  O  O  O  O  O
+X  X  O  Y  O  X  O  X  O  X  O  O  O  O  O  O
+X  X  O  X  Z  X  X  X  X  X  X  X  O  O  O  O
+O  O  B  Y  X  O  X  O  O  A  Y  X  X  O  O  O
+O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O  O
+O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O
+O  O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O
+O  O  B  A  X  X  O  X  O  O  A  Y  X  X  O  O
 
 CellBlock: 1, 0
-O  O  O  O
-O  O  O  B
-X  O  X  O
-Y  X  X  X
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
 
 CellBlock: 0, 1
-X  Y  O  X
-X  X  O  Y
-X  X  O  X
-O  O  B  Y
-
-CellBlock: 2, 0
-A  Y  O  O
-Z  X  X  X
-O  A  Y  X
-X  X  X  X
+O  A  Z  O  X  Y  X  X  X  X  X  X  X  O  O  O
+O  X  Y  O  X  O  X  O  X  O  X  O  O  O  O  O
+O  X  X  O  Y  O  X  O  X  O  X  O  O  O  O  O
+O  X  X  O  X  Z  X  X  X  X  X  X  X  O  O  O
+O  O  O  B  Y  X  O  X  O  O  A  Y  X  X  O  O
+O  O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O
+O  O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
 
 CellBlock: 1, 1
-O  X  O  X
-O  X  O  X
-Z  X  X  X
-X  O  X  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
 
-CellBlock: 3, 0
-O  O  O  O
-O  O  O  O
-X  O  O  O
-O  O  O  O
+CellBlock: 0, -1
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O
+O  O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O
+O  O  B  A  X  X  O  X  O  O  A  Y  X  X  O  O
+O  A  Z  O  X  Y  X  X  X  X  X  X  X  O  O  O
+O  X  Y  O  X  O  X  O  X  O  X  O  O  O  O  O
+O  X  X  O  Y  O  X  O  X  O  X  O  O  O  O  O
+O  X  X  O  X  Z  X  X  X  X  X  X  X  O  O  O
+O  O  O  B  Y  X  O  X  O  O  A  Y  X  X  O  O
+O  O  O  O  O  O  O  O  B  Z  X  X  X  O  O  O
+O  O  O  O  O  O  O  O  O  A  Y  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
 
-CellBlock: 0, 2
-O  O  O  O
-O  O  O  O
-O  O  O  O
-O  O  O  O
+CellBlock: 1, -1
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
+O  O  O  O  O  O  O  O  O  O  O  O  O  O  O  O
 
-CellBlock: 2, 1
-O  X  O  O
-O  X  O  O
-X  X  X  X
-O  A  Y  X
-
-CellBlock: 1, 2
-O  O  O  B
-O  O  O  O
-O  O  O  O
-O  O  O  O
-
-CellBlock: 3, 1
-O  O  O  O
-O  O  O  O
-O  O  O  O
-X  O  O  O
-
-CellBlock: 2, 2
-Z  X  X  X
-A  Y  O  O
-O  O  O  O
-O  O  O  O
-
-n_cell_blocks: 11
+n_cell_blocks: 6

@@ -168,87 +168,115 @@ Result: North_Special
    *
 
 
-Pattern: Confluent State Rules
+Pattern: C00 with input
 Result: C01
                 South_Ordinary_E
 !East_Ordinary  C00               !West_Ordinary
                 !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C00 with input
 Result: C01
                  !South_Ordinary
 East_Ordinary_E  C00              !West_Ordinary
                  !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C00 with input
 Result: C01
                 !South_Ordinary
 !East_Ordinary  C00               !West_Ordinary
                 North_Ordinary_E
 
 
-Pattern: Confluent State Rules
+Pattern: C00 with input
 Result: C01
                 !South_Ordinary
 !East_Ordinary  C00              (West_Ordinary_E)
                 !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C01 with input
 Result: C11
                 South_Ordinary_E
 !East_Ordinary  C01               !West_Ordinary
                 !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C01 with input
 Result: C11
                  !South_Ordinary
 East_Ordinary_E  C01              !West_Ordinary
                  !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C01 with input
 Result: C11
                 !South_Ordinary
 !East_Ordinary  C01               !West_Ordinary
                 North_Ordinary_E
 
 
-Pattern: Confluent State Rules
+Pattern: C01 with input
 Result: C11
                 !South_Ordinary
 !East_Ordinary  C01              West_Ordinary_E
                 !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C10 with input
 Result: C01
                 South_Ordinary_E
 !East_Ordinary  C10               !West_Ordinary
                 !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C10 with input
 Result: C01
                  !South_Ordinary
 East_Ordinary_E  C10              !West_Ordinary
                  !North_Ordinary
 
 
-Pattern: Confluent State Rules
+Pattern: C10 with input
 Result: C01
                 !South_Ordinary
 !East_Ordinary  C10               !West_Ordinary
                 North_Ordinary_E
 
 
-Pattern: Confluent State Rules
+Pattern: C10 with input
 Result: C01
                 !South_Ordinary
 !East_Ordinary  C10              West_Ordinary_E
+                !North_Ordinary
+
+
+Pattern: C11 with input
+Result: C11
+                South_Ordinary_E
+!East_Ordinary  C11               !West_Ordinary
+                !North_Ordinary
+
+
+Pattern: C11 with input
+Result: C11
+                 !South_Ordinary
+East_Ordinary_E  C11              !West_Ordinary
+                 !North_Ordinary
+
+
+Pattern: C11 with input
+Result: C11
+                !South_Ordinary
+!East_Ordinary  C11               !West_Ordinary
+                North_Ordinary_E
+
+
+Pattern: C11 with input
+Result: C11
+                !South_Ordinary
+!East_Ordinary  C11              West_Ordinary_E
                 !North_Ordinary
 
 

@@ -10,193 +10,43 @@ initialisation_type: RANDOM
 initial_states: Ground
 
 CellBlock: 0, 0
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            East_Ordinary     East_Ordinary_E   East_Ordinary_E   South_Ordinary    Ground            Ground            Ground
-Ground            North_Ordinary_E  Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
-Ground            North_Ordinary    West_Ordinary_E   West_Ordinary_E   C00               East_Special      Ground            Ground
+Ground            Ground            Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
 Ground            Ground            Ground            Ground            South_Ordinary    Ground            Ground            Ground
-West_Ordinary     West_Ordinary     West_Ordinary     West_Ordinary     West_Ordinary     Ground            Ground            Ground
-Ground            West_Ordinary_E   West_Ordinary     West_Ordinary     West_Ordinary     West_Ordinary     Ground            Ground
-
-CellBlock: -3, 2
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     West_Special      West_Special      West_Special      West_Special      West_Special
+Ground            Ground            Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
+Ground            Ground            Ground            Ground            C00               East_Special      Ground            Ground
+West_Ordinary     West_Ordinary_E   West_Ordinary_E   West_Ordinary     West_Ordinary     Ground            Ground            Ground
 Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
 Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
 Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 3, -1
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: -2, 2
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 2, 0
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-
-CellBlock: -1, 2
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 3, 0
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 0, 2
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 2, 1
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-
-CellBlock: 1, 2
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special      West_Special
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 3, 1
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 2, 2
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-Ground            Ground            Ground            Ground            South_Special     Ground            Ground            Ground
-West_Special      West_Special      West_Special      West_Special      West_Special      Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: 3, 2
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            South_Special     Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: -3, -1
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            East_Special      East_Special      East_Special      East_Special      East_Special      East_Special
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-
-CellBlock: -2, -1
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-East_Special      East_Special      East_Special      East_Special      East_Special      East_Special      East_Special      East_Special
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-
-CellBlock: -3, 0
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
 
 CellBlock: -1, -1
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
-Ground            Ground            Ground            Ground            Ground            Ground            North_Special     Ground
-Ground            Ground            Ground            Ground            Ground            Ground            North_Special     C00
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-East_Special      East_Special      East_Special      East_Special      East_Special      East_Special      East_Special      North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Special
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Special
+Ground            Ground            East_Ordinary     East_Ordinary_E   East_Ordinary_E   East_Ordinary     East_Ordinary_E   C00
+Ground            Ground            North_Ordinary    Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary    Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
 
-CellBlock: -3, 1
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
-Ground            Ground            North_Special     Ground            Ground            Ground            Ground            Ground
+CellBlock: 0, -1
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+East_Ordinary     East_Ordinary_E   East_Ordinary_E   East_Ordinary     South_Ordinary    Ground            Ground            Ground
+Ground            Ground            Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
+Ground            Ground            Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
+Ground            Ground            Ground            Ground            South_Ordinary    Ground            Ground            Ground
+Ground            Ground            Ground            Ground            C00               East_Special      Ground            Ground
+Ground            Ground            Ground            Ground            South_Ordinary_E  Ground            Ground            Ground
 
 CellBlock: -1, 0
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
-Ground            Ground            Ground            Ground            Ground            Ground            Ground            North_Ordinary
+Ground            Ground            North_Ordinary    Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary_E  Ground            Ground            Ground            Ground            Ground
+Ground            Ground            North_Ordinary    West_Ordinary_E   West_Ordinary_E   West_Ordinary_E   C00               West_Ordinary_E
+Ground            Ground            Ground            Ground            Ground            Ground            South_Special     Ground
+Ground            Ground            Ground            Ground            Ground            Ground            South_Special     Ground
 Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
 
-n_cell_blocks: 19
+n_cell_blocks: 4
