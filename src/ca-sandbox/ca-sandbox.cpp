@@ -289,15 +289,22 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     do_cell_selections_ui(cell_selections_ui, mouse_universe_pos, &mouse_click_consumed);
 
     //
+    // Keyboard short-cuts
+    //
+
+    if (!io.WantCaptureKeyboard)
+    {
+      if (ImGui::IsKeyPressed(SDL_SCANCODE_DELETE))
+      {
+        cell_tools->flags |= CellToolFlags__SetSelectionNull;
+      }
+    }
+
+    //
     // Draw imGui elements
     //
 
     do_main_gui(state, window_size, mouse_universe_pos, &mouse_click_consumed);
-
-    if (ImGui::IsKeyPressed(SDL_SCANCODE_DELETE))
-    {
-      cell_tools->flags |= CellToolFlags__SetSelectionNull;
-    }
 
     if (cell_regions_ui->make_new_region)
     {
@@ -355,13 +362,13 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
       state->cells_file_loaded = true;
       simulation_ui->simulating = false;
-      simulation_ui->mode = Mode::EDITOR;
+      simulation_ui->mode = Mode::Editor;
     }
 
     if (universe_ui->reload_cells_file && state->rule_file_loaded)
     {
       simulation_ui->simulating = false;
-      simulation_ui->mode = Mode::EDITOR;
+      simulation_ui->mode = Mode::Editor;
 
       universe_ui->reload_cells_file = false;
       state->cells_file_loaded = true;
@@ -408,7 +415,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Simulate
     //
 
-    if (simulation_ui->mode == Mode::SIMULATOR)
+    if (simulation_ui->mode == Mode::Simulator)
     {
       u32 n_simulation_steps = 0;
 
@@ -453,7 +460,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         simulation_ui->simulation_delta_cumulative_average_n += n_simulation_steps;
       }
     }
-    else if (simulation_ui->mode == Mode::EDITOR)
+    else if (simulation_ui->mode == Mode::Editor)
     {
       if (state->cells_file_loaded)
       {

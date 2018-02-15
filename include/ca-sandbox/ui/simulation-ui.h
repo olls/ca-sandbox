@@ -10,8 +10,8 @@
 
 enum struct Mode
 {
-  EDITOR,
-  SIMULATOR
+  Editor,
+  Simulator
 };
 
 
