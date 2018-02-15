@@ -65,12 +65,12 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32, UniversePosition mo
   r32 left_side_bar_width = 0;
   if (state->left_side_bar_open)
   {
-    left_side_bar_width = window_size.x * 0.15;
+    left_side_bar_width = window_size.x * 0.25;
   }
   r32 right_side_bar_width = 0;
   if (state->right_side_bar_open)
   {
-    right_side_bar_width = window_size.x * 0.15;
+    right_side_bar_width = window_size.x * 0.25;
   }
 
   if (state->right_side_bar_open)
