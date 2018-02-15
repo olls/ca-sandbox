@@ -144,7 +144,7 @@ find_state_names(String file_string, NamedStates *named_states, u32 n_states)
 
   if (named_states->states.n_elements != n_states)
   {
-    print("Error whilst parsing rule, incorrect number of named rules.\n");
+    print("Error whilst parsing rule, incorrect number of named states.\n");
     success &= false;
   }
 

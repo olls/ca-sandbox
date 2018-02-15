@@ -330,14 +330,32 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     if (rule_ui->reload_rule_file)
     {
-      rule_ui->reload_rule_file = false;
-      state->rule_file_loaded = true;
+      if (rule_ui->file_picker.selected_file.n_elements != 0)
+      {
+        rule_ui->reload_rule_file = false;
+        state->rule_file_loaded = true;
 
-      print("\nLoading rule file: %s\n", rule_ui->file_picker.selected_file.elements);
-      result.success &= load_rule_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
-      print("\n");
+        print("\nLoading rule file: %s\n", rule_ui->file_picker.selected_file.elements);
+        result.success &= load_rule_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
+        print("\n");
 
-      start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
+        start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
+      }
+    }
+
+    if (universe_ui->new_universe_ui.create_new_universe)
+    {
+      destroy_cell_hashmap(state->universe);
+      init_cell_hashmap(state->universe);
+      state->universe->cell_block_dim = universe_ui->new_universe_ui.cell_block_dim;
+
+      copy_string(universe_ui->loaded_file_name,
+                  universe_ui->new_universe_ui.directory_picker.selected_file.elements,
+                  universe_ui->new_universe_ui.directory_picker.selected_file.n_elements);
+
+      state->cells_file_loaded = true;
+      simulation_ui->simulating = false;
+      simulation_ui->mode = Mode::EDITOR;
     }
 
     if (universe_ui->reload_cells_file && state->rule_file_loaded)

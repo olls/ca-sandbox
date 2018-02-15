@@ -32,6 +32,7 @@
 = better cell editing tools:
   - selections: move, rotate, mirror
   - sub-modules
+  - copy-paste buffer
 - cell initialisation options ui
 - ability to specify associated .rule file in .cells file
 - composite count matching comparison: (3 <= x <= 4) or (>= 3, <= 4)
