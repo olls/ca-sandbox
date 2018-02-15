@@ -54,6 +54,7 @@ destroy_cell_hashmap(CellBlocks *cell_blocks)
   if (cell_blocks->hashmap != 0)
   {
     un_allocate(cell_blocks->hashmap);
+    cell_blocks->hashmap = 0;
   }
 }
 

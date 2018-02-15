@@ -59,6 +59,10 @@ void
 append_string(Array::Array<char>& dynamic_string, String source);
 
 
+char *
+dynamic_string_to_heap(Array::Array<char>& dynamic_string);
+
+
 b32
 str_eq(const char *a, const char *b, u32 n);
 

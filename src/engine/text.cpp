@@ -112,6 +112,16 @@ append_string(Array::Array<char>& dynamic_string, String source)
 }
 
 
+char *
+dynamic_string_to_heap(Array::Array<char>& dynamic_string)
+{
+  char *result = allocate(char, dynamic_string.n_elements + 1);
+  copy_string(result, dynamic_string.elements, dynamic_string.n_elements);
+  result[dynamic_string.n_elements] = '\0';
+  return result;
+}
+
+
 b32
 str_eq(const char *a, const char *b, u32 n)
 {

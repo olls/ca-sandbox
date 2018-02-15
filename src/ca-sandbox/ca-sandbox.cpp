@@ -339,27 +339,45 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         rule_ui->reload_rule_file = false;
         state->rule_file_loaded = true;
 
-        print("\nLoading rule file: %s\n", rule_ui->file_picker.selected_file.elements);
-        result.success &= load_rule_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
+        char *loading_file_name = dynamic_string_to_heap(rule_ui->file_picker.selected_file);
+
+        print("\nLoading rule file: %s\n", loading_file_name);
+        result.success &= load_rule_file(loading_file_name, &loaded_rule->config);
         print("\n");
+
+        un_allocate(loading_file_name);
 
         start_build_rule_tree_thread(rule_creation_thread, loaded_rule);
       }
     }
 
-    if (universe_ui->new_universe_ui.create_new_universe)
+    if (universe_ui->new_universe_ui.create_new_universe && state->rule_file_loaded)
     {
-      destroy_cell_hashmap(state->universe);
-      init_cell_hashmap(state->universe);
-      state->universe->cell_block_dim = universe_ui->new_universe_ui.cell_block_dim;
+      char *loading_file_name = dynamic_string_to_heap(universe_ui->new_universe_ui.directory_picker.selected_file);
 
-      copy_string(universe_ui->loaded_file_name,
-                  universe_ui->new_universe_ui.directory_picker.selected_file.elements,
-                  universe_ui->new_universe_ui.directory_picker.selected_file.n_elements);
+      if (state->universe)
+      {
+        destroy_cell_hashmap(state->universe);
+        un_allocate(state->universe);
+        state->universe = 0;
+      }
+
+      state->universe = allocate(Universe, 1);
+      init_cell_hashmap(state->universe);
+
+      *simulate_options = default_simulation_options();
+      Array::clear(cell_initialisation_options->set_of_initial_states);
+      default_cell_initialisation_options(cell_initialisation_options);
+
+      state->universe->cell_block_dim = universe_ui->new_universe_ui.cell_block_dim;
+      universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
 
       state->cells_file_loaded = true;
       simulation_ui->simulating = false;
       simulation_ui->mode = Mode::Editor;
+
+      strcpy(universe_ui->loaded_file_name, loading_file_name);
+      un_allocate(loading_file_name);
     }
 
     if (universe_ui->reload_cells_file && state->rule_file_loaded)
@@ -374,8 +392,10 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       Array::clear(cell_initialisation_options->set_of_initial_states);
       default_cell_initialisation_options(cell_initialisation_options);
 
+      char *loading_file_name = dynamic_string_to_heap(universe_ui->cells_file_picker.selected_file);
+
       universe_ui->loading_error_message.n_elements = 0;
-      Universe *new_universe = load_universe(universe_ui->cells_file_picker.selected_file.elements, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
+      Universe *new_universe = load_universe(loading_file_name, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
 
       if (new_universe == 0)
       {
@@ -398,14 +418,16 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         {
           destroy_cell_hashmap(state->universe);
           un_allocate(state->universe);
+          state->universe = 0;
         }
 
         state->universe = new_universe;
         universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
-        copy_string(universe_ui->loaded_file_name,
-                    universe_ui->cells_file_picker.selected_file.elements,
-                    universe_ui->cells_file_picker.selected_file.n_elements);
+
+        strcpy(universe_ui->loaded_file_name, loading_file_name);
       }
+
+      un_allocate(loading_file_name);
     }
 
     //

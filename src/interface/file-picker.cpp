@@ -121,8 +121,6 @@ file_picker(const char *picker_name, FilePicker *picker, b32 is_directory_picker
         append_string(picker->selected_file, new_string(file.name));
       }
 
-      picker->selected_file += '\0';
-
       print("Selected file: %.*s\n", picker->selected_file.n_elements, picker->selected_file.elements);
       ImGui::CloseCurrentPopup();
     }

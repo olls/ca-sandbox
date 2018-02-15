@@ -356,6 +356,7 @@ load_universe(const char *filename, SimulateOptions *simulate_options, CellIniti
 
   if (!success)
   {
+    destroy_cell_hashmap(result);
     un_allocate(result);
     result = 0;
   }

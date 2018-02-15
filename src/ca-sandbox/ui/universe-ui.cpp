@@ -25,7 +25,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
 {
   if (*universe_ptr != 0)
   {
-    ImGui::InputText("Cells filename", universe_ui->loaded_file_name, FILE_NAME_LIMIT);
+    ImGui::Text("Cells filename: %s", universe_ui->loaded_file_name);
   }
 
   const char *cells_file_picker_name = "Cells file picker";
