@@ -1,11 +1,15 @@
 neighbourhood_region_shape: VON_NEUMANN
 neighbourhood_region_size: 1
 
-n_states: 17
+n_states: 19
 State: Ground
 State: Wire
 State: Excited
 State: Trail
+State: Not
+State: NotExcited
+State: Or
+State: OrExcited
 State: And
 State: AndExcited
 State: XOr
@@ -17,8 +21,6 @@ State: Crossing00
 State: Crossing01
 State: Crossing10
 State: Crossing11
-State: Or
-State: OrExcited
 
 null_states: Ground
 
@@ -41,6 +43,34 @@ Pattern: Trail -> Wire
 Result: Wire
    *
 *  Trail  *
+   *
+
+
+Pattern: Not -> NotExcited
+Result: NotExcited
+          !Excited
+!Excited  [NotExcited, Not]  !Excited
+          !Excited
+
+
+Pattern: NotExcited -> Not
+Result: Not
+   *
+*  NotExcited  *
+   *
+
+
+Pattern: Or -> OrExcited
+Result: OrExcited
+           (Excited)
+(Excited)  [Or, OrExcited]  (Excited)
+           (Excited)
+
+
+Pattern: OrExcited -> Or
+Result: Or
+   *
+*  OrExcited  *
    *
 
 
@@ -96,9 +126,9 @@ Result: XOr
 
 Pattern: Output -> OutputExcited
 Result: OutputExcited
-                                                               ([AndExcited, XOrExcited, Crossing11, Crossing01, OrExcited])
-([AndExcited, XOrExcited, Crossing10, Crossing11, OrExcited])  [OutputExcited, Output]                                        ([AndExcited, XOrExcited, Crossing11, Crossing10, OrExcited])
-                                                               ([AndExcited, XOrExcited, Crossing11, Crossing01, OrExcited])
+                                                                           ([NotExcited, OrExcited, AndExcited, XOrExcited, Crossing11, Crossing01])
+([NotExcited, OrExcited, AndExcited, XOrExcited, Crossing10, Crossing11])  [OutputExcited, Output]                                                    ([NotExcited, OrExcited, AndExcited, XOrExcited, Crossing11, Crossing10])
+                                                                           ([NotExcited, OrExcited, AndExcited, XOrExcited, Crossing11, Crossing01])
 
 
 Pattern: OutputExcited -> OutputTrail
@@ -162,19 +192,3 @@ Result: Crossing00
    *
 *  [Crossing01, Crossing10, Crossing11]  *
    *
-
-
-Pattern: Or -> OrExcited
-Result: OrExcited
-           (Excited)
-(Excited)  [Or, OrExcited]  (Excited)
-           (Excited)
-
-
-Pattern: OrExcited -> Or
-Result: Or
-   *
-*  OrExcited  *
-   *
-
-
