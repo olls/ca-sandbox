@@ -9,6 +9,7 @@
   - rewrite create-new loop to only loop through the cells it actually needs to check
 - reduce tree building time
 - profiling tools
+- resize universe hashmap, if saturated
 
 # composite states?
 - eg: Modifier: Transmission
@@ -32,23 +33,25 @@
 = better cell editing tools:
   - selections: move, rotate, mirror
   - sub-modules
-  - copy-paste buffer
+  - cut regions
+- fix re-blockifying -ve cell blocks
+- keyboard shortcuts for selecting states (0-9)
+- auto centre/scale universe
+- render border
+- draw grid (or origin axes)
 - cell initialisation options ui
 - ability to specify associated .rule file in .cells file
 - composite count matching comparison: (3 <= x <= 4) or (>= 3, <= 4)
 - figure out explanation of "or" cell patterns ("Match if one OR pattern cell matches")
 - rule pattern groups/sets/blocks
 - better parsing error messages (i.e: keep a line number counter?)
-- auto centre/scale universe
 - colour cells state buttons in rule patterns UI where only one state is used
 - reduce risk of corrupting cells files (i.e: it's too easy to overwrite, after opening with rule using different states)
-- resize universe hashmap, if saturated
 - separate model matrix and projection matrix uniform (ie: aspect ratio goes in projection, view_panning goes in model)
-- render border
-- tabbed interface
-- render selection in screen space - for constant line width
 - tools for creation of new rule files
+- renaming files
 - rotationally invariant patterns
 - delete states
 - unfiddlify named states given value by position in .rule file (to enable state deletion)
     (would require reloading the cells file to update the state values stored in memory)
+- undo history
