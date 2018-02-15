@@ -314,6 +314,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     if (universe_ui->save_cells_file && state->universe != 0)
     {
       universe_ui->save_cells_file = false;
+      delete_null_cell_blocks(state->universe, &loaded_rule->config);
       result.success &= save_universe_to_file(universe_ui->loaded_file_name, state->universe, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states);
     }
 
