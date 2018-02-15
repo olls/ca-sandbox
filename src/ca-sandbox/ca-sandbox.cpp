@@ -304,13 +304,10 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Draw imGui elements
     //
 
-    do_main_gui(state, window_size, mouse_universe_pos, &mouse_click_consumed);
 
-    if (cell_regions_ui->make_new_region)
-    {
-      cell_regions_ui->make_new_region = false;
-      make_new_region(cell_regions, cell_selections_ui, state->universe, cell_regions_ui->new_region_name_buffer, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer);
-    }
+    do_main_gui(state, window_size);
+
+    update_cell_regions(cell_regions_ui, cell_regions, cell_selections_ui, state->universe, state->minimap_framebuffer, cell_drawing, cell_instancing, general_vertex_buffer, mouse_universe_pos, &mouse_click_consumed);
 
     perform_cell_tools(cell_tools, cell_selections_ui, state->universe, &loaded_rule->config);
 
@@ -579,29 +576,38 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Region placement drawing
     //
 
-    if (cell_regions_ui->placing_region)
+    if (cell_regions_ui->placing_region ||
+        cell_regions_ui->placing_clipboard_region)
     {
-      CellRegion& region = cell_regions->regions[cell_regions_ui->placing_region_index];
+      CellRegion *region;
+      if (cell_regions_ui->placing_region)
+      {
+        region = Array::get(cell_regions->regions, cell_regions_ui->placing_region_index);
+      }
+      else
+      {
+        region = &cell_regions->clipboard_region;
+      }
 
       Border region_border = {
         .type = BorderType::FIXED,
-        .min_corner_block = region.start_block,
-        .min_corner_cell = region.start_cell,
-        .max_corner_block = region.end_block,
-        .max_corner_cell = region.end_cell
+        .min_corner_block = region->start_block,
+        .min_corner_cell = region->start_cell,
+        .max_corner_block = region->end_block,
+        .max_corner_cell = region->end_cell
       };
-      upload_cell_instances(&region.cell_blocks, region_border, cell_instancing);
+      upload_cell_instances(&region->cell_blocks, region_border, cell_instancing);
 
-      vec2 start_offset = s32vec2_to_vec2(region.start_block);
-      start_offset = vec2_add(start_offset, vec2_multiply(s32vec2_to_vec2(region.start_cell), -1.0 / region.cell_blocks.cell_block_dim));
+      vec2 start_offset = s32vec2_to_vec2(region->start_block);
+      start_offset = vec2_add(start_offset, vec2_multiply(s32vec2_to_vec2(region->start_cell), -1.0 / region->cell_blocks.cell_block_dim));
 
-      s32vec2 cell_dim = vec2_multiply(vec2_subtract(region.end_block, region.start_block), region.cell_blocks.cell_block_dim);
-      cell_dim = vec2_add(cell_dim, region.end_cell);
-      cell_dim = vec2_subtract(cell_dim, region.start_cell);
-      vec2 midpoint_offset = vec2_multiply(s32vec2_to_vec2(vec2_multiply(cell_dim, 0.5)), 1.0/region.cell_blocks.cell_block_dim);
+      s32vec2 cell_dim = vec2_multiply(vec2_subtract(region->end_block, region->start_block), region->cell_blocks.cell_block_dim);
+      cell_dim = vec2_add(cell_dim, region->end_cell);
+      cell_dim = vec2_subtract(cell_dim, region->start_cell);
+      vec2 midpoint_offset = vec2_multiply(s32vec2_to_vec2(vec2_multiply(cell_dim, 0.5)), 1.0/region->cell_blocks.cell_block_dim);
 
       vec2 mouse_cell_offset = mouse_universe_pos.cell_position;
-      quantise_0to1_cell_position(mouse_cell_offset, region.cell_blocks.cell_block_dim);
+      quantise_0to1_cell_position(mouse_cell_offset, region->cell_blocks.cell_block_dim);
       vec2 mouse_offset = vec2_add(s32vec2_to_vec2(mouse_universe_pos.cell_block_position), mouse_cell_offset);
 
       vec2 offset = {};
@@ -619,7 +625,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       mat4x4 placing_region_projection_matrix_aspect;
       mat4x4MultiplyMatrix(placing_region_projection_matrix_aspect, placing_region_projection_matrix, view_panning->projection_matrix);
 
-      draw_cell_blocks(&region.cell_blocks, cell_instancing, cell_drawing, general_vertex_buffer, placing_region_projection_matrix_aspect);
+      draw_cell_blocks(&region->cell_blocks, cell_instancing, cell_drawing, general_vertex_buffer, placing_region_projection_matrix_aspect);
     }
 
     //

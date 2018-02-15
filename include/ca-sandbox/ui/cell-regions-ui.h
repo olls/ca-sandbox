@@ -17,11 +17,18 @@ struct CellRegionsUI
 
   b32 placing_region;
   u32 placing_region_index;
+
+  b32 placing_clipboard_region;
 };
 
 
 void
-do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, Universe *universe, CellSelectionsUI *cell_selections_ui, UniversePosition mouse_universe_position, b32 *mouse_click_consumed);
+do_cell_regions_ui(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui);
 
+
+void
+update_cell_regions(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui, Universe *universe,
+                    GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer,
+                    UniversePosition mouse_universe_position, b32 *mouse_click_consumed);
 
 #endif

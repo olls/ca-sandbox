@@ -35,6 +35,9 @@ struct CellRegion
 struct CellRegions
 {
   Array::Array<CellRegion> regions;
+
+  b32 clipboard_region_in_use;
+  CellRegion clipboard_region;
 };
 
 
@@ -43,11 +46,15 @@ get_cell_region_by_name(CellRegions *cell_regions, String search_name);
 
 
 void
-make_new_region(CellRegions *cell_regions, CellSelectionsUI *cell_selections_ui, Universe *universe, const char *name, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer);
+copy_cell_blocks(CellBlocks *from, CellBlocks *to, s32vec2 start_block, s32vec2 start_cell, s32vec2 end_block, s32vec2 end_cell, s32vec2 to_block_offset = {}, s32vec2 to_cell_offset = {});
+
+
+CellRegion
+make_new_region(CellSelectionsUI *cell_selections_ui, Universe *universe, const char *name, GLuint minimap_framebuffer, CellDrawing *cell_drawing, CellInstancing *cell_instancing, OpenGL_Buffer *cell_vertices_buffer);
 
 
 void
-add_region_to_universe(CellRegions *cell_regions, Universe *universe, u32 region_index, UniversePosition place_position);
+add_region_to_universe(Universe *universe, CellRegion *region, UniversePosition place_position);
 
 
 void

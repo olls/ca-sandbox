@@ -40,7 +40,7 @@ setup_imgui_style()
 
 
 void
-do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32, UniversePosition mouse_universe_pos, b32 *mouse_click_consumed)
+do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
 {
   const ImGuiWindowFlags imgui_window_flags = ImGuiWindowFlags_NoResize |
                                               ImGuiWindowFlags_NoMove |
@@ -113,7 +113,7 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32, UniversePosition mo
 
       if (ImGui::TabItem("Cell Regions"))
       {
-        do_cell_regions_ui(&state->cell_regions_ui, &state->cell_regions, state->universe, &state->cell_selections_ui, mouse_universe_pos, mouse_click_consumed);
+        do_cell_regions_ui(&state->cell_regions_ui, &state->cell_regions, &state->cell_selections_ui);
       }
 
       if (ImGui::TabItem("Cell Tools"))
