@@ -1,0 +1,102 @@
+cell_block_dim: 8
+
+border_type: INFINITE
+border_min_block: 0 0
+border_min_cell: 0 0
+border_max_block: 10 10
+border_max_cell: 0 0
+
+initialisation_type: RANDOM
+initial_states: Ground
+
+CellBlock: 0, 0
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Trail          Excited        Excited        Excited        Excited        Wire           Ground
+Ground         Wire           Ground         Ground         Ground         Ground         Wire           Ground
+Ground         Wire           Ground         Ground         Ground         Ground         Wire           Ground
+Ground         Wire           Ground         Ground         Ground         Ground         Wire           Ground
+Ground         Wire           Ground         Ground         Ground         Ground         Wire           Ground
+Ground         Wire           Wire           Wire           Wire           Wire           Wire           Ground
+Ground         Ground         Ground         Wire           Ground         Ground         Ground         Ground
+
+CellBlock: 0, 1
+Ground         Wire           Wire           Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Wire           Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+
+CellBlock: 1, 1
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+And            Output         Wire           Wire           Wire           Wire           Wire           Wire
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+
+CellBlock: 0, 2
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Wire           Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Wire           Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+
+CellBlock: 1, 2
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+XOr            Output         Wire           Wire           Wire           Wire           Wire           Wire
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+
+CellBlock: 0, 3
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Wire           Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Wire           Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+Ground         Wire           Ground         Wire           Ground         Ground         Ground         Ground
+
+CellBlock: 1, 3
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Or             Output         Wire           Wire           Wire           Wire           Wire           Wire
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+
+CellBlock: 0, 4
+Ground         Wire           Ground         Wire           Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+
+CellBlock: 1, 4
+Wire           Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+
+n_cell_blocks: 9

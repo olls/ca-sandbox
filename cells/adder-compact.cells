@@ -1,0 +1,126 @@
+cell_block_dim: 4
+
+border_type: INFINITE
+border_min_block: 0 0
+border_min_cell: 0 0
+border_max_block: 10 10
+border_max_cell: 0 0
+
+initialisation_type: RANDOM
+initial_states: Ground
+
+CellBlock: 0, 0
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Excited        Wire
+Ground         Ground         Ground         Ground
+
+CellBlock: 1, 0
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+
+CellBlock: 0, 1
+Ground         Ground         Excited        Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Wire
+Ground         Ground         Ground         Ground
+
+CellBlock: 2, 0
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+
+CellBlock: 1, 1
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+
+CellBlock: 3, 0
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire
+Ground         Ground         Wire           Ground
+
+CellBlock: 2, 1
+Wire           Wire           Wire           Wire
+Ground         Ground         Wire           Ground
+Wire           Wire           Crossing00     Output
+Wire           Ground         Output         Ground
+
+CellBlock: 4, 0
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Wire           Wire           Ground         Ground
+Ground         Wire           Ground         Ground
+
+CellBlock: 3, 1
+Wire           Ground         XOr            Output
+XOr            Output         Wire           Ground
+Wire           Ground         Wire           Ground
+Ground         Ground         Wire           Wire
+
+CellBlock: 2, 2
+Wire           Ground         Wire           Ground
+Wire           Wire           And            Output
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 4, 1
+Wire           Crossing00     Output         Wire
+Ground         Output         Ground         Ground
+Ground         Wire           Ground         Ground
+Wire           And            Output         Wire
+
+CellBlock: 3, 2
+Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 5, 1
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 4, 2
+Ground         Ground         Ground         Or
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 6, 1
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 5, 2
+Output         Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 7, 1
+Wire           Wire           Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 6, 2
+Wire           Wire           Wire           Wire
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+CellBlock: 7, 2
+Wire           Wire           Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground
+
+n_cell_blocks: 19
