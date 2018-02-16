@@ -465,7 +465,7 @@ display_rule_pattern(RuleConfiguration *rule_config, RulePattern *rule_pattern)
 /// Display the Rule UI window; contains the rule file selector, tree building, rule patterns editor
 ///
 void
-do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread)
+do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread, FilesLoadedState *files_loaded_state)
 {
   ImGui::Text("Rule file: %.*s", rule_ui->file_picker.selected_file.n_elements, rule_ui->file_picker.selected_file.elements);
 
@@ -484,7 +484,7 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
 
   if (file_picker(rule_file_picker_name, &rule_ui->file_picker))
   {
-    rule_ui->reload_rule_file = true;
+    flag_load_rule_file(files_loaded_state);
 
   }
 

@@ -1,13 +1,15 @@
 #ifndef UNIVERSE_UI_H_DEF
 #define UNIVERSE_UI_H_DEF
 
-#include "engine/types.h"
-
 #include "ca-sandbox/cell-blocks.h"
 #include "ca-sandbox/simulate.h"
+#include "ca-sandbox/files-loaded-state.h"
+
 #include "ca-sandbox/ui/new-universe-ui.h"
 
 #include "interface/file-picker.h"
+
+#include "engine/types.h"
 
 /// @file
 ///
@@ -19,7 +21,6 @@ struct UniverseUI
 
   FilePicker cells_file_picker;
   char loaded_file_name[FILE_NAME_LIMIT];
-  b32 reload_cells_file;
   b32 save_cells_file;
 
   NewUniverseUI new_universe_ui;
@@ -32,7 +33,7 @@ struct UniverseUI
 
 
 void
-do_universe_ui(UniverseUI *universe_ui, Universe **universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states);
+do_universe_ui(UniverseUI *universe_ui, Universe **universe, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, FilesLoadedState *files_laoded_state);
 
 
 void

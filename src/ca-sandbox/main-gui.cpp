@@ -8,6 +8,7 @@
 #include "ca-sandbox/ui/named-states-ui.h"
 #include "ca-sandbox/ui/cell-regions-ui.h"
 #include "ca-sandbox/ui/cell-tools-ui.h"
+#include "ca-sandbox/ui/files-loaded-state-ui.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_tabs.h"
@@ -84,12 +85,12 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
 
       if (ImGui::TabItem("Cells File"))
       {
-        do_universe_ui(&state->universe_ui, &state->universe, &state->simulate_options, &state->cell_initialisation_options, &state->loaded_rule.config.named_states);
+        do_universe_ui(&state->universe_ui, &state->universe, &state->simulate_options, &state->cell_initialisation_options, &state->loaded_rule.config.named_states, &state->files_loaded_state);
       }
 
       if (ImGui::TabItem("Simulation"))
       {
-        do_simulation_ui(&state->simulation_ui, state->frame_timing.frame_start, state->loaded_rule.rule_tree_built, &state->universe_ui.reload_cells_file, &state->universe_ui.save_cells_file);
+        do_simulation_ui(&state->simulation_ui, state->frame_timing.frame_start, state->loaded_rule.rule_tree_built, &state->files_loaded_state, &state->universe_ui.save_cells_file);
       }
 
       if (ImGui::TabItem("Simulation Options"))
@@ -135,7 +136,7 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
 
     if (ImGui::Begin("Rules File Editor", NULL, imgui_window_flags))
     {
-      do_rule_ui(&state->rule_ui, &state->loaded_rule, &state->rule_creation_thread);
+      do_rule_ui(&state->rule_ui, &state->loaded_rule, &state->rule_creation_thread, &state->files_loaded_state);
     }
     ImGui::End();
 
@@ -200,4 +201,6 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
     // }
     ImGui::EndMainMenuBar();
   }
+
+  do_files_loaded_state_ui(&state->files_loaded_state);
 }

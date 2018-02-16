@@ -21,7 +21,7 @@
 /// The GUI elements for managing the .cells file, and the objects which its data fills.
 ///
 void
-do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states)
+do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, FilesLoadedState *files_loaded_state)
 {
   if (*universe_ptr != 0)
   {
@@ -43,7 +43,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
 
   if (file_picker(cells_file_picker_name, &universe_ui->cells_file_picker))
   {
-    universe_ui->reload_cells_file = true;
+    flag_load_cells_file(files_loaded_state);
   }
 
   const char *new_universe_ui_window_name = "New Universe";

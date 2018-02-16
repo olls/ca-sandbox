@@ -196,7 +196,7 @@ create_any_new_cell_blocks_needed(SimulateOptions *simulate_options, CellInitial
     }
   }
 
-#if 1
+#if 0
   if (simulate_options->border.type == BorderType::TORUS)
   {
     // Calculate the border reduced by the neighbourhood region size to check the cell block against

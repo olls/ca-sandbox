@@ -12,6 +12,7 @@
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/cell-tools.h"
 #include "ca-sandbox/screen-shader.h"
+#include "ca-sandbox/files-loaded-state.h"
 
 #include "ca-sandbox/ui/simulate-options-ui.h"
 #include "ca-sandbox/ui/simulation-ui.h"
@@ -60,13 +61,13 @@ struct CA_SandboxState
 
   ScreenShader screen_shader;
 
+  FilesLoadedState files_loaded_state;
+
   Universe *universe;
   SimulateOptions simulate_options;
   CellInitialisationOptions cell_initialisation_options;
-  b32 cells_file_loaded;
 
   Rule loaded_rule;
-  b32 rule_file_loaded;
   RuleCreationThread rule_creation_thread;
 
   CellSelectionsUI cell_selections_ui;

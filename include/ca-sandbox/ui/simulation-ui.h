@@ -1,6 +1,8 @@
 #ifndef SIMULATION_UI_H_DEF
 #define SIMULATION_UI_H_DEF
 
+#include "ca-sandbox/files-loaded-state.h"
+
 #include "engine/types.h"
 #include "engine/text.h"
 
@@ -46,7 +48,7 @@ struct SimulationUI
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe, b32 *save_universe);
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, FilesLoadedState *files_loaded_state, b32 *save_universe);
 
 
 #endif

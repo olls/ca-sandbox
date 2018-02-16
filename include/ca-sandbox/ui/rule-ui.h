@@ -4,6 +4,7 @@
 #include "interface/file-picker.h"
 
 #include "ca-sandbox/rule.h"
+#include "ca-sandbox/files-loaded-state.h"
 
 /// @file
 ///
@@ -13,13 +14,12 @@
 struct RuleUI
 {
   FilePicker file_picker;
-  b32 reload_rule_file;
   b32 save_rule_file;
 };
 
 
 void
-do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread);
+do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread, FilesLoadedState *files_loaded_state);
 
 
 #endif

@@ -21,7 +21,7 @@
 
 
 void
-do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, b32 *reload_universe, b32 *save_universe)
+do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_built, FilesLoadedState *files_loaded_state, b32 *save_universe)
 {
   ImGui::Text("Mode: %s", simulation_ui->mode == Mode::Simulator ? "Simulator" : "Editor");
 
@@ -105,7 +105,7 @@ do_simulation_ui(SimulationUI *simulation_ui, u64 frame_start, b32 rule_tree_bui
     {
       simulation_ui->simulating = false;
       simulation_ui->mode = Mode::Editor;
-      *reload_universe = true;
+      flag_load_cells_file(files_loaded_state);
     }
   }
 }

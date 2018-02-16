@@ -142,6 +142,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
   CellSelectionsUI *cell_selections_ui = &state->cell_selections_ui;
   CellTools *cell_tools = &state->cell_tools;
   ScreenShader *screen_shader = &state->screen_shader;
+  FilesLoadedState *files_loaded_state = &state->files_loaded_state;
 
   if (state->init)
   {
@@ -204,11 +205,14 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     {
       String rule_filename = new_string(argv[2]);
       append_string(rule_ui->file_picker.selected_file, rule_filename);
-      rule_ui->reload_rule_file = true;
+      flag_load_rule_file(files_loaded_state);
 
       String cells_filename = new_string(argv[1]);
       append_string(universe_ui->cells_file_picker.selected_file, cells_filename);
-      universe_ui->reload_cells_file = true;
+
+      // NOTE: Setting value directly here instead of using flag_load_cells_file() because the rule
+      //         file is not loaded until we get to in the main loop.
+      files_loaded_state->load_cells_file = true;
     }
 
     opengl_print_errors();
@@ -249,8 +253,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     ImGuiIO& io = ImGui::GetIO();
 
-    if (io.KeysDown[SDL_SCANCODE_ESCAPE] ||
-        (io.KeyCtrl && ImGui::IsKeyDown(SDL_SCANCODE_W)))
+    if (io.KeyCtrl && ImGui::IsKeyDown(SDL_SCANCODE_W))
     {
       running = false;
     }
@@ -332,12 +335,18 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Load input files
     //
 
-    if (rule_ui->reload_rule_file)
+    if (files_loaded_state->load_rule_file)
     {
-      if (rule_ui->file_picker.selected_file.n_elements != 0)
+      if (rule_ui->file_picker.selected_file.n_elements == 0)
       {
-        rule_ui->reload_rule_file = false;
-        state->rule_file_loaded = true;
+        // TODO: User error message
+        printf("Error: no filename selected\n");
+        assert(0);
+      }
+      else
+      {
+        files_loaded_state->load_rule_file = false;
+        files_loaded_state->rule_file_loaded = true;
 
         char *loading_file_name = dynamic_string_to_heap(rule_ui->file_picker.selected_file);
 
@@ -351,69 +360,15 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
       }
     }
 
-    if (universe_ui->new_universe_ui.create_new_universe && state->rule_file_loaded)
+
+    if (files_loaded_state->load_cells_file)
     {
-      char *loading_file_name = dynamic_string_to_heap(universe_ui->new_universe_ui.directory_picker.selected_file);
+      files_loaded_state->load_cells_file = false;
 
-      if (state->universe)
+      if (universe_ui->new_universe_ui.create_new_universe)
       {
-        destroy_cell_hashmap(state->universe);
-        un_allocate(state->universe);
-        state->universe = 0;
-      }
+        char *loading_file_name = dynamic_string_to_heap(universe_ui->new_universe_ui.directory_picker.selected_file);
 
-      state->universe = allocate(Universe, 1);
-      init_cell_hashmap(state->universe);
-
-      *simulate_options = default_simulation_options();
-      Array::clear(cell_initialisation_options->set_of_initial_states);
-      default_cell_initialisation_options(cell_initialisation_options);
-
-      state->universe->cell_block_dim = universe_ui->new_universe_ui.cell_block_dim;
-      universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
-
-      state->cells_file_loaded = true;
-      simulation_ui->simulating = false;
-      simulation_ui->mode = Mode::Editor;
-
-      strcpy(universe_ui->loaded_file_name, loading_file_name);
-      un_allocate(loading_file_name);
-    }
-
-    if (universe_ui->reload_cells_file && state->rule_file_loaded)
-    {
-      simulation_ui->simulating = false;
-      simulation_ui->mode = Mode::Editor;
-
-      universe_ui->reload_cells_file = false;
-      state->cells_file_loaded = true;
-
-      *simulate_options = default_simulation_options();
-      Array::clear(cell_initialisation_options->set_of_initial_states);
-      default_cell_initialisation_options(cell_initialisation_options);
-
-      char *loading_file_name = dynamic_string_to_heap(universe_ui->cells_file_picker.selected_file);
-
-      universe_ui->loading_error_message.n_elements = 0;
-      Universe *new_universe = load_universe(loading_file_name, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
-
-      if (new_universe == 0)
-      {
-        universe_ui->loading_error = true;
-      }
-      else if (loaded_rule->config.neighbourhood_region_size >= new_universe->cell_block_dim)
-      {
-        universe_ui->loading_error = true;
-        append_string(universe_ui->loading_error_message, new_string("cell_block_dim is too small for the current neighbourhood_region_size.\n"));
-      }
-
-      if (universe_ui->loading_error)
-      {
-        print("%.*s\n", universe_ui->loading_error_message.n_elements, universe_ui->loading_error_message.elements);
-      }
-      else
-      {
-        // Successfully loaded new_universe!
         if (state->universe)
         {
           destroy_cell_hashmap(state->universe);
@@ -421,13 +376,71 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
           state->universe = 0;
         }
 
-        state->universe = new_universe;
+        state->universe = allocate(Universe, 1);
+        init_cell_hashmap(state->universe);
+
+        *simulate_options = default_simulation_options();
+        Array::clear(cell_initialisation_options->set_of_initial_states);
+        default_cell_initialisation_options(cell_initialisation_options);
+
+        state->universe->cell_block_dim = universe_ui->new_universe_ui.cell_block_dim;
         universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
 
+        files_loaded_state->cells_file_loaded = true;
+        simulation_ui->simulating = false;
+        simulation_ui->mode = Mode::Editor;
+
         strcpy(universe_ui->loaded_file_name, loading_file_name);
+        un_allocate(loading_file_name);
+      }
+      else
+      {
+        simulation_ui->simulating = false;
+        simulation_ui->mode = Mode::Editor;
+
+        *simulate_options = default_simulation_options();
+        Array::clear(cell_initialisation_options->set_of_initial_states);
+        default_cell_initialisation_options(cell_initialisation_options);
+
+        char *loading_file_name = dynamic_string_to_heap(universe_ui->cells_file_picker.selected_file);
+
+        universe_ui->loading_error_message.n_elements = 0;
+        Universe *new_universe = load_universe(loading_file_name, simulate_options, cell_initialisation_options, &loaded_rule->config.named_states, universe_ui->loading_error_message);
+
+        if (new_universe == 0)
+        {
+          universe_ui->loading_error = true;
+        }
+        else if (loaded_rule->config.neighbourhood_region_size >= new_universe->cell_block_dim)
+        {
+          universe_ui->loading_error = true;
+          append_string(universe_ui->loading_error_message, new_string("cell_block_dim is too small for the current neighbourhood_region_size.\n"));
+        }
+
+        if (universe_ui->loading_error)
+        {
+          print("%.*s\n", universe_ui->loading_error_message.n_elements, universe_ui->loading_error_message.elements);
+        }
+        else
+        {
+          // Successfully loaded new_universe!
+          if (state->universe)
+          {
+            destroy_cell_hashmap(state->universe);
+            un_allocate(state->universe);
+            state->universe = 0;
+          }
+
+          state->universe = new_universe;
+          universe_ui->edited_cell_block_dim = state->universe->cell_block_dim;
+
+          strcpy(universe_ui->loaded_file_name, loading_file_name);
+        }
+
+        un_allocate(loading_file_name);
       }
 
-      un_allocate(loading_file_name);
+      files_loaded_state->cells_file_loaded = !universe_ui->loading_error;
     }
 
     //
@@ -481,7 +494,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     }
     else if (simulation_ui->mode == Mode::Editor)
     {
-      if (state->cells_file_loaded)
+      if (files_loaded_state->cells_file_loaded)
       {
         do_cells_editor(cells_editor, state->universe, cell_initialisation_options, &loaded_rule->config.named_states, mouse_universe_pos, &mouse_click_consumed);
       }
