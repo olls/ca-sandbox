@@ -1,0 +1,60 @@
+cell_block_dim: 10
+
+border_type: INFINITE
+border_min_block: 0 0
+border_min_cell: 0 0
+border_max_block: 10 10
+border_max_cell: 0 0
+
+initialisation_type: RANDOM
+initial_states: Ground
+
+CellBlock: 0, 0
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Wire              Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Insulator         Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+
+CellBlock: -1, -1
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Insulator         Ground            Ground
+Insulator         TrailingExcited   ExcitedEast       Wire              Wire              Wire              Wire              Ground            Wire              Wire
+Ground            Ground            Ground            Ground            Wire              Ground            Ground            Wire              Ground            Ground
+Ground            Ground            Ground            Ground            Wire              Ground            Ground            Wire              Ground            Ground
+Ground            Ground            Ground            Ground            Wire              Wire              Wire              Wire              Insulator         Ground
+
+CellBlock: 0, -1
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Wire              Wire              Wire              Wire              Wire              Wire              Wire              Wire              Insulator         Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+Wire              Ground            Ground            Ground            Ground            Ground            Ground            Wire              Ground            Ground
+
+CellBlock: -1, 0
+Ground            Ground            Ground            Ground            Insulator         Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Wire
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground            Ground
+
+n_cell_blocks: 4

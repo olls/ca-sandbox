@@ -1,0 +1,118 @@
+neighbourhood_region_shape: VON_NEUMANN
+neighbourhood_region_size: 1
+
+n_states: 12
+State: Ground
+State: Wire
+State: ExcitedEast
+State: ExcitedSouth
+State: ExcitedWest
+State: ExcitedNorth
+State: TrailingExcited
+State: Insulator
+State: And
+State: AndExcited
+State: Interface
+State: InterfaceExcited
+
+null_states: Ground
+
+
+Pattern: Create wire from Ground
+Result: Wire
+               (ExcitedSouth)
+(ExcitedEast)  Ground          (ExcitedWest)
+               (ExcitedNorth)
+
+
+Pattern: East Excited Wire
+Result: ExcitedEast
+                                                                          *
+[ExcitedEast, ExcitedSouth, ExcitedWest, ExcitedNorth, InterfaceExcited]  [Wire, ExcitedEast, AndExcited]  *
+                                                                          *
+
+
+Pattern: South Excited Wire
+Result: ExcitedSouth
+   [ExcitedSouth, ExcitedEast, ExcitedNorth, ExcitedWest, InterfaceExcited]
+*  [Wire, ExcitedSouth, AndExcited]                                          *
+   *
+
+
+Pattern: West Excited Wire
+Result: ExcitedWest
+   *
+*  [Wire, ExcitedWest]  [ExcitedWest, ExcitedSouth, ExcitedEast, ExcitedNorth, InterfaceExcited]
+   *
+
+
+Pattern: North Excited Wire
+Result: ExcitedNorth
+   *
+*  [Wire, ExcitedNorth, InterfaceExcited]                              *
+   [ExcitedNorth, ExcitedEast, ExcitedSouth, ExcitedWest, AndExcited]
+
+
+Pattern: Excited Decays to Trailing
+Result: TrailingExcited
+   *
+*  [ExcitedEast, ExcitedWest, ExcitedNorth, ExcitedSouth]  *
+   *
+
+
+Pattern: Trailing Decays to Wire
+Result: Wire
+   *
+*  TrailingExcited  *
+   *
+
+
+Pattern: And Decays
+Result: And
+   *
+*  AndExcited  *
+   *
+
+
+Pattern: East Excited And 
+Result: AndExcited
+             !Wire
+ExcitedEast  [And, AndExcited]  !Wire
+             !Wire
+
+
+Pattern: South Excited And
+Result: AndExcited
+       ExcitedSouth
+!Wire  [And, AndExcited]  !Wire
+       !Wire
+
+
+Pattern: West Excited And
+Result: AndExcited
+       !Wire
+!Wire  [And, AndExcited]  ExcitedWest
+       !Wire
+
+
+Pattern: NorthExcitedAnd
+Result: AndExcited
+       !Wire
+!Wire  [And, AndExcited]  !Wire
+       ExcitedNorth
+
+
+Pattern: Excited Interface
+Result: InterfaceExcited
+              (AndExcited)
+(AndExcited)  Interface     (AndExcited)
+              (AndExcited)
+
+
+Pattern: Interface Decays
+Result: Interface
+   *
+*  InterfaceExcited  *
+   *
+
+
