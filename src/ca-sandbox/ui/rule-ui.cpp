@@ -485,15 +485,41 @@ do_rule_ui(RuleUI *rule_ui, Rule *rule, RuleCreationThread *rule_creation_thread
   if (file_picker(rule_file_picker_name, &rule_ui->file_picker))
   {
     flag_load_rule_file(files_loaded_state);
-
   }
 
-  if (rule_ui->file_picker.selected_file.n_elements != 0)
+  if (files_loaded_state->rule_file_loaded && rule_ui->file_picker.selected_file.n_elements != 0)
   {
     ImGui::SameLine();
     if (ImGui::Button("Save rule file"))
     {
       rule_ui->save_rule_file = true;
+    }
+
+    const char *close_warning_window_name = "Close Rule File";
+    if (ImGui::Button("Close rule file"))
+    {
+      ImGui::OpenPopup(close_warning_window_name);
+    }
+
+    if (ImGui::BeginPopupModal(close_warning_window_name))
+    {
+
+      ImGui::Text("Are you sure you want to close this rule file?");
+      ImGui::Spacing();
+
+      if (ImGui::Button("Close Rule File"))
+      {
+        flag_unload_rule_file(files_loaded_state);
+        ImGui::CloseCurrentPopup();
+      }
+
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel"))
+      {
+        ImGui::CloseCurrentPopup();
+      }
+
+      ImGui::EndPopup();
     }
   }
 

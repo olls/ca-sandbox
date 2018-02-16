@@ -23,7 +23,7 @@
 void
 do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions *simulate_options, CellInitialisationOptions *cell_initialisation_options, NamedStates *named_states, FilesLoadedState *files_loaded_state)
 {
-  if (*universe_ptr != 0)
+  if (files_loaded_state->cells_file_loaded && *universe_ptr != 0)
   {
     ImGui::Text("Cells filename: %s", universe_ui->loaded_file_name);
   }
@@ -47,17 +47,25 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
   }
 
   const char *new_universe_ui_window_name = "New Universe";
+  ImGui::SameLine();
   if (ImGui::Button("New Cells File"))
   {
     open_new_universe_ui(&universe_ui->new_universe_ui);
   }
   new_universe_ui(&universe_ui->new_universe_ui);
 
-  if (*universe_ptr != 0)
+  if (files_loaded_state->cells_file_loaded && *universe_ptr != 0)
   {
     if (ImGui::Button("Save cells file"))
     {
       universe_ui->save_cells_file = true;
+    }
+
+    const char *close_warning_window_name = "Close Cells File";
+    ImGui::SameLine();
+    if (ImGui::Button("Close cells file"))
+    {
+      ImGui::OpenPopup(close_warning_window_name);
     }
 
     ImGui::Text("Cell Block Dimensions");
@@ -77,6 +85,26 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
       un_allocate(old_universe);
 
       *universe_ptr = new_universe;
+    }
+
+    if (ImGui::BeginPopupModal(close_warning_window_name))
+    {
+      ImGui::Text("Are you sure you want to close this cells file?");
+      ImGui::Spacing();
+
+      if (ImGui::Button("Close Cells File"))
+      {
+        flag_unload_cells_file(files_loaded_state);
+        ImGui::CloseCurrentPopup();
+      }
+
+      ImGui::SameLine();
+      if (ImGui::Button("Cancel"))
+      {
+        ImGui::CloseCurrentPopup();
+      }
+
+      ImGui::EndPopup();
     }
   }
 }

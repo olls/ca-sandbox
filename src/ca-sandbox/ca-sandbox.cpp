@@ -315,7 +315,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     perform_cell_tools(cell_tools, cell_selections_ui, state->universe, &loaded_rule->config);
 
     //
-    // Save
+    // Save files
     //
 
     if (universe_ui->save_cells_file && state->universe != 0)
@@ -329,6 +329,22 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     {
       rule_ui->save_rule_file = false;
       result.success &= save_rule_config_to_file(rule_ui->file_picker.selected_file.elements, &loaded_rule->config);
+    }
+
+    //
+    // Close files
+    //
+
+    if (files_loaded_state->unload_cells_file)
+    {
+      files_loaded_state->unload_cells_file = false;
+      files_loaded_state->cells_file_loaded = false;
+    }
+
+    if (files_loaded_state->unload_rule_file)
+    {
+      files_loaded_state->unload_rule_file = false;
+      files_loaded_state->rule_file_loaded = false;
     }
 
     //
@@ -513,7 +529,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     // Cell instance drawing
     //
 
-    if (state->universe != 0)
+    if (files_loaded_state->cells_file_loaded && state->universe != 0)
     {
       upload_cell_instances(state->universe, simulate_options->border, cell_instancing);
 
@@ -676,7 +692,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     BufferDrawingLocation debug_universe_lines_ibo = {};
 
 #ifdef DEBUG_CELL_BLOCK_DRAWING
-    if (state->universe != 0)
+    if (files_loaded_state->cells_file_loaded && state->universe != 0)
     {
       debug_universe_lines_ibo.n_elements += debug_cell_block_outline_drawing_upload(state->universe, general_universe_vbo, general_universe_ibo);
     }
@@ -694,7 +710,7 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 #endif
 
 #ifdef DEBUG_CELL_SELECTIONS_DRAWING
-    if (state->universe != 0)
+    if (files_loaded_state->cells_file_loaded && state->universe != 0)
     {
       debug_universe_lines_ibo.n_elements += debug_cell_selections_drawing_upload(cell_selections_ui, state->universe, general_universe_vbo, general_universe_ibo);
     }
