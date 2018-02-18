@@ -86,6 +86,10 @@ struct CA_SandboxState
 
   b32 left_side_bar_open;
   b32 right_side_bar_open;
+  r32 left_side_bar_width;
+  r32 right_side_bar_width;
+  r32 left_side_bar_split;
+  r32 right_side_bar_split;
 };
 
 

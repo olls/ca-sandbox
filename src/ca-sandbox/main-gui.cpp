@@ -41,43 +41,49 @@ setup_imgui_style()
 
 
 void
-do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
+do_main_gui(CA_SandboxState *state, s32vec2 screen_size_s32)
 {
-  const ImGuiWindowFlags imgui_window_flags = ImGuiWindowFlags_NoResize |
-                                              ImGuiWindowFlags_NoMove |
+  const ImGuiWindowFlags imgui_window_flags = ImGuiWindowFlags_NoMove |
                                               ImGuiWindowFlags_NoCollapse |
-                                              ImGuiWindowFlags_HorizontalScrollbar;
+                                              ImGuiWindowFlags_HorizontalScrollbar |
+                                              ImGuiWindowFlags_ResizeFromAnySide;
 
-  vec2 window_size = s32vec2_to_vec2(window_size_s32);
+  vec2 screen_size = s32vec2_to_vec2(screen_size_s32);
 
-  vec2 window_bottom_right = vec2_multiply(window_size, {1, 1});
+  vec2 window_bottom_right = vec2_multiply(screen_size, {1, 1});
   vec2 window_one_past_bottom_right = vec2_add(window_bottom_right, {1, 1});
-  vec2 window_top_right = vec2_multiply(window_size, {1, 0});
+  vec2 window_top_right = vec2_multiply(screen_size, {1, 0});
   vec2 window_one_past_top_right = vec2_add(window_top_right, {1, -1});
 
-  vec2 window_bottom_left = vec2_multiply(window_size, {0, 1});
+  vec2 window_bottom_left = vec2_multiply(screen_size, {0, 1});
   vec2 window_one_past_bottom_left = vec2_add(window_bottom_left, {-1, 1});
-  vec2 window_top_left = vec2_multiply(window_size, {0, 0});
+  vec2 window_top_left = vec2_multiply(screen_size, {0, 0});
   vec2 window_one_past_top_left = vec2_add(window_top_left, {-1, -1});
 
-  r32 half_window_height_plus_one = (window_size.y * 0.5) + 1;
-  r32 third_window_height_plus_one = (window_size.y * (1.0/3.0)) + 1;
-
-  r32 left_side_bar_width = 0;
-  if (state->left_side_bar_open)
+  // Set the initial side bar widths
+  if (state->left_side_bar_width == 0)
   {
-    left_side_bar_width = window_size.x * 0.25;
+    state->left_side_bar_width = screen_size.x * 0.25;
   }
-  r32 right_side_bar_width = 0;
-  if (state->right_side_bar_open)
+  if (state->right_side_bar_width == 0)
   {
-    right_side_bar_width = window_size.x * 0.25;
+    state->right_side_bar_width = screen_size.x * 0.25;
+  }
+
+  // Set the initial side bar vertical split heights
+  if (state->left_side_bar_split == 0)
+  {
+    state->left_side_bar_split = (screen_size.y * (1.0/3.0));
+  }
+  if (state->right_side_bar_split == 0)
+  {
+    state->right_side_bar_split = (screen_size.y * 0.5);
   }
 
   if (state->right_side_bar_open)
   {
     ImGui::SetNextWindowPos(window_one_past_bottom_right, ImGuiCond_Always, {1, 1});
-    ImGui::SetNextWindowSize({right_side_bar_width, half_window_height_plus_one});
+    ImGui::SetNextWindowSize({state->right_side_bar_width, state->right_side_bar_split+1});
 
     if (ImGui::Begin("Universe", NULL, imgui_window_flags))
     {
@@ -100,13 +106,16 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
 
       ImGui::EndTabBar();
 
+      state->right_side_bar_width = ImGui::GetWindowSize().x;
+      state->right_side_bar_split = ImGui::GetWindowSize().y-1;
+
       // ImGui::SetTabItemClosed(const char* label); // Optional, allows to bypass a frame of flicker in situation where tab is closed programmatically
       // ImGui::SetTabItemSelected(const char* label);
     }
     ImGui::End();
 
     ImGui::SetNextWindowPos(window_one_past_top_right, ImGuiCond_Always, {1, 0});
-    ImGui::SetNextWindowSize({right_side_bar_width, half_window_height_plus_one});
+    ImGui::SetNextWindowSize({state->right_side_bar_width, screen_size.y-state->right_side_bar_split+1});
 
     if (ImGui::Begin("Universe Editing", NULL, imgui_window_flags))
     {
@@ -123,6 +132,9 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
       }
 
       ImGui::EndTabBar();
+
+      state->right_side_bar_width = ImGui::GetWindowSize().x;
+      state->right_side_bar_split = screen_size.y - (ImGui::GetWindowSize().y-1);
     }
     ImGui::End();
   }
@@ -132,73 +144,47 @@ do_main_gui(CA_SandboxState *state, s32vec2 window_size_s32)
   if (state->left_side_bar_open)
   {
     ImGui::SetNextWindowPos(window_one_past_top_left, ImGuiCond_Always, {0, 0});
-    ImGui::SetNextWindowSize({left_side_bar_width, 2*third_window_height_plus_one});
+    ImGui::SetNextWindowSize({state->left_side_bar_width, state->left_side_bar_split+1});
 
     if (ImGui::Begin("Rules File Editor", NULL, imgui_window_flags))
     {
       do_rule_ui(&state->rule_ui, &state->loaded_rule, &state->rule_creation_thread, &state->files_loaded_state);
+
+      state->left_side_bar_width = ImGui::GetWindowSize().x;
+      state->left_side_bar_split = ImGui::GetWindowSize().y-1;
     }
     ImGui::End();
 
     ImGui::SetNextWindowPos(window_one_past_bottom_left, ImGuiCond_Always, {0, 1});
-    ImGui::SetNextWindowSize({left_side_bar_width, third_window_height_plus_one});
+    ImGui::SetNextWindowSize({state->left_side_bar_width, screen_size.y-state->left_side_bar_split+1});
 
     if (ImGui::Begin("Rule States Editor", NULL, imgui_window_flags))
     {
       do_named_states_ui(&state->loaded_rule.config, &state->cells_editor.active_state);
+
+      state->left_side_bar_width = ImGui::GetWindowSize().x;
+      state->left_side_bar_split = screen_size.y - (ImGui::GetWindowSize().y-1);
     }
     ImGui::End();
   }
 
   // Menu bar for opening and closing side bars.  Created after side bars to remove frame of flicker
   //   on change.
-  if (ImGui::BeginCustomMainMenuBar({left_side_bar_width-1, 0}, {right_side_bar_width-1, 0}))
+  r32 left_offset = state->left_side_bar_open ? state->left_side_bar_width : 0;
+  r32 right_offset = state->right_side_bar_open ? state->right_side_bar_width : 0;
+  if (ImGui::BeginCustomMainMenuBar({left_offset-1, 0}, {right_offset-1, 0}))
   {
-    if (state->left_side_bar_open)
+    if (ImGui::MenuItem(state->left_side_bar_open ? "< Close" : "> Open"))
     {
-      if (ImGui::MenuItem("< Close"))
-      {
-        state->left_side_bar_open = false;
-      }
-    }
-    else
-    {
-      if (ImGui::MenuItem("> Open"))
-      {
-        state->left_side_bar_open = true;
-      }
+      state->left_side_bar_open = !state->left_side_bar_open;
     }
 
     ImGui::SetCursorPosX(ImGui::GetWindowSize().x-60);
-    if (state->right_side_bar_open)
+    if (ImGui::MenuItem(state->right_side_bar_open ? "> Close" : "< Open"))
     {
-      if (ImGui::MenuItem("Close >"))
-      {
-        state->right_side_bar_open = false;
-      }
-    }
-    else
-    {
-      if (ImGui::MenuItem("Open <"))
-      {
-        state->right_side_bar_open = true;
-      }
+      state->right_side_bar_open = !state->right_side_bar_open;
     }
 
-    // if (ImGui::BeginMenu("File"))
-    // {
-    //   ImGui::EndMenu();
-    // }
-    // if (ImGui::BeginMenu("Edit"))
-    // {
-    //   if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-    //   if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-    //   ImGui::Separator();
-    //   if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-    //   if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-    //   if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-    //   ImGui::EndMenu();
-    // }
     ImGui::EndMainMenuBar();
   }
 
