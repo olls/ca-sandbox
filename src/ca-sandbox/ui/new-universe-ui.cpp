@@ -31,7 +31,7 @@ open_new_universe_ui(NewUniverseUI *new_universe_ui)
 
 
 void
-new_universe_ui(NewUniverseUI *new_universe_ui)
+new_universe_ui(NewUniverseUI *new_universe_ui, FilesLoadedState *files_loaded_state)
 {
   ImGui::SetNextWindowSize({0, 0});
   if (ImGui::BeginPopupModal(NEW_UNIVERSE_UI_WINDOW_NAME))
@@ -55,6 +55,7 @@ new_universe_ui(NewUniverseUI *new_universe_ui)
     {
       append_string(new_universe_ui->directory_picker.selected_file, new_string("/"));
       append_string(new_universe_ui->directory_picker.selected_file, new_string(new_universe_ui->file_name_buffer));
+      flag_load_cells_file(files_loaded_state);
       new_universe_ui->create_new_universe = true;
       ImGui::CloseCurrentPopup();
     }

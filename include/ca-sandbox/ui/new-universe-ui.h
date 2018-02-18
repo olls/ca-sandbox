@@ -1,6 +1,8 @@
 #ifndef NEW_UNIVERSE_UI_H_DEF
 #define NEW_UNIVERSE_UI_H_DEF
 
+#include "ca-sandbox/files-loaded-state.h"
+
 #include "interface/file-picker.h"
 
 
@@ -20,7 +22,7 @@ open_new_universe_ui(NewUniverseUI *new_universe_ui);
 
 
 void
-new_universe_ui(NewUniverseUI *new_universe_ui);
+new_universe_ui(NewUniverseUI *new_universe_ui, FilesLoadedState *files_loaded_state);
 
 
 #endif

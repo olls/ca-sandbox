@@ -55,3 +55,4 @@
 - unfiddlify named states given value by position in .rule file (to enable state deletion)
     (would require reloading the cells file to update the state values stored in memory)
 - undo history
+- loading a different cells file after creating a new cells file is broken

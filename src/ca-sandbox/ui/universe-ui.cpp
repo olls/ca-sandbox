@@ -52,7 +52,7 @@ do_universe_ui(UniverseUI *universe_ui, Universe **universe_ptr, SimulateOptions
   {
     open_new_universe_ui(&universe_ui->new_universe_ui);
   }
-  new_universe_ui(&universe_ui->new_universe_ui);
+  new_universe_ui(&universe_ui->new_universe_ui, files_loaded_state);
 
   if (files_loaded_state->cells_file_loaded && *universe_ptr != 0)
   {
