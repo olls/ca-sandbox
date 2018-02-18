@@ -19,21 +19,11 @@ Ground         Ground         Ground         Ground         Ground         Groun
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 
-CellBlock: -6, 0
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Trail
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-
 CellBlock: -5, 0
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Excited        Excited        Excited        Excited        Excited        Excited        Excited        Excited
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Trail          Excited        Excited        Excited        Excited        Excited        Excited        Excited
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
@@ -52,8 +42,8 @@ Ground         Ground         Ground         Ground         Ground         Groun
 CellBlock: -4, 0
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Excited        Excited        Wire           Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Excited        Excited        Excited        Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
@@ -72,8 +62,8 @@ Ground         Ground         Ground         Ground         Ground         Groun
 CellBlock: -3, 0
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Wire           Wire           Wire           Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
@@ -92,8 +82,8 @@ Ground         Ground         Ground         Ground         Ground         Groun
 CellBlock: -2, 0
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
-Wire           Wire           Wire           Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Wire           Wire           Wire           Wire           Wire           Wire           Wire           Wire
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
@@ -112,11 +102,11 @@ Wire           Ground         Ground         Ground         Ground         Groun
 CellBlock: -1, 0
 Ground         Ground         Ground         Ground         Ground         Ground         Wire           Output
 Ground         Ground         Ground         Ground         Ground         Ground         Wire           Ground
-Wire           Wire           Wire           Not            Output         Wire           And            Output
-Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
+Ground         Ground         Ground         Ground         Ground         Wire           And            Output
+Wire           Wire           Wire           Wire           Not            Output         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 Ground         Ground         Ground         Ground         Ground         Ground         Ground         Ground
 
-n_cell_blocks: 11
+n_cell_blocks: 10
