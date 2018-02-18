@@ -12,9 +12,9 @@
 // Thank you,
 // -Your beloved friend, imgui_demo.cpp (that you won't delete)
 
-// Message to beginner C/C++ programmers. About the meaning of 'static': in this demo code, we frequently we use 'static' variables inside functions. 
-// We do this as a way to gather code and data in the same place, just to make the demo code faster to read, faster to write, and use less code. 
-// A static variable persist across calls, so it is essentially like a global variable but declared inside the scope of the function. 
+// Message to beginner C/C++ programmers. About the meaning of 'static': in this demo code, we frequently we use 'static' variables inside functions.
+// We do this as a way to gather code and data in the same place, just to make the demo code faster to read, faster to write, and use less code.
+// A static variable persist across calls, so it is essentially like a global variable but declared inside the scope of the function.
 // It also happens to be a convenient way of storing simple UI related information as long as your function doesn't need to be reentrant or used in threads.
 // This might be a pattern you occasionally want to use in your code, but most of the real data you would be editing is likely to be stored outside your function.
 
@@ -271,7 +271,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
         if (ImGui::TreeNode("Basic"))
         {
             static int clicked = 0;
-            if (ImGui::Button("Button")) 
+            if (ImGui::Button("Button"))
                 clicked++;
             if (clicked & 1)
             {
@@ -415,7 +415,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
                     if (ImGui::TreeNode((void*)(intptr_t)i, "Child %d", i))
                     {
                         ImGui::Text("blah blah");
-                        ImGui::SameLine(); 
+                        ImGui::SameLine();
                         if (ImGui::SmallButton("button")) { };
                         ImGui::TreePop();
                     }
@@ -442,7 +442,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
                     {
                         // Node
                         bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Node %d", i);
-                        if (ImGui::IsItemClicked()) 
+                        if (ImGui::IsItemClicked())
                             node_clicked = i;
                         if (node_open)
                         {
@@ -455,7 +455,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
                         // Leaf: The only reason we have a TreeNode at all is to allow selection of the leaf. Otherwise we can use BulletText() or TreeAdvanceToLabelPos()+Text().
                         node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
                         ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Leaf %d", i);
-                        if (ImGui::IsItemClicked()) 
+                        if (ImGui::IsItemClicked())
                             node_clicked = i;
                     }
                 }
@@ -574,7 +574,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
             // If you decided that ImTextureID = MyEngineTexture*, then you can pass your MyEngineTexture* pointers to ImGui::Image(), and gather width/height through your own functions, etc.
             // Using ShowMetricsWindow() as a "debugger" to inspect the draw data that are being passed to your render will help you debug issues if you are confused about this.
             // Consider using the lower-level ImDrawList::AddImage() API, via ImGui::GetWindowDrawList()->AddImage().
-            ImTextureID my_tex_id = io.Fonts->TexID; 
+            ImTextureID my_tex_id = io.Fonts->TexID;
             float my_tex_w = (float)io.Fonts->TexWidth;
             float my_tex_h = (float)io.Fonts->TexHeight;
 
@@ -635,7 +635,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
                 {
                     char buf[32];
                     sprintf(buf, "Object %d", n);
-                    if (ImGui::Selectable(buf, selected == n)) 
+                    if (ImGui::Selectable(buf, selected == n))
                         selected = n;
                 }
                 ImGui::TreePop();
@@ -651,7 +651,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
                     if (ImGui::Selectable(buf, selection[n]))
                     {
                         if (!ImGui::GetIO().KeyCtrl)    // Clear selection when CTRL is not held
-                            memset(selection, 0, sizeof(selection)); 
+                            memset(selection, 0, sizeof(selection));
                         selection[n] ^= 1;
                     }
                 }
@@ -1367,7 +1367,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
             ImGui::BeginChild("scrolling", ImVec2(0, ImGui::GetFrameHeightWithSpacing()*7 + 30), true, ImGuiWindowFlags_HorizontalScrollbar);
             for (int line = 0; line < lines; line++)
             {
-                // Display random stuff (for the sake of this trivial demo we are using basic Button+SameLine. If you want to create your own time line for a real application you may be better off 
+                // Display random stuff (for the sake of this trivial demo we are using basic Button+SameLine. If you want to create your own time line for a real application you may be better off
                 // manipulating the cursor position yourself, aka using SetCursorPos/SetCursorScreenPos to position the widgets yourself. You may also want to use the lower-level ImDrawList API)
                 int num_buttons = 10 + ((line & 1) ? line * 9 : line * 3);
                 for (int n = 0; n < num_buttons; n++)
@@ -1390,9 +1390,9 @@ void ImGui::ShowDemoWindow(bool* p_open)
             ImGui::EndChild();
             ImGui::PopStyleVar(2);
             float scroll_x_delta = 0.0f;
-            ImGui::SmallButton("<<"); if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f; ImGui::SameLine(); 
+            ImGui::SmallButton("<<"); if (ImGui::IsItemActive()) scroll_x_delta = -ImGui::GetIO().DeltaTime * 1000.0f; ImGui::SameLine();
             ImGui::Text("Scroll from code"); ImGui::SameLine();
-            ImGui::SmallButton(">>"); if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f; ImGui::SameLine(); 
+            ImGui::SmallButton(">>"); if (ImGui::IsItemActive()) scroll_x_delta = +ImGui::GetIO().DeltaTime * 1000.0f; ImGui::SameLine();
             ImGui::Text("%.0f/%.0f", scroll_x, scroll_max_x);
             if (scroll_x_delta != 0.0f)
             {
@@ -1963,7 +1963,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
         {
             ImGui::TextWrapped("You can use ImGui::GetMouseDragDelta(0) to query for the dragged amount on any widget.");
             for (int button = 0; button < 3; button++)
-                ImGui::Text("IsMouseDragging(%d):\n  w/ default threshold: %d,\n  w/ zero threshold: %d\n  w/ large threshold: %d", 
+                ImGui::Text("IsMouseDragging(%d):\n  w/ default threshold: %d,\n  w/ zero threshold: %d\n  w/ large threshold: %d",
                     button, ImGui::IsMouseDragging(button), ImGui::IsMouseDragging(button, 0.0f), ImGui::IsMouseDragging(button, 20.0f));
             ImGui::Button("Drag Me");
             if (ImGui::IsItemActive())
@@ -2038,7 +2038,7 @@ void ImGui::ShowFontSelector(const char* label)
                 io.FontDefault = io.Fonts->Fonts[n];
         ImGui::EndCombo();
     }
-    ImGui::SameLine(); 
+    ImGui::SameLine();
     ShowHelpMarker(
         "- Load additional fonts with io.Fonts->AddFontFromFileTTF().\n"
         "- The font atlas is built when calling io.Fonts->GetTexDataAsXXXX() or io.Fonts->Build().\n"
@@ -2067,7 +2067,7 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
     ImGui::ShowFontSelector("Fonts##Selector");
 
     // Simplified Settings
-    if (ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f")) 
+    if (ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f"))
         style.GrabRounding = style.FrameRounding; // Make GrabRounding always the same value as FrameRounding
     { bool window_border = (style.WindowBorderSize > 0.0f); if (ImGui::Checkbox("WindowBorder", &window_border)) style.WindowBorderSize = window_border ? 1.0f : 0.0f; }
     ImGui::SameLine();
@@ -2153,8 +2153,8 @@ void ImGui::ShowStyleEditor(ImGuiStyle* ref)
         filter.Draw("Filter colors", 200);
 
         static ImGuiColorEditFlags alpha_flags = 0;
-        ImGui::RadioButton("Opaque", &alpha_flags, 0); ImGui::SameLine(); 
-        ImGui::RadioButton("Alpha", &alpha_flags, ImGuiColorEditFlags_AlphaPreview); ImGui::SameLine(); 
+        ImGui::RadioButton("Opaque", &alpha_flags, 0); ImGui::SameLine();
+        ImGui::RadioButton("Alpha", &alpha_flags, ImGuiColorEditFlags_AlphaPreview); ImGui::SameLine();
         ImGui::RadioButton("Both", &alpha_flags, ImGuiColorEditFlags_AlphaPreviewHalf);
 
         ImGui::BeginChild("#colors", ImVec2(0, 300), true, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NavFlattened);
@@ -2399,7 +2399,7 @@ static void ShowExampleAppConstrainedResize(bool* p_open)
     ImGuiWindowFlags flags = auto_resize ? ImGuiWindowFlags_AlwaysAutoResize : 0;
     if (ImGui::Begin("Example: Constrained Resize", p_open, flags))
     {
-        const char* desc[] = 
+        const char* desc[] =
         {
             "Resize vertical only",
             "Resize horizontal only",
@@ -2443,7 +2443,7 @@ static void ShowExampleAppFixedOverlay(bool* p_open)
             if (ImGui::MenuItem("Top-right", NULL, corner == 1)) corner = 1;
             if (ImGui::MenuItem("Bottom-left", NULL, corner == 2)) corner = 2;
             if (ImGui::MenuItem("Bottom-right", NULL, corner == 3)) corner = 3;
-            if (p_open && ImGui::MenuItem("Close")) *p_open = false; 
+            if (p_open && ImGui::MenuItem("Close")) *p_open = false;
             ImGui::EndPopup();
         }
         ImGui::End();
@@ -2477,7 +2477,7 @@ static void ShowExampleAppWindowTitles(bool*)
     ImGui::End();
 }
 
-// Demonstrate using the low-level ImDrawList to draw custom shapes. 
+// Demonstrate using the low-level ImDrawList to draw custom shapes.
 static void ShowExampleAppCustomRendering(bool* p_open)
 {
     ImGui::SetNextWindowSize(ImVec2(350,560), ImGuiCond_FirstUseEver);
