@@ -33,7 +33,6 @@
 = better cell editing tools:
   - selections: move, rotate, mirror
   - sub-modules
-  - cut regions
 = render border
   - then render cells outside of border (maybe disallow editing?)
 = fix re-blockifying -ve cell blocks

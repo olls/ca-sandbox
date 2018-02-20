@@ -30,6 +30,10 @@ struct CellTools {
 
 
 void
+set_cells_to_state(CellSelectionsUI *cell_selections_ui, Universe *universe, CellState new_state);
+
+
+void
 delete_null_cell_blocks(CellBlocks *cell_blocks, RuleConfiguration *rule_config);
 
 

@@ -3,6 +3,8 @@
 #include "ca-sandbox/cell-block-coordinate-system.h"
 #include "ca-sandbox/cell-regions.h"
 #include "ca-sandbox/universe.h"
+#include "ca-sandbox/cell-tools.h"
+
 #include "ca-sandbox/ui/cell-selections-ui.h"
 
 #include "engine/vectors.h"
@@ -120,15 +122,25 @@ update_cell_regions(CellRegionsUI *cell_regions_ui, CellRegions *cell_regions, C
     Array::new_element(cell_regions->regions) = make_new_region(cell_selections_ui, universe, cell_regions_ui->new_region_name_buffer, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
   }
 
-  // Add region to clipboard buffer
+  b32 copy_region = ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) &&
+                    ImGui::IsKeyPressed(SDL_SCANCODE_C);
+
+  b32 cut_region = ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) &&
+                   ImGui::IsKeyPressed(SDL_SCANCODE_X);
+
+  // copy/cut region to clipboard buffer
   //
   if (cell_selections_ui->selection_made &&
-    ImGui::IsKeyDown(SDL_SCANCODE_LCTRL) &&
-    ImGui::IsKeyPressed(SDL_SCANCODE_C))
+      (copy_region || cut_region))
   {
     cell_regions->clipboard_region = make_new_region(cell_selections_ui, universe, cell_regions_ui->new_region_name_buffer, minimap_framebuffer, cell_drawing, cell_instancing, cell_vertices_buffer);
     cell_regions->clipboard_region_in_use = true;
     cell_selections_ui->selection_made = false;
+  }
+
+  if (cut_region)
+  {
+    set_cells_to_state(cell_selections_ui, universe, 0);
   }
 
   // Start placing clipboard region
