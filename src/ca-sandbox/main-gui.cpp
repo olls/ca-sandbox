@@ -60,30 +60,15 @@ do_main_gui(CA_SandboxState *state, s32vec2 screen_size_s32)
   vec2 window_top_left = vec2_multiply(screen_size, {0, 0});
   vec2 window_one_past_top_left = vec2_add(window_top_left, {-1, -1});
 
-  // Set the initial side bar widths
-  if (state->left_side_bar_width == 0)
-  {
-    state->left_side_bar_width = screen_size.x * 0.25;
-  }
-  if (state->right_side_bar_width == 0)
-  {
-    state->right_side_bar_width = screen_size.x * 0.25;
-  }
-
-  // Set the initial side bar vertical split heights
-  if (state->left_side_bar_split == 0)
-  {
-    state->left_side_bar_split = (screen_size.y * (1.0/3.0));
-  }
-  if (state->right_side_bar_split == 0)
-  {
-    state->right_side_bar_split = (screen_size.y * 0.5);
-  }
-
   if (state->right_side_bar_open)
   {
     ImGui::SetNextWindowPos(window_one_past_bottom_right, ImGuiCond_Always, {1, 1});
-    ImGui::SetNextWindowSize({state->right_side_bar_width, state->right_side_bar_split+1});
+
+    // If not set yet, let ImGui set the size
+    if (state->right_side_bar_width != 0)
+    {
+      ImGui::SetNextWindowSize({state->right_side_bar_width, state->right_side_bar_split+1});
+    }
 
     if (ImGui::Begin("Universe", NULL, imgui_window_flags))
     {
@@ -115,7 +100,12 @@ do_main_gui(CA_SandboxState *state, s32vec2 screen_size_s32)
     ImGui::End();
 
     ImGui::SetNextWindowPos(window_one_past_top_right, ImGuiCond_Always, {1, 0});
-    ImGui::SetNextWindowSize({state->right_side_bar_width, screen_size.y-state->right_side_bar_split+1});
+
+    // If not set yet, let ImGui set the size
+    if (state->right_side_bar_width != 0)
+    {
+      ImGui::SetNextWindowSize({state->right_side_bar_width, screen_size.y-state->right_side_bar_split+1});
+    }
 
     if (ImGui::Begin("Universe Editing", NULL, imgui_window_flags))
     {
@@ -144,7 +134,12 @@ do_main_gui(CA_SandboxState *state, s32vec2 screen_size_s32)
   if (state->left_side_bar_open)
   {
     ImGui::SetNextWindowPos(window_one_past_top_left, ImGuiCond_Always, {0, 0});
-    ImGui::SetNextWindowSize({state->left_side_bar_width, state->left_side_bar_split+1});
+
+    // If not set yet, let ImGui set the size
+    if (state->left_side_bar_width != 0)
+    {
+      ImGui::SetNextWindowSize({state->left_side_bar_width, state->left_side_bar_split+1});
+    }
 
     if (ImGui::Begin("Rules File Editor", NULL, imgui_window_flags))
     {
@@ -156,7 +151,12 @@ do_main_gui(CA_SandboxState *state, s32vec2 screen_size_s32)
     ImGui::End();
 
     ImGui::SetNextWindowPos(window_one_past_bottom_left, ImGuiCond_Always, {0, 1});
-    ImGui::SetNextWindowSize({state->left_side_bar_width, screen_size.y-state->left_side_bar_split+1});
+
+    // If not set yet, let ImGui set the size
+    if (state->left_side_bar_width != 0)
+    {
+      ImGui::SetNextWindowSize({state->left_side_bar_width, screen_size.y-state->left_side_bar_split+1});
+    }
 
     if (ImGui::Begin("Rule States Editor", NULL, imgui_window_flags))
     {

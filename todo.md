@@ -35,6 +35,8 @@
   - sub-modules
   - cut regions
 - fix re-blockifying -ve cell blocks
+- fix moving regions / copy-pasting between universes with different cell block dims  (may be related to broken re-blockifying)
+- loading a different cells file after creating a new cells file is broken
 - keyboard shortcuts for selecting states (0-9)
 - auto centre/scale universe
 - render border
@@ -55,4 +57,3 @@
 - unfiddlify named states given value by position in .rule file (to enable state deletion)
     (would require reloading the cells file to update the state values stored in memory)
 - undo history
-- loading a different cells file after creating a new cells file is broken
