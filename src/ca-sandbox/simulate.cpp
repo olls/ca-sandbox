@@ -19,7 +19,7 @@ default_simulation_options()
 {
   SimulateOptions result;
 
-  result.border.type = BorderType::TORUS;
+  result.border.type = BorderType::INFINITE;
 
   result.border.min_corner_block = {0, 0};
   result.border.min_corner_cell = {0, 0};

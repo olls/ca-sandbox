@@ -156,6 +156,10 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
     state->imgui_context = ImGui::CreateContext();
     ImGui::SetCurrentContext(state->imgui_context);
 
+    ImGuiIO& io = ImGui::GetIO();
+    ImFont *font = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 24);
+    font->Scale = .7;
+
     ImGui_ImplSdlGL3_Init(engine->sdl_window);
 
     opengl_create_general_buffers(general_vertex_buffer, general_index_buffer);

@@ -34,12 +34,14 @@
   - selections: move, rotate, mirror
   - sub-modules
   - cut regions
-- fix re-blockifying -ve cell blocks
-- fix moving regions / copy-pasting between universes with different cell block dims  (may be related to broken re-blockifying)
+= render border
+  - then render cells outside of border (maybe disallow editing?)
+= fix re-blockifying -ve cell blocks
+= fix moving regions / copy-pasting between universes with different cell block dims  (may be related to broken re-blockifying)
+= keyboard shortcuts for selecting states (0-9)
+= auto centre/scale universe
+
 - loading a different cells file after creating a new cells file is broken
-- keyboard shortcuts for selecting states (0-9)
-- auto centre/scale universe
-- render border
 - draw grid (or origin axes)
 - cell initialisation options ui
 - ability to specify associated .rule file in .cells file
@@ -57,3 +59,4 @@
 - unfiddlify named states given value by position in .rule file (to enable state deletion)
     (would require reloading the cells file to update the state values stored in memory)
 - undo history
+- shape tools (lines, circles, ...)
