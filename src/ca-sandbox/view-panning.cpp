@@ -135,3 +135,21 @@ update_view_panning(ViewPanning *view_panning, vec2 screen_mouse_pos, mat4x4 asp
     view_panning->currently_panning = false;
   }
 }
+
+
+void
+centre_universe(ViewPanning *view_panning, Universe *universe, s32vec2 window_size)
+{
+  s32vec2 lowest_coord;
+  s32vec2 highest_coord;
+  get_cell_blocks_dimentions(universe, &lowest_coord, &highest_coord);
+
+  // Get centre point of the two coordinates
+  view_panning->offset = vec2_multiply(s32vec2_to_vec2(vec2_add(vec2_add(lowest_coord, highest_coord), 1)), -0.5);
+  view_panning->offset.y *= -1;
+
+  s32vec2 dim = vec2_add(vec2_subtract(highest_coord, lowest_coord), 1);
+  vec2 dim_ratio_to_texture = vec2_divide(s32vec2_to_vec2(dim), s32vec2_to_vec2(window_size));
+  view_panning->scale = min(((r32)window_size.x / window_size.y)*(2.0/dim.x), 2.0/dim.y);
+  view_panning->scale_speed = 0;
+}

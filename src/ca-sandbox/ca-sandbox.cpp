@@ -318,6 +318,12 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
 
     perform_cell_tools(cell_tools, cell_selections_ui, state->universe, &loaded_rule->config);
 
+    // TODO:  Where does this belong?
+    if (ImGui::Button("Centre Universe"))
+    {
+      centre_universe(view_panning, state->universe, window_size);
+    }
+
     //
     // Save files
     //
@@ -458,6 +464,11 @@ main_loop(int argc, const char *argv[], Engine *engine, CA_SandboxState **state_
         }
 
         un_allocate(loading_file_name);
+      }
+
+      if (!universe_ui->loading_error)
+      {
+        centre_universe(view_panning, state->universe, window_size);
       }
 
       files_loaded_state->cells_file_loaded = !universe_ui->loading_error;

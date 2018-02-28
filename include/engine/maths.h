@@ -1,6 +1,8 @@
 #ifndef MATHS_H_DEF
 #define MATHS_H_DEF
 
+#include "engine/types.h"
+
 #include <math.h>
 
 /// @file

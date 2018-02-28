@@ -39,4 +39,8 @@ UniversePosition
 screen_position_to_universe_position(ViewPanning *view_panning, vec2 screen_mouse_position);
 
 
+void
+centre_universe(ViewPanning *view_panning, Universe *universe, s32vec2 window_size);
+
+
 #endif
