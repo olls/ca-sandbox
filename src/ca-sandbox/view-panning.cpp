@@ -81,12 +81,13 @@ update_view_scaling(ViewPanning *view_panning, vec2 screen_mouse_pos)
   if (!io.WantCaptureMouse)
   {
     view_panning->scale_speed += io.MouseWheel * scale_acceleration;
-    view_panning->scale *= 1 + view_panning->scale_speed;
 
     // TODO: Calculate pixel == cell scale for min?
-    view_panning->scale = max(min_scale, min(max_scale, view_panning->scale));
-    view_panning->scale_speed *= scale_deacceleration;
   }
+
+  view_panning->scale *= 1 + view_panning->scale_speed;
+  view_panning->scale = max(min_scale, min(max_scale, view_panning->scale));
+  view_panning->scale_speed *= scale_deacceleration;
 }
 
 
