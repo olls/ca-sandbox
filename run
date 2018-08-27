@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ./build/$1
+./loader "${@:2}"

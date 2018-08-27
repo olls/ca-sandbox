@@ -47,10 +47,10 @@ int main(int argc, char const *argv[])
   void *library_handle = 0;
   Export_VTable *ca_sandbox_exports;
 
-  const char *library_path = "libca-sandbox.so";
+  const char *library_path = "lib" APP_NAME ".so";
 
   Engine engine;
-  b32 engine_started = start_engine(argc, argv, "CA Sandbox", &engine);
+  b32 engine_started = start_engine(argc, argv, APP_NAME " - Version " APP_VERSION, &engine);
 
   CA_SandboxState *state = 0;
   LoaderReturnStatus status = {.reload = true, .success = true};
@@ -73,7 +73,7 @@ int main(int argc, char const *argv[])
       }
       else
       {
-        printf("\nReloading ca-sandbox library\n");
+        printf("\nReloading " APP_NAME " library\n");
         ca_sandbox_exports = load_library(&library_handle, library_path);
         printf("\n");
 

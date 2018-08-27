@@ -1,4 +1,4 @@
-APPNAME = 'ca-sandbox'
+APPNAME = 'CA-Sandbox'
 VERSION = '0.1.0'
 
 top = '.'
@@ -15,6 +15,8 @@ def configure(conf):
   conf.env.append_value('CXXFLAGS', ['-Werror', '-std=c++14'] + sdl_flags)
   conf.env.append_value('INCLUDES', ['./include', './include/imgui'])
   #conf.env.append_value('LINKFLAGS', ['-v'])
+  conf.env.append_value('DEFINES', ['APP_NAME="{}"'.format(APPNAME),
+                                    'APP_VERSION="{}"'.format(VERSION)])
 
   conf.env.LIB_LOADER = ['GLEW', 'GL', 'GLU', 'dl']
   conf.env.LINKFLAGS_LOADER = ['-Wl,-export-dynamic,--no-undefined,-rpath,./'] + sdl_libs
@@ -41,9 +43,15 @@ def build(bld):
               target='loader',
               use='LOADER')
 
-  bld(rule='ln -s {} {}'.format(bld.path.find_node('cells').abspath(), 'cells'),
+  bld(rule='ln -s -f {} {}'.format(bld.path.find_node('cells').abspath(), 'cells'),
       source=bld.path.find_node('cells'),
       target='cells')
+  bld(rule='ln -s -f {} {}'.format(bld.path.find_node('rules').abspath(), 'rules'),
+      source=bld.path.find_node('rules'),
+      target='rules')
+  bld(rule='ln -s -f {} {}'.format(bld.path.find_node('imgui.ini').abspath(), 'imgui.ini'),
+      source=bld.path.find_node('imgui.ini'),
+      target='imgui.ini')
 
   import waflib.extras.buildcopy
   bld(features = 'buildcopy',
