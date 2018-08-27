@@ -7,7 +7,7 @@
 
 #include "imgui/imgui.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 /// @file
 /// @brief  Provides GUI for controlling the simulation

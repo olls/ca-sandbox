@@ -12,7 +12,7 @@
 
 #include "imgui/imgui.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 
 void

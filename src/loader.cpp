@@ -47,11 +47,7 @@ int main(int argc, char const *argv[])
   void *library_handle = 0;
   Export_VTable *ca_sandbox_exports;
 
-#ifdef _DEBUG
-  const char *library_path = "debug-build/dynamic/libca-sandbox.so";
-#else
-  const char *library_path = "build/dynamic/libca-sandbox.so";
-#endif
+  const char *library_path = "libca-sandbox.so";
 
   Engine engine;
   b32 engine_started = start_engine(argc, argv, "CA Sandbox", &engine);
